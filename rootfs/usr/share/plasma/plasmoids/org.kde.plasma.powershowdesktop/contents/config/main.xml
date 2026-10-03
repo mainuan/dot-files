@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+			http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
+	<kcfgfile name=""/>
+
+	<group name="General">
+		<entry name="click_action" type="string">
+			<default>run_command</default>
+		</entry>
+		<entry name="click_command" type="string">
+			<default>qdbus6 org.kde.kglobalaccel /component/kwin invokeShortcut "Show Desktop"</default>
+		</entry>
+		<entry name="longclick_command" type="string">
+			<default>qdbus6 org.kde.kglobalaccel /component/kmix invokeShortcut "mute"</default>
+		</entry>
+		<entry name="ctrl_click_command" type="string">
+			<default>qdbus6 org.kde.kglobalaccel /component/kwin invokeShortcut "Overview"</default>
+		</entry>
+		<entry name="middle_click_command" type="string">
+			<default>qdbus6 org.kde.kglobalaccel /component/kmix invokeShortcut "mute"</default>
+		</entry>
+		<entry name="shift_click_command" type="string">
+			<default></default>
+		</entry>
+		<entry name="alt_click_command" type="string">
+			<default></default>
+		</entry>
+		<entry name="ctrl_mousewheel_up" type="string">
+			<default>qdbus6 org.kde.kglobalaccel /component/kwin invokeShortcut "Switch One Desktop to the Right"</default>
+		</entry>
+		<entry name="ctrl_mousewheel_down" type="string">
+			<default></default>
+		</entry>
+		<entry name="ctrl_mousewheel_cooldown" type="int">
+			<default>500</default>
+		</entry>
+		<entry name="mousewheel_cooldown" type="int">
+			<default>0</default>
+		</entry>
+		<entry name="mousewheel_action" type="string">
+			<default>run_commands</default>
+		</entry>
+		<entry name="mousewheel_up" type="string">
+			<default>qdbus6 org.kde.kglobalaccel /component/kmix invokeShortcut "increase_volume"</default>
+		</entry>
+		<entry name="mousewheel_down" type="string">
+			<default>qdbus6 org.kde.kglobalaccel /component/kmix invokeShortcut "decrease_volume"</default>
+		</entry>
+		<entry name="size" type="int">
+			<default>8</default>
+		</entry>
+		<entry name="peekingEnabled" type="bool">
+			<default>false</default>
+		</entry>
+		<entry name="peekingThreshold" type="int">
+			<default>1000</default>
+		</entry>
+		<entry name="edgeColor" type="string">
+			<default>#ffffff</default>
+		</entry>
+		<entry name="hoveredColor" type="string">
+			<default>#c5ff95</default>
+		</entry>
+		<entry name="pressedColor" type="string">
+			<default>#ffba80</default>
+		</entry>
+		<entry name="longpressColor" type="string">
+			<default>#c792ff</default>
+		</entry>
+		<entry name="useIcon" type="bool">
+			<default>false</default>
+		</entry>
+		<entry name="iconName" type="string">
+			<default>🧬</default>
+		</entry>
+	</group>
+</kcfg>
