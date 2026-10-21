@@ -46,4 +46,4 @@ Scale=1
 
 [org.kde.kdecoration2]
 library=org.kde.kwin.aurorae.v2
-theme=theme=__aurorae__svg__Lavanda-Light
+theme=__aurorae__svg__Lavanda-Light
