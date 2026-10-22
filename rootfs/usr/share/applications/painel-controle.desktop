@@ -1,0 +1,13 @@
+[Desktop Entry]
+Exec=painel-controle
+Icon=preferences-system
+Type=Application
+SingleMainWindow=true
+X-DocPath=systemsettings/index.html
+StartupNotify=true
+X-KDE-Shortcuts=Tools,Meta+I
+OnlyShowIn=KDE;
+Name=Painel de Controle
+X-DBUS-StartupType=Unique
+X-DBUS-ServiceName=org.kde.systemsettings
+Categories=Qt;KDE;Settings;
