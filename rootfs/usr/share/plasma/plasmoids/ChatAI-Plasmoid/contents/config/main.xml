@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+  <kcfgfile name="" />
+
+  <group name="General">
+    <!-- Schema version used by Migration.js. 0 = configuration written by ChatAI <= 1.0.0. -->
+    <entry name="configVersion" type="Int">
+      <default>0</default>
+    </entry>
+
+    <!-- Current provider / page -->
+    <entry name="url" type="String">
+      <default>https://duck.ai/chat</default>
+    </entry>
+
+    <!-- Compact representation icon -->
+    <entry name="iconMode" type="Int">
+      <label>Icon display mode (0: Favicon, 1: Adaptive, 2: Dark, 3: Light, 4: Outlined, 5: Filled, 6: Colorful, 7: Custom)</label>
+      <default>1</default>
+    </entry>
+    <entry name="customIcon" type="String">
+      <default>help-about</default>
+    </entry>
+    <entry name="favIcon" type="String">
+      <default></default>
+    </entry>
+    <entry name="lastFavIcon" type="String">
+      <default></default>
+    </entry>
+
+    <!-- Built-in providers (one switch per provider; see ProviderModel.qml) -->
+    <entry name="showDuckDuckGoChat" type="Bool"><default>true</default></entry>
+    <entry name="showChatGPT" type="Bool"><default>true</default></entry>
+    <entry name="showHugginChat" type="Bool"><default>true</default></entry>
+    <entry name="showGoogleGemini" type="Bool"><default>true</default></entry>
+    <entry name="showClaude" type="Bool"><default>true</default></entry>
+    <entry name="showYou" type="Bool"><default>false</default></entry>
+    <entry name="showPerplexity" type="Bool"><default>false</default></entry>
+    <entry name="showBlackBox" type="Bool"><default>false</default></entry>
+    <entry name="showBingCopilot" type="Bool"><default>false</default></entry>
+    <entry name="showLobeChat" type="Bool"><default>false</default></entry>
+    <entry name="showBigAGI" type="Bool"><default>false</default></entry>
+    <entry name="showDeepSeek" type="Bool"><default>true</default></entry>
+    <entry name="showMetaAI" type="Bool"><default>false</default></entry>
+    <entry name="showGrok" type="Bool"><default>false</default></entry>
+    <entry name="showT3Chat" type="Bool"><default>false</default></entry>
+    <entry name="showGitHubCopilot" type="Bool"><default>false</default></entry>
+    <entry name="showManus" type="Bool"><default>false</default></entry>
+    <entry name="showQwen" type="Bool"><default>false</default></entry>
+    <entry name="showKimi" type="Bool"><default>false</default></entry>
+    <entry name="showMistral" type="Bool"><default>false</default></entry>
+
+    <!-- Custom providers: JSON array of {"name": "...", "url": "https://..."} -->
+    <entry name="customSitesJson" type="String">
+      <default></default>
+    </entry>
+    <!-- Legacy format "name|url,name|url"; migrated to customSitesJson and cleared. -->
+    <entry name="customSites" type="String">
+      <default></default>
+    </entry>
+
+    <!-- Header -->
+    <entry name="hideHeader" type="Bool"><default>false</default></entry>
+    <entry name="autoHideHeader" type="Bool"><default>false</default></entry>
+    <entry name="hideKeepOpen" type="Bool"><default>false</default></entry>
+    <entry name="hideNavigationButtons" type="Bool"><default>false</default></entry>
+    <entry name="hideRefreshButton" type="Bool"><default>false</default></entry>
+    <entry name="hideHomeButton" type="Bool"><default>false</default></entry>
+    <entry name="hideCustomURL" type="Bool"><default>false</default></entry>
+    <!-- Obsolete since 1.0.1: auto-hide and downloads live in the kebab menu only; kept for old configurations. -->
+    <entry name="hideAutoHideButton" type="Bool"><default>false</default></entry>
+    <entry name="hideDownloadButton" type="Bool"><default>false</default></entry>
+    <entry name="hideCloseButton" type="Bool"><default>false</default></entry>
+    <!-- Legacy: was misused to hide the auto-hide button. Migrated to hideAutoHideButton. -->
+    <entry name="hidePrintButton" type="Bool"><default>false</default></entry>
+
+    <!-- Window behaviour -->
+    <entry name="pin" type="Bool"><default>false</default></entry>
+    <!-- Legacy alias of pin (ChatAI < 1.0). Migrated. -->
+    <entry name="keepOpen" type="Bool"><default>false</default></entry>
+    <entry name="loadOnStartup" type="Bool"><default>false</default></entry>
+    <entry name="dialogWidth" type="Int"><default>0</default></entry>
+    <entry name="dialogHeight" type="Int"><default>0</default></entry>
+
+    <!-- Permissions: 0 = ask per site, 1 = allow, 2 = block -->
+    <entry name="notificationsPolicy" type="Int"><default>0</default></entry>
+    <entry name="microphonePolicy" type="Int"><default>0</default></entry>
+    <entry name="webcamPolicy" type="Int"><default>0</default></entry>
+    <entry name="screenSharePolicy" type="Int"><default>0</default></entry>
+    <entry name="geolocationPolicy" type="Int"><default>0</default></entry>
+    <entry name="clipboardPolicy" type="Int"><default>0</default></entry>
+    <!-- Legacy boolean permissions (ChatAI <= 1.0.0). Migrated to *Policy. -->
+    <entry name="notificationsEnabled" type="Bool"><default>true</default></entry>
+    <entry name="microphoneEnabled" type="Bool"><default>false</default></entry>
+    <entry name="webcamEnabled" type="Bool"><default>false</default></entry>
+    <entry name="screenShareEnabled" type="Bool"><default>false</default></entry>
+    <entry name="geolocationEnabled" type="Bool"><default>false</default></entry>
+
+    <!-- Web features (WebEngineSettings) -->
+    <entry name="spatialNavigationEnabled" type="Bool"><default>false</default></entry>
+    <entry name="javascriptCanAccessClipboard" type="Bool"><default>true</default></entry>
+    <entry name="javascriptCanPaste" type="Bool"><default>false</default></entry>
+    <entry name="javascriptCanOpenWindows" type="Bool"><default>true</default></entry>
+    <entry name="allowUnknownUrlSchemes" type="Bool"><default>false</default></entry>
+    <entry name="playbackRequiresUserGesture" type="Bool"><default>false</default></entry>
+    <entry name="focusOnNavigationEnabled" type="Bool"><default>true</default></entry>
+
+    <!-- Downloads -->
+    <entry name="downloadPath" type="String"><default></default></entry>
+
+    <!-- Profile / cache -->
+    <entry name="webEngineProfileName" type="String"><default>chat-ai</default></entry>
+    <!-- HTTP cache limit in MiB; 0 lets Qt WebEngine decide -->
+    <entry name="httpCacheMaximumSize" type="Int"><default>0</default></entry>
+
+    <!-- View -->
+    <entry name="zoomFactor" type="Double"><default>1.0</default></entry>
+
+    <!-- Advanced -->
+    <entry name="freezeWhenHidden" type="Bool"><default>true</default></entry>
+    <!-- Minutes hidden before the page may be discarded (0 = never). Default 30:
+         short hides keep the frozen page for instant reopen; only long idle
+         discards the renderer to return its memory to the system. User-tunable. -->
+    <entry name="discardAfterMinutes" type="Int"><default>30</default></entry>
+    <entry name="enableDevTools" type="Bool"><default>false</default></entry>
+    <!-- Remove the "QtWebEngine/x.y" token from the user agent (identify as plain Chromium).
+         Off by default: Google sign-in REJECTS browsers whose UA claims Chrome/Firefox but
+         whose fingerprint differs ("browser or app may not be secure"), while the honest
+         Qt WebEngine identity is accepted. -->
+    <entry name="compatibilityUserAgent" type="Bool"><default>false</default></entry>
+    <entry name="customUserAgent" type="String"><default></default></entry>
+  </group>
+</kcfg>
