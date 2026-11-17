@@ -1,6 +1,6 @@
 [General]
 HotspotConnectionPath=
-HotspotName=ALHN-04E0
+HotspotName=
 HotspotPassword=
 ManageVirtualConnections=false
 SystemConnectionsByDefault=false
