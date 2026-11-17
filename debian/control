@@ -45,10 +45,11 @@ Architecture: all
 Multi-Arch: foreign
 Depends: ${misc:Depends}
 Description: imagem de usuário padrão do Mainuan no lugar da do Kubuntu
- Troca a imagem padrão das novas contas (/etc/skel/.face) e o avatar
- kubuntu-bug.png do seletor de imagens do Plasma pelo logotipo do Mainuan.
+ Troca a imagem padrão das novas contas (/etc/skel/.face), o avatar
+ kubuntu-bug.png do seletor de imagens do Plasma e o rosto padrão da tela de
+ login (tema Breeze do SDDM) pelo logotipo do Mainuan.
  .
- Os dois arquivos pertencem ao kubuntu-settings-desktop e são desviados com
- dpkg-divert: os originais ficam em /var/lib/mainuan-user-avatar/diverted,
+ Os arquivos pertencem ao kubuntu-settings-desktop e ao sddm-theme-breeze e
+ são desviados com dpkg-divert: os originais ficam em /var/lib/mainuan-user-avatar/diverted,
  continuam recebendo atualizações e voltam ao lugar quando este pacote é
  removido.

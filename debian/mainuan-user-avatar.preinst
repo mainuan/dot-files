@@ -10,6 +10,11 @@ set -e
 #   /etc/skel/.face                            imagem do usuário
 #   /usr/share/plasma/avatars/kubuntu-bug.png  avatar
 #
+# E um arquivo do sddm-theme-breeze:
+#
+#   /usr/share/sddm/themes/breeze/faces/.face.icon  rosto padrão da tela de
+#       login (o SDDM prefere o rosto do tema ao do FacesDir)
+#
 # Este pacote instala /etc/skel/.face como link simbólico, não como arquivo
 # de configuração: assim o dpkg não confunde o conffile do Kubuntu com o
 # deste pacote.
@@ -19,6 +24,7 @@ case "$1" in
         mkdir -p /var/lib/mainuan-user-avatar/diverted
         dpkg-divert --package mainuan-user-avatar --add --rename --divert /var/lib/mainuan-user-avatar/diverted/skel.face /etc/skel/.face
         dpkg-divert --package mainuan-user-avatar --add --rename --divert /var/lib/mainuan-user-avatar/diverted/kubuntu-bug.png /usr/share/plasma/avatars/kubuntu-bug.png
+        dpkg-divert --package mainuan-user-avatar --add --rename --divert /var/lib/mainuan-user-avatar/diverted/breeze.face.icon /usr/share/sddm/themes/breeze/faces/.face.icon
         ;;
 esac
 
