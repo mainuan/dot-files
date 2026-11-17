@@ -1,0 +1,37 @@
+Source: mainuan-desktop-defaults
+Section: kde
+Priority: optional
+Maintainer: Mainuan Packaging <openwebosbr@gmail.com>
+Uploaders: ruscher <rruscher@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+               gettext <!nocheck>,
+               python3 <!nocheck>,
+Standards-Version: 4.7.2
+Rules-Requires-Root: no
+Homepage: https://github.com/mainuan/dot-files
+Vcs-Browser: https://github.com/mainuan/dot-files
+Vcs-Git: https://github.com/mainuan/dot-files.git
+
+Package: mainuan-desktop-defaults
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Recommends: mainuan-icon-themes,
+            mainuan-plasma-themes,
+            mainuan-wallpapers,
+            plasma-workspace,
+Description: configuração padrão da área de trabalho Plasma do Mainuan
+ Configuração inicial do KDE Plasma para as contas criadas no Mainuan Linux:
+  - /etc/skel: painéis e widgets, tema do Plasma, esquema de cores, tema de
+    ícones, atalhos, KWin, Dolphin e Kate, papel de parede e imagem do
+    usuário (.face);
+  - /etc/xdg/kscreenlockerrc: papel de parede da tela de bloqueio;
+  - widgets ChatAI, Mike Desktop e Power Show Desktop;
+  - avatar do Mainuan, atalho do Painel de Controle e identidade visual do
+    instalador Calamares.
+ .
+ /etc/skel/.face e /usr/share/plasma/avatars/kubuntu-bug.png, do
+ kubuntu-settings-desktop, e /etc/skel/.config/Trolltech.conf, do
+ xubuntu-default-settings, são desviados com dpkg-divert e voltam ao lugar
+ quando este pacote é removido (.face e Trolltech.conf, que são arquivos de
+ configuração, voltam no expurgo).

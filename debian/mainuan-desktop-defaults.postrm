@@ -1,0 +1,43 @@
+#!/bin/sh
+set -e
+
+# Desfaz os desvios criados pelo preinst. Quando o caminho original está
+# livre, o arquivo do pacote dono volta para ele (--rename); se algo ocupa o
+# caminho, o arquivo é mantido e o original fica no diretório de desvios.
+#
+# O avatar some com o pacote, então volta na remoção. /etc/skel/.face e
+# Trolltech.conf são arquivos de configuração (conffiles): continuam no
+# disco depois de "remove" e só saem no expurgo, quando o original volta.
+
+case "$1" in
+    remove|abort-install|disappear)
+        if [ -e /usr/share/plasma/avatars/kubuntu-bug.png ] || [ -L /usr/share/plasma/avatars/kubuntu-bug.png ]; then
+            echo "mainuan-desktop-defaults: /usr/share/plasma/avatars/kubuntu-bug.png existe; original mantido em /usr/share/mainuan-desktop-defaults/diverted" >&2
+            dpkg-divert --package mainuan-desktop-defaults --remove --no-rename --divert /usr/share/mainuan-desktop-defaults/diverted/kubuntu-bug.png /usr/share/plasma/avatars/kubuntu-bug.png
+        else
+            dpkg-divert --package mainuan-desktop-defaults --remove --rename --divert /usr/share/mainuan-desktop-defaults/diverted/kubuntu-bug.png /usr/share/plasma/avatars/kubuntu-bug.png
+        fi
+        ;;
+esac
+
+case "$1" in
+    purge|abort-install|disappear)
+        if [ -e /etc/skel/.face ] || [ -L /etc/skel/.face ]; then
+            echo "mainuan-desktop-defaults: /etc/skel/.face existe; original mantido em /usr/share/mainuan-desktop-defaults/diverted" >&2
+            dpkg-divert --package mainuan-desktop-defaults --remove --no-rename --divert /usr/share/mainuan-desktop-defaults/diverted/skel.face /etc/skel/.face
+        else
+            dpkg-divert --package mainuan-desktop-defaults --remove --rename --divert /usr/share/mainuan-desktop-defaults/diverted/skel.face /etc/skel/.face
+        fi
+        if [ -e /etc/skel/.config/Trolltech.conf ] || [ -L /etc/skel/.config/Trolltech.conf ]; then
+            echo "mainuan-desktop-defaults: /etc/skel/.config/Trolltech.conf existe; original mantido em /usr/share/mainuan-desktop-defaults/diverted" >&2
+            dpkg-divert --package mainuan-desktop-defaults --remove --no-rename --divert /usr/share/mainuan-desktop-defaults/diverted/skel.Trolltech.conf /etc/skel/.config/Trolltech.conf
+        else
+            dpkg-divert --package mainuan-desktop-defaults --remove --rename --divert /usr/share/mainuan-desktop-defaults/diverted/skel.Trolltech.conf /etc/skel/.config/Trolltech.conf
+        fi
+        rmdir --ignore-fail-on-non-empty /usr/share/mainuan-desktop-defaults/diverted /usr/share/mainuan-desktop-defaults 2>/dev/null || true
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

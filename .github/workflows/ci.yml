@@ -1,0 +1,182 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v[0-9]*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
+jobs:
+  package:
+    permissions:
+      contents: write # only the release job uses it, and only for v* tags
+    uses: mainuan/.github/.github/workflows/debian-package.yml@2409a50535befe90ac3bbfc4db6eed7d65eac4e5
+    with:
+      package: mainuan-desktop-defaults
+      release-title: Mainuan Desktop Defaults
+      test-command: |
+        bash po/i18n.sh check-pot
+        bash po/i18n.sh validate
+        # The translations written into the menu entry must match po/.
+        out="$(po/apply-desktop-translations.sh)"
+        if [ -n "$out" ]; then
+          echo "$out"; echo "::error::run po/apply-desktop-translations.sh"; exit 1
+        fi
+        sh -n debian/mainuan-desktop-defaults.preinst
+        sh -n debian/mainuan-desktop-defaults.postrm
+        # The source package must not carry .git or build leftovers.
+        dpkg-source -Zgzip -z1 --build .
+        tar -tzf ../mainuan-desktop-defaults_*.tar.gz > ../source-files.txt
+        if grep -E '(^|/)\.git(/|$)|/debian/(\.debhelper|debhelper-build-stamp|files$|.*\.substvars$|mainuan-desktop-defaults/)' ../source-files.txt; then
+          echo "::error::source package carries VCS or build files"; exit 1
+        fi
+        du -h ../mainuan-desktop-defaults_*.tar.gz
+        rm -f ../mainuan-desktop-defaults_*.dsc ../mainuan-desktop-defaults_*.tar.gz ../source-files.txt
+      # kubuntu-settings-desktop owns /etc/skel/.face and the kubuntu-bug.png
+      # avatar that this package diverts; it also brings plasma-workspace.
+      # The shared purge step checks that the diverted files are back.
+      extra-install-packages: kubuntu-settings-desktop kpackagetool6 libkf6config-bin desktop-file-utils python3
+      smoke-command: |
+        cd "$HOME"
+        dpkg-divert --list | grep ' by mainuan-desktop-defaults$' | tee diversions.txt
+        test "$(wc -l < diversions.txt)" -eq 3
+        for f in /etc/skel/.face /etc/skel/.config/Trolltech.conf /usr/share/plasma/avatars/kubuntu-bug.png; do
+          test "$(dpkg-divert --listpackage "$f")" = mainuan-desktop-defaults
+        done
+        dpkg --verify mainuan-desktop-defaults kubuntu-settings-desktop
+        test -s /usr/share/mainuan-desktop-defaults/diverted/skel.face
+        test -s /usr/share/mainuan-desktop-defaults/diverted/kubuntu-bug.png
+        grep -q '<svg' /etc/skel/.face
+        test "$(readlink -f /etc/skel/.face.icon)" = /etc/skel/.face
+        cmp /usr/share/plasma/avatars/kubuntu-bug.png /usr/share/plasma/avatars/logoMainuan.png
+        python3 -I - <<'PY'
+        import configparser, glob, json, os
+        for d in ("ChatAI-Plasmoid", "com.mike.desktop", "org.kde.plasma.powershowdesktop"):
+            path = f"/usr/share/plasma/plasmoids/{d}/"
+            with open(path + "metadata.json", encoding="utf-8") as f:
+                plugin = json.load(f)["KPlugin"]
+            assert plugin["Id"] == d and plugin["Name"], d
+            assert os.path.isfile(path + "contents/ui/main.qml"), d
+        for path in sorted(glob.glob("/etc/skel/.config/*")) + ["/etc/xdg/kscreenlockerrc"]:
+            c = configparser.ConfigParser(interpolation=None, strict=False)
+            c.optionxform = str
+            with open(path, encoding="utf-8") as f:
+                c.read_file(f)
+            print(path, len(c.sections()), "groups")
+        PY
+        # Effective values with Kubuntu's configuration directory in the
+        # cascade, as in a Kubuntu session.
+        export XDG_CONFIG_DIRS=/etc/xdg:/usr/share/kubuntu-default-settings/kf5-settings
+        img="$(kreadconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General --key Image)"
+        echo "lock screen: $img"
+        test "$img" = file:///usr/share/wallpapers/01ciano.png
+        img="$(kreadconfig6 --file /etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc --group Containments --group 455 --group Wallpaper --group org.kde.image --group General --key Image)"
+        echo "desktop: $img"
+        test "$img" = file:///usr/share/wallpapers/01ciano.png
+        kpackagetool6 --global --type Plasma/Applet --list > applets.txt
+        for id in ChatAI-Plasmoid com.mike.desktop org.kde.plasma.powershowdesktop; do
+          grep -qwF -- "$id" applets.txt || { cat applets.txt; exit 1; }
+        done
+        desktop-file-validate /usr/share/applications/painel-controle.desktop
+        if dpkg -L mainuan-desktop-defaults | grep -E '/(translate|locale|images|LICENSE[^/]*|README[^/]*|[^/]*\.plasmoid)$'; then exit 1; fi
+
+  # Root-level checks the shared pipeline cannot do: both installation
+  # orders, reinstalling the diverted package, and restoration on remove and
+  # purge, byte for byte.
+  diversions:
+    needs: package
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    container:
+      image: ubuntu:26.04@sha256:42527649dbc4f9197a6073f426f488cbff0e9cc9f2afce32d91c383e4875634a
+      options: --platform linux/amd64
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Download package artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: deb-mainuan-desktop-defaults-${{ github.sha }}
+          path: dist
+
+      - name: Divert, keep and restore the Kubuntu files
+        run: |
+          set -euo pipefail
+          rm -f /etc/dpkg/dpkg.cfg.d/excludes
+          (cd dist && sha256sum --check SHA256SUMS)
+          deb="$(echo "$PWD"/dist/mainuan-desktop-defaults_*.deb)"
+          apt=(apt-get --yes --no-install-recommends -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold)
+          D=/usr/share/mainuan-desktop-defaults/diverted
+          ours="$(mktemp -d)"
+          dpkg-deb -x "$deb" "$ours"
+          sum() { sha256sum < "$1" | cut -d' ' -f1; }
+          step() { echo "::group::$*"; }
+
+          apt-get update
+          "${apt[@]}" install kubuntu-settings-desktop
+          kface="$(sum /etc/skel/.face)"
+          kbug="$(sum /usr/share/plasma/avatars/kubuntu-bug.png)"
+
+          diverted() {  # Mainuan files in place, Kubuntu's kept aside
+            for f in /etc/skel/.face /etc/skel/.config/Trolltech.conf /usr/share/plasma/avatars/kubuntu-bug.png; do
+              test "$(dpkg-divert --listpackage "$f")" = mainuan-desktop-defaults
+              test "$(sum "$f")" = "$(sum "$ours$f")"
+            done
+            test "$(sum $D/skel.face)" = "$kface"
+            test "$(sum $D/kubuntu-bug.png)" = "$kbug"
+            test ! -e $D/skel.Trolltech.conf
+            dpkg --verify kubuntu-settings-desktop mainuan-desktop-defaults
+          }
+          restored() {  # Kubuntu files back, no diversion, nothing left
+            test "$(sum /etc/skel/.face)" = "$kface"
+            test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$kbug"
+            test ! -e /etc/skel/.config/Trolltech.conf
+            test ! -e /usr/share/mainuan-desktop-defaults
+            if dpkg-divert --list | grep mainuan; then exit 1; fi
+            test "$(readlink -f /etc/skel/.face.icon)" = /etc/skel/.face
+            dpkg --verify kubuntu-settings-desktop
+          }
+
+          step "Kubuntu first, then Mainuan"
+          "${apt[@]}" install "$deb"
+          diverted
+          "${apt[@]}" install --reinstall kubuntu-settings-desktop
+          diverted
+          "${apt[@]}" install --reinstall "$deb"
+          diverted
+          echo "::endgroup::"
+
+          step "remove: the avatar returns, the conffiles stay until purge"
+          "${apt[@]}" remove mainuan-desktop-defaults
+          test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$kbug"
+          test -z "$(dpkg-divert --listpackage /usr/share/plasma/avatars/kubuntu-bug.png)"
+          test "$(sum /etc/skel/.face)" = "$(sum "$ours/etc/skel/.face")"
+          test "$(sum $D/skel.face)" = "$kface"
+          dpkg --purge mainuan-desktop-defaults
+          restored
+          echo "::endgroup::"
+
+          step "Mainuan first, then Kubuntu"
+          "${apt[@]}" purge kubuntu-settings-desktop
+          test ! -e /etc/skel/.face
+          "${apt[@]}" install "$deb"
+          test ! -e $D/skel.face
+          "${apt[@]}" install kubuntu-settings-desktop
+          diverted
+          "${apt[@]}" remove mainuan-desktop-defaults
+          dpkg --purge mainuan-desktop-defaults
+          restored
+          echo "::endgroup::"
