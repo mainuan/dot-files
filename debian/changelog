@@ -1,3 +1,16 @@
+mainuan-desktop-defaults (2026.11.17.2) resolute; urgency=medium
+
+  * Tela de login com a identidade do Mainuan: /etc/sddm.conf.d/30-mainuan.conf
+    escolhe o tema Breeze (o Kubuntu escolhe o tema "kubuntu", com a
+    engrenagem) e um FacesDir com o logotipo do Mainuan como rosto padrão;
+    theme.conf.user do Breeze com o papel de parede 01ciano e o logotipo.
+  * Tela de inicialização "mainuan" (Plymouth two-step com a animação do
+    tema Spinner e o logotipo e o nome do Mainuan), padrão com prioridade
+    200 (o tema do Kubuntu usa 150) e removida na desinstalação.
+  * Corrige o slide 5 do instalador: "No Mainuam" passa a "No Mainuan".
+
+ -- ruscher <rruscher@gmail.com>  Tue, 17 Nov 2026 18:08:47 -0300
+
 mainuan-desktop-defaults (2026.11.17.1) resolute; urgency=medium
 
   * O atalho do menu do Painel de Controle

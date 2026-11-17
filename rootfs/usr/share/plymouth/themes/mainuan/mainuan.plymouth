@@ -1,0 +1,50 @@
+[Plymouth Theme]
+Name=Mainuan
+Name[pt_BR]=Mainuan
+Description=Tela de inicialização do Mainuan: logotipo e animação do tema Spinner.
+ModuleName=two-step
+
+[two-step]
+Font=Cantarell 12
+TitleFont=Cantarell Light 30
+# A animação vem do tema Spinner (links nesta pasta); a marca d'água é o
+# logotipo e o nome do Mainuan.
+ImageDir=/usr/share/plymouth/themes/mainuan
+DialogHorizontalAlignment=.5
+DialogVerticalAlignment=.382
+TitleHorizontalAlignment=.5
+TitleVerticalAlignment=.382
+HorizontalAlignment=.5
+VerticalAlignment=.75
+WatermarkHorizontalAlignment=.5
+WatermarkVerticalAlignment=.45
+Transition=none
+TransitionDuration=0.0
+BackgroundStartColor=0x000000
+BackgroundEndColor=0x000000
+ProgressBarBackgroundColor=0x606060
+ProgressBarForegroundColor=0x06b6d4
+MessageBelowAnimation=true
+
+[boot-up]
+UseEndAnimation=false
+
+[shutdown]
+UseEndAnimation=false
+
+[reboot]
+UseEndAnimation=false
+
+[updates]
+SuppressMessages=true
+ProgressBarShowPercentComplete=true
+UseProgressBar=true
+Title=Instalando atualizações...
+SubTitle=Não desligue o computador
+
+[system-upgrade]
+SuppressMessages=true
+ProgressBarShowPercentComplete=true
+UseProgressBar=true
+Title=Atualizando o sistema...
+SubTitle=Não desligue o computador

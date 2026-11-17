@@ -1,0 +1,23 @@
+#!/bin/sh
+set -e
+
+theme=/usr/share/plymouth/themes/mainuan
+
+case "$1" in
+    configure)
+        # Tela de inicialização do Mainuan; prioridade acima da do Kubuntu (150).
+        update-alternatives \
+            --install /usr/share/plymouth/themes/default.plymouth default.plymouth \
+                "$theme/mainuan.plymouth" 200 \
+            --slave /usr/share/plymouth/themes/default.grub default.plymouth.grub \
+                "$theme/mainuan.grub"
+        # O tema vai para o initramfs na próxima geração (gatilho do initramfs-tools).
+        if command -v update-initramfs >/dev/null 2>&1; then
+            dpkg-trigger --no-await update-initramfs 2>/dev/null || true
+        fi
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
