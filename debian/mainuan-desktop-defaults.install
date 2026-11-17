@@ -1,6 +1,5 @@
 rootfs/etc/calamares etc
 rootfs/etc/skel etc
 rootfs/etc/xdg etc
-rootfs/usr/share/applications usr/share
 rootfs/usr/share/plasma/avatars/logoMainuan.png usr/share/plasma/avatars
 rootfs/usr/share/plasma/plasmoids usr/share/plasma
