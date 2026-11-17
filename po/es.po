@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Mainuan dot-files\n"
 "Report-Msgid-Bugs-To: https://github.com/mainuan\n"
-"POT-Creation-Date: 2026-11-16 13:33-0300\n"
+"POT-Creation-Date: 2026-11-17 00:38-0300\n"
 "PO-Revision-Date: 2026-11-16 11:58-0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: Spanish\n"
@@ -17,6 +17,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: rootfs/usr/share/applications/painel-controle.desktop:28
+#: rootfs/usr/share/applications/painel-controle.desktop:42
 msgid "Control Panel"
 msgstr "Panel de control"
