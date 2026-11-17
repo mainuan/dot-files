@@ -5,6 +5,8 @@ case "$1" in
     remove|deconfigure)
         update-alternatives --remove default.plymouth \
             /usr/share/plymouth/themes/mainuan/mainuan.plymouth
+        update-alternatives --remove text.plymouth \
+            /usr/share/plymouth/themes/mainuan-text/mainuan-text.plymouth
         ;;
 esac
 

@@ -83,6 +83,10 @@ jobs:
         # Boot splash: the Mainuan theme is the default and its animation exists.
         update-alternatives --query default.plymouth | grep -qx 'Value: /usr/share/plymouth/themes/mainuan/mainuan.plymouth'
         test -s /usr/share/plymouth/themes/mainuan/throbber-0001.png
+        # Real files: the initramfs hook does not follow links out of the theme.
+        if find /usr/share/plymouth/themes/mainuan -type l | grep .; then exit 1; fi
+        update-alternatives --query text.plymouth | grep -qx 'Value: /usr/share/plymouth/themes/mainuan-text/mainuan-text.plymouth'
+        grep -qx 'title=Mainuan 2027.1' /usr/share/plymouth/themes/mainuan-text/mainuan-text.plymouth
         test -s /usr/share/plymouth/themes/mainuan/watermark.png
         # Login screen: Breeze theme (after Kubuntu's 20-kubuntu.conf) and the
         # Mainuan logo as the default face.

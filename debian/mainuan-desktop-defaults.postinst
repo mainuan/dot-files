@@ -11,6 +11,10 @@ case "$1" in
                 "$theme/mainuan.plymouth" 200 \
             --slave /usr/share/plymouth/themes/default.grub default.plymouth.grub \
                 "$theme/mainuan.grub"
+        # Modo texto (sem vídeo gráfico); a do Kubuntu usa prioridade 60.
+        update-alternatives \
+            --install /usr/share/plymouth/themes/text.plymouth text.plymouth \
+                /usr/share/plymouth/themes/mainuan-text/mainuan-text.plymouth 200
         # O tema vai para o initramfs na próxima geração (gatilho do initramfs-tools).
         if command -v update-initramfs >/dev/null 2>&1; then
             dpkg-trigger --no-await update-initramfs 2>/dev/null || true

@@ -1,0 +1,15 @@
+[Plymouth Theme]
+Name=Mainuan Text
+Description=Tela de inicialização do Mainuan em modo texto (sem vídeo gráfico).
+ModuleName=ubuntu-text
+
+[ubuntu-text]
+title=Mainuan 2027.1
+# Fundo
+black=0x000000
+# Título e mensagens
+white=0xFFFFFF
+# Pontos de progresso
+brown=0x06B6D4
+# Mensagens de status (fsck)
+blue=0x06B6D4
