@@ -30,34 +30,28 @@ jobs:
         if [ -n "$out" ]; then
           echo "$out"; echo "::error::run po/apply-desktop-translations.sh"; exit 1
         fi
-        sh -n debian/mainuan-desktop-defaults.preinst
-        sh -n debian/mainuan-desktop-defaults.postrm
+        sh -n debian/mainuan-user-avatar.preinst
+        sh -n debian/mainuan-user-avatar.postrm
         # The source package must not carry .git or build leftovers.
         dpkg-source -Zgzip -z1 --build .
         tar -tzf ../mainuan-desktop-defaults_*.tar.gz > ../source-files.txt
-        if grep -E '(^|/)\.git(/|$)|/debian/(\.debhelper|debhelper-build-stamp|files$|.*\.substvars$|mainuan-desktop-defaults/)' ../source-files.txt; then
+        if grep -E '(^|/)\.git(/|$)|/debian/(\.debhelper|debhelper-build-stamp|files$|.*\.substvars$|mainuan-desktop-defaults/|mainuan-user-avatar/)' ../source-files.txt; then
           echo "::error::source package carries VCS or build files"; exit 1
         fi
         du -h ../mainuan-desktop-defaults_*.tar.gz
         rm -f ../mainuan-desktop-defaults_*.dsc ../mainuan-desktop-defaults_*.tar.gz ../source-files.txt
-      # kubuntu-settings-desktop owns /etc/skel/.face and the kubuntu-bug.png
-      # avatar that this package diverts; it also brings plasma-workspace.
-      # The shared remove/purge step checks that the diverted files are back.
+      # kubuntu-settings-desktop first (it also brings plasma-workspace): the
+      # main package must install next to it without touching its files.
+      # The diversions of mainuan-user-avatar are tested in the job below.
       extra-install-packages: kubuntu-settings-desktop kpackagetool6 libkf6config-bin desktop-file-utils python3
       smoke-command: |
         cd "$HOME"
-        dpkg-divert --list | grep ' by mainuan-desktop-defaults$' | tee diversions.txt
-        test "$(wc -l < diversions.txt)" -eq 2
-        for f in /etc/skel/.face /usr/share/plasma/avatars/kubuntu-bug.png; do
-          test "$(dpkg-divert --listpackage "$f")" = mainuan-desktop-defaults
-        done
+        # This package replaces nothing: Kubuntu's files stay untouched.
+        if dpkg-divert --list | grep mainuan; then exit 1; fi
         dpkg --verify mainuan-desktop-defaults kubuntu-settings-desktop
-        test -s /var/lib/mainuan-desktop-defaults/diverted/skel.face
-        test -s /var/lib/mainuan-desktop-defaults/diverted/kubuntu-bug.png
-        test "$(readlink /etc/skel/.face)" = /usr/share/mainuan-desktop-defaults/face.svg
-        test "$(readlink -f /etc/skel/.face.icon)" = /usr/share/mainuan-desktop-defaults/face.svg
-        grep -q '<svg' /etc/skel/.face
-        cmp /usr/share/plasma/avatars/kubuntu-bug.png /usr/share/plasma/avatars/logoMainuan.png
+        dpkg -S /etc/skel/.face | grep -qx 'kubuntu-settings-desktop: /etc/skel/.face'
+        dpkg -S /usr/share/plasma/avatars/kubuntu-bug.png | grep -q '^kubuntu-settings-desktop:'
+        test -s /usr/share/plasma/avatars/logoMainuan.png
         python3 -I - <<'PY'
         import configparser, json, os, subprocess
         for d in ("ChatAI-Plasmoid", "com.mike.desktop", "org.kde.plasma.powershowdesktop"):
@@ -93,9 +87,11 @@ jobs:
         desktop-file-validate /usr/share/applications/painel-controle.desktop
         if dpkg -L mainuan-desktop-defaults | grep -E '/(translate|locale|images|LICENSE[^/]*|README[^/]*|[^/]*\.plasmoid)$'; then exit 1; fi
 
-  # Root-level checks the shared pipeline cannot do: both installation
-  # orders, reinstalling the diverted package, and restoration on remove and
-  # purge, byte for byte.
+  # mainuan-user-avatar diverts two kubuntu-settings-desktop files. The
+  # shared install test only covers the main package (and its dpkg -L check
+  # does not understand diversion lines), so this job tests, as root and
+  # without --force-conf*, both installation orders, reinstalling both
+  # packages, and byte-for-byte restoration on remove and purge.
   diversions:
     needs: package
     runs-on: ubuntu-26.04
@@ -117,15 +113,16 @@ jobs:
           name: deb-mainuan-desktop-defaults-${{ github.sha }}
           path: dist
 
-      - name: Divert, keep and restore the Kubuntu files
+      - name: Divert, keep and restore the Kubuntu files (mainuan-user-avatar)
         run: |
           set -euo pipefail
           rm -f /etc/dpkg/dpkg.cfg.d/excludes
           (cd dist && sha256sum --check SHA256SUMS)
-          deb="$(echo "$PWD"/dist/mainuan-desktop-defaults_*.deb)"
+          deb="$(echo "$PWD"/dist/mainuan-user-avatar_*.deb)"
+          main="$(echo "$PWD"/dist/mainuan-desktop-defaults_*.deb)"
           # No --force-conf*: a conffile prompt (stdin is closed) fails the job.
           apt=(apt-get --yes --no-install-recommends)
-          D=/var/lib/mainuan-desktop-defaults/diverted
+          D=/var/lib/mainuan-user-avatar/diverted
           ours="$(mktemp -d)"
           dpkg-deb -x "$deb" "$ours"
           sum() { sha256sum < "$1" | cut -d' ' -f1; }
@@ -138,27 +135,29 @@ jobs:
 
           diverted() {  # Mainuan files in place, Kubuntu's kept aside
             for f in /etc/skel/.face /usr/share/plasma/avatars/kubuntu-bug.png; do
-              test "$(dpkg-divert --listpackage "$f")" = mainuan-desktop-defaults
+              test "$(dpkg-divert --listpackage "$f")" = mainuan-user-avatar
             done
-            test "$(readlink /etc/skel/.face)" = /usr/share/mainuan-desktop-defaults/face.svg
+            test "$(readlink /etc/skel/.face)" = /usr/share/mainuan-user-avatar/face.svg
+            test "$(readlink -f /etc/skel/.face.icon)" = /usr/share/mainuan-user-avatar/face.svg
+            grep -q '<svg' /etc/skel/.face
             test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$(sum "$ours/usr/share/plasma/avatars/kubuntu-bug.png")"
             test "$(sum $D/skel.face)" = "$kface"
             test "$(sum $D/kubuntu-bug.png)" = "$kbug"
-            dpkg --verify kubuntu-settings-desktop mainuan-desktop-defaults
+            dpkg --verify kubuntu-settings-desktop mainuan-user-avatar
           }
           restored() {  # Kubuntu files back, no diversion, nothing left
             test -f /etc/skel/.face && test ! -L /etc/skel/.face
             test "$(sum /etc/skel/.face)" = "$kface"
             test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$kbug"
             test "$(readlink -f /etc/skel/.face.icon)" = /etc/skel/.face
-            test ! -e /var/lib/mainuan-desktop-defaults
-            test ! -e /usr/share/mainuan-desktop-defaults
+            test ! -e /var/lib/mainuan-user-avatar
+            test ! -e /usr/share/mainuan-user-avatar
             if dpkg-divert --list | grep mainuan; then exit 1; fi
             dpkg --verify kubuntu-settings-desktop
           }
 
-          step "Kubuntu first, then Mainuan; reinstall both"
-          "${apt[@]}" install "$deb"
+          step "Kubuntu first, then Mainuan (with mainuan-desktop-defaults); reinstall"
+          "${apt[@]}" install "$main" "$deb"
           diverted
           "${apt[@]}" install --reinstall kubuntu-settings-desktop
           diverted
@@ -167,10 +166,11 @@ jobs:
           echo "::endgroup::"
 
           step "remove restores the Kubuntu files; purge leaves nothing"
-          "${apt[@]}" remove mainuan-desktop-defaults
+          "${apt[@]}" remove mainuan-user-avatar
           restored
-          dpkg --purge mainuan-desktop-defaults
+          dpkg --purge mainuan-user-avatar
           restored
+          dpkg --verify mainuan-desktop-defaults
           echo "::endgroup::"
 
           step "Mainuan first, then Kubuntu"
@@ -182,7 +182,7 @@ jobs:
           diverted
           "${apt[@]}" install --reinstall kubuntu-settings-desktop
           diverted
-          "${apt[@]}" remove mainuan-desktop-defaults
-          dpkg --purge mainuan-desktop-defaults
+          "${apt[@]}" remove mainuan-user-avatar
+          dpkg --purge mainuan-user-avatar
           restored
           echo "::endgroup::"

@@ -3,7 +3,7 @@ set -e
 
 # Arquivos do kubuntu-settings-desktop substituídos por este pacote
 # (dpkg-divert --rename). O original é guardado em
-# /var/lib/mainuan-desktop-defaults/diverted, fora de /etc/skel (senão seria
+# /var/lib/mainuan-user-avatar/diverted, fora de /etc/skel (senão seria
 # copiado para a pasta de cada novo usuário), e continua recebendo as
 # atualizações do pacote dono. O postrm o devolve ao lugar.
 #
@@ -16,9 +16,9 @@ set -e
 
 case "$1" in
     install|upgrade)
-        mkdir -p /var/lib/mainuan-desktop-defaults/diverted
-        dpkg-divert --package mainuan-desktop-defaults --add --rename --divert /var/lib/mainuan-desktop-defaults/diverted/skel.face /etc/skel/.face
-        dpkg-divert --package mainuan-desktop-defaults --add --rename --divert /var/lib/mainuan-desktop-defaults/diverted/kubuntu-bug.png /usr/share/plasma/avatars/kubuntu-bug.png
+        mkdir -p /var/lib/mainuan-user-avatar/diverted
+        dpkg-divert --package mainuan-user-avatar --add --rename --divert /var/lib/mainuan-user-avatar/diverted/skel.face /etc/skel/.face
+        dpkg-divert --package mainuan-user-avatar --add --rename --divert /var/lib/mainuan-user-avatar/diverted/kubuntu-bug.png /usr/share/plasma/avatars/kubuntu-bug.png
         ;;
 esac
 

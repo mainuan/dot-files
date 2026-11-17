@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 PKG := debian/mainuan-desktop-defaults
+AVATAR := debian/mainuan-user-avatar
 PLASMOIDS := $(PKG)/usr/share/plasma/plasmoids
 
 %:
@@ -17,14 +18,15 @@ execute_after_dh_install:
 	       $(PLASMOIDS)/org.kde.plasma.powershowdesktop/translate
 	find $(PLASMOIDS) \( -name 'LICENSE*' -o -name 'README*' -o -name '*~' \) \
 	    -type f -delete
-	# /etc/skel/.face pertence ao kubuntu-settings-desktop (conffile). A
-	# imagem fica fora de /etc e /etc/skel/.face vira um link para ela
-	# (debian/links): um conffile desviado faria o dpkg perguntar sobre o
-	# arquivo nas instalações e atualizações dos dois pacotes.
-	mkdir -p $(PKG)/usr/share/mainuan-desktop-defaults
-	mv $(PKG)/etc/skel/.face $(PKG)/usr/share/mainuan-desktop-defaults/face.svg
+	# /etc/skel/.face pertence ao kubuntu-settings-desktop: vai para o
+	# mainuan-user-avatar, que o desvia. Lá a imagem fica fora de /etc e
+	# /etc/skel/.face é um link para ela (debian/mainuan-user-avatar.links):
+	# um conffile no lugar de um conffile desviado faria o dpkg perguntar
+	# sobre o arquivo nas instalações e atualizações dos dois pacotes.
+	rm $(PKG)/etc/skel/.face
+	install -D -m 0644 rootfs/etc/skel/.face $(AVATAR)/usr/share/mainuan-user-avatar/face.svg
 
 execute_after_dh_fixperms:
 	# Configurações e widgets são dados: nenhum arquivo precisa ser executável.
-	find $(PKG) -path $(PKG)/DEBIAN -prune -o -type f -perm /111 \
+	find $(PKG) $(AVATAR) -path '*/DEBIAN' -prune -o -type f -perm /111 \
 	    -exec chmod a-x {} +
