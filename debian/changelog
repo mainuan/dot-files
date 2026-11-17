@@ -1,3 +1,13 @@
+mainuan-desktop-defaults (2026.11.17.3) resolute; urgency=medium
+
+  * Tela de inicialização: a animação do Spinner passa a ser instalada como
+    arquivos reais. O gancho do initramfs não segue links para fora da pasta
+    do tema, e o boot caía no tema texto do Kubuntu.
+  * Novo tema texto "mainuan-text" (Mainuan 2027.1), usado quando não há
+    vídeo gráfico, no lugar do "Kubuntu 26.04".
+
+ -- ruscher <rruscher@gmail.com>  Tue, 17 Nov 2026 19:51:49 -0300
+
 mainuan-desktop-defaults (2026.11.17.2) resolute; urgency=medium
 
   * Tela de login com a identidade do Mainuan: /etc/sddm.conf.d/30-mainuan.conf

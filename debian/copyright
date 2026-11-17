@@ -62,6 +62,20 @@ Files: debian/*
 Copyright: 2026 ruscher <rruscher@gmail.com>
 License: GPL-3
 
+Files: usr/share/plymouth/themes/mainuan/animation-*.png
+       usr/share/plymouth/themes/mainuan/throbber-*.png
+       usr/share/plymouth/themes/mainuan/bgrt-fallback.png
+       usr/share/plymouth/themes/mainuan/bullet.png
+       usr/share/plymouth/themes/mainuan/capslock.png
+       usr/share/plymouth/themes/mainuan/entry.png
+       usr/share/plymouth/themes/mainuan/keyboard.png
+       usr/share/plymouth/themes/mainuan/keymap-render.png
+       usr/share/plymouth/themes/mainuan/lock.png
+Copyright: Red Hat, Inc. and the Plymouth authors (Spinner theme by Jakub Steiner)
+License: GPL-2+
+Comment: Copiados no build do pacote plymouth-theme-spinner (tema Spinner do
+ Plymouth), para que o initramfs leve a animação junto com o tema Mainuan.
+
 License: LicenseRef-ChatAI-provider-icons
  Do README do ChatAI-Plasmoid ("License and Assets"):
  .
