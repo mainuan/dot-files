@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    remove|deconfigure)
+        update-alternatives --remove default.plymouth \
+            /usr/share/plymouth/themes/mainuan/mainuan.plymouth
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

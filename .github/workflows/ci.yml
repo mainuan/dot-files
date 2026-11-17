@@ -80,6 +80,17 @@ jobs:
           grep -qwF -- "$id" applets.txt || { cat applets.txt; exit 1; }
         done
         if dpkg -L mainuan-desktop-defaults | grep -E '/plasmoids/[^/]+/(translate|locale|images|[^/]*\.plasmoid)$|/(LICENSE|README)[^/]*$'; then exit 1; fi
+        # Boot splash: the Mainuan theme is the default and its animation exists.
+        update-alternatives --query default.plymouth | grep -qx 'Value: /usr/share/plymouth/themes/mainuan/mainuan.plymouth'
+        test -s /usr/share/plymouth/themes/mainuan/throbber-0001.png
+        test -s /usr/share/plymouth/themes/mainuan/watermark.png
+        # Login screen: Breeze theme (after Kubuntu's 20-kubuntu.conf) and the
+        # Mainuan logo as the default face.
+        test "$(ls /etc/sddm.conf.d | tail -1)" = 30-mainuan.conf
+        grep -qx 'Current=breeze' /etc/sddm.conf.d/30-mainuan.conf
+        test "$(readlink -f /usr/share/mainuan-desktop-defaults/sddm-faces/.face.icon)" = /usr/share/plasma/avatars/logoMainuan.png
+        grep -qx 'background=/usr/share/wallpapers/01ciano.png' /usr/share/sddm/themes/breeze/theme.conf.user
+        test -s /usr/share/sddm/themes/breeze/Main.qml
 
   # mainuan-user-avatar diverts two kubuntu-settings-desktop files. The
   # shared install test only covers the main package (and its dpkg -L check
