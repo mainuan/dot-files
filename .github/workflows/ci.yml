@@ -87,7 +87,7 @@ jobs:
           grep -qwF -- "$id" applets.txt || { cat applets.txt; exit 1; }
         done
         desktop-file-validate /usr/share/applications/painel-controle.desktop
-        if dpkg -L mainuan-desktop-defaults | grep -E '/(translate|locale|images|LICENSE[^/]*|README[^/]*|[^/]*\.plasmoid)$'; then exit 1; fi
+        if dpkg -L mainuan-desktop-defaults | grep -E '/plasmoids/[^/]+/(translate|locale|images|[^/]*\.plasmoid)$|/(LICENSE|README)[^/]*$'; then exit 1; fi
 
   # mainuan-user-avatar diverts two kubuntu-settings-desktop files. The
   # shared install test only covers the main package (and its dpkg -L check
