@@ -16,6 +16,9 @@ Initial Plasma desktop configuration of **Mainuan Linux**, packaged as `mainuan-
 
 ---
 
+<p align="center"><img src="docs/screenshots/desktop.png" width="900" alt="Mainuan default desktop"></p>
+
+
 ## What it is
 
 The `rootfs/` tree defines what a new Mainuan account looks like. Both

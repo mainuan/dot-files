@@ -18,6 +18,9 @@ Configuração inicial da área de trabalho Plasma do **Mainuan Linux**, empacot
 
 ---
 
+<p align="center"><img src="docs/screenshots/desktop.png" width="900" alt="Área de trabalho padrão do Mainuan"></p>
+
+
 ## O que é
 
 Este repositório define como a área de trabalho do Mainuan se apresenta numa
