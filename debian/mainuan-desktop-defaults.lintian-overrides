@@ -1,0 +1,5 @@
+# Este é o pacote de configuração padrão das contas do Mainuan (como o
+# kubuntu-settings-desktop no Kubuntu): /etc/skel é a sua finalidade. A
+# configuração do Plasma (painéis, widgets, atalhos) é por usuário e não tem
+# equivalente em /etc/xdg; as contas existentes não são alteradas.
+mainuan-desktop-defaults: package-contains-file-in-etc-skel [etc/skel/*]

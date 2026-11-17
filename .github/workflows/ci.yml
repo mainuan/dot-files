@@ -58,14 +58,18 @@ jobs:
         test "$(readlink -f /etc/skel/.face.icon)" = /etc/skel/.face
         cmp /usr/share/plasma/avatars/kubuntu-bug.png /usr/share/plasma/avatars/logoMainuan.png
         python3 -I - <<'PY'
-        import configparser, glob, json, os
+        import configparser, json, os, subprocess
         for d in ("ChatAI-Plasmoid", "com.mike.desktop", "org.kde.plasma.powershowdesktop"):
             path = f"/usr/share/plasma/plasmoids/{d}/"
             with open(path + "metadata.json", encoding="utf-8") as f:
                 plugin = json.load(f)["KPlugin"]
             assert plugin["Id"] == d and plugin["Name"], d
             assert os.path.isfile(path + "contents/ui/main.qml"), d
-        for path in sorted(glob.glob("/etc/skel/.config/*")) + ["/etc/xdg/kscreenlockerrc"]:
+        ours = subprocess.run(["dpkg", "-L", "mainuan-desktop-defaults"], check=True,
+                              capture_output=True, text=True).stdout.splitlines()
+        configs = [p for p in ours if p.startswith("/etc/skel/.config/") or p == "/etc/xdg/kscreenlockerrc"]
+        assert len(configs) == 15, configs
+        for path in configs:
             c = configparser.ConfigParser(interpolation=None, strict=False)
             c.optionxform = str
             with open(path, encoding="utf-8") as f:
