@@ -177,7 +177,6 @@ configVersion=2
 customSitesJson=[{"name":"Maritaca AI","url":"https://chat.maritaca.ai/auth"}]
 dialogHeight=684
 dialogWidth=615
-downloadPath=file:///home/daigo/Downloads
 favIcon=https://chat.maritaca.ai/favicon.svg
 javascriptCanPaste=true
 lastFavIcon=https://chat.maritaca.ai/favicon.svg

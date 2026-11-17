@@ -27,4 +27,7 @@ mainuan-desktop-defaults (2026.11.17) resolute; urgency=medium
   * lintian: sobreposição justificada para package-contains-file-in-etc-skel
     (a finalidade do pacote é a configuração inicial das contas).
 
+  * Remove dados pessoais da configuração inicial: o nome de uma rede Wi-Fi
+    (plasma-nm) e a pasta de downloads /home/daigo/Downloads do widget
+    ChatAI, que não existe para nenhum outro usuário.
  -- ruscher <rruscher@gmail.com>  Tue, 17 Nov 2026 11:19:46 -0300
