@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+
+# Arquivos do kubuntu-settings-desktop substituídos por este pacote
+# (dpkg-divert --rename). O original é guardado em
+# /var/lib/mainuan-user-avatar/diverted, fora de /etc/skel (senão seria
+# copiado para a pasta de cada novo usuário), e continua recebendo as
+# atualizações do pacote dono. O postrm o devolve ao lugar.
+#
+#   /etc/skel/.face                            imagem do usuário
+#   /usr/share/plasma/avatars/kubuntu-bug.png  avatar
+#
+# Este pacote instala /etc/skel/.face como link simbólico, não como arquivo
+# de configuração: assim o dpkg não confunde o conffile do Kubuntu com o
+# deste pacote.
+
+case "$1" in
+    install|upgrade)
+        mkdir -p /var/lib/mainuan-user-avatar/diverted
+        dpkg-divert --package mainuan-user-avatar --add --rename --divert /var/lib/mainuan-user-avatar/diverted/skel.face /etc/skel/.face
+        dpkg-divert --package mainuan-user-avatar --add --rename --divert /var/lib/mainuan-user-avatar/diverted/kubuntu-bug.png /usr/share/plasma/avatars/kubuntu-bug.png
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

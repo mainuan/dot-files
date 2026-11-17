@@ -1,0 +1,48 @@
+Source: mainuan-desktop-defaults
+Section: kde
+Priority: optional
+Maintainer: Mainuan Packaging <openwebosbr@gmail.com>
+Uploaders: ruscher <rruscher@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+               gettext <!nocheck>,
+               python3 <!nocheck>,
+Standards-Version: 4.7.2
+Rules-Requires-Root: no
+Homepage: https://github.com/mainuan/dot-files
+Vcs-Browser: https://github.com/mainuan/dot-files
+Vcs-Git: https://github.com/mainuan/dot-files.git
+
+Package: mainuan-desktop-defaults
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Recommends: mainuan-icon-themes,
+            mainuan-plasma-themes,
+            mainuan-user-avatar,
+            mainuan-wallpapers,
+            painel-de-controle,
+            plasma-workspace,
+Description: configuração padrão da área de trabalho Plasma do Mainuan
+ Configuração inicial do KDE Plasma para as contas criadas no Mainuan Linux:
+  - /etc/skel: painéis e widgets, tema do Plasma, esquema de cores, tema de
+    ícones, atalhos, KWin, Dolphin, Kate e papel de parede;
+  - /etc/xdg/kscreenlockerrc: papel de parede da tela de bloqueio;
+  - widgets ChatAI, Mike Desktop e Power Show Desktop;
+  - avatar do Mainuan, atalho do Painel de Controle e identidade visual do
+    instalador Calamares.
+ .
+ Nenhum arquivo de outro pacote é substituído. A imagem de usuário padrão
+ (/etc/skel/.face) vem do pacote mainuan-user-avatar.
+
+Package: mainuan-user-avatar
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Description: imagem de usuário padrão do Mainuan no lugar da do Kubuntu
+ Troca a imagem padrão das novas contas (/etc/skel/.face) e o avatar
+ kubuntu-bug.png do seletor de imagens do Plasma pelo logotipo do Mainuan.
+ .
+ Os dois arquivos pertencem ao kubuntu-settings-desktop e são desviados com
+ dpkg-divert: os originais ficam em /var/lib/mainuan-user-avatar/diverted,
+ continuam recebendo atualizações e voltam ao lugar quando este pacote é
+ removido.

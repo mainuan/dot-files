@@ -1,0 +1,30 @@
+mainuan-desktop-defaults (2026.11.17) resolute; urgency=medium
+
+  * Primeiro pacote Debian do repositório dot-files: a configuração inicial
+    do Plasma (/etc/skel), os widgets ChatAI, Mike Desktop e Power Show
+    Desktop, o avatar, o atalho do Painel de Controle e a identidade visual
+    do Calamares são instalados por um pacote versionado e verificável, em
+    vez de uma cópia do repositório git sobre o sistema.
+  * Novo pacote mainuan-user-avatar: /etc/skel/.face e
+    /usr/share/plasma/avatars/kubuntu-bug.png, do kubuntu-settings-desktop,
+    são desviados com dpkg-divert, sem sobrescrever arquivos de outro
+    pacote; os originais voltam ao lugar na remoção. /etc/skel/.face é um
+    link para /usr/share/mainuan-user-avatar/face.svg, para não haver dois
+    arquivos de configuração no mesmo caminho. Fica num pacote separado para
+    que a configuração padrão não dependa de desvios.
+  * Remove /etc/skel/.config/Trolltech.conf: o arquivo pertence ao
+    xubuntu-default-settings e o Plasma o gera a cada sessão.
+  * Define o papel de parede padrão (01ciano.png) da área de trabalho em
+    /etc/skel e da tela de bloqueio em /etc/xdg/kscreenlockerrc, em vez de
+    trocar os arquivos dos pacotes de papéis de parede do Kubuntu.
+  * Remove as cópias dos widgets que já vêm no mainuan-plasma-themes e dos
+    papéis de parede que já vêm no mainuan-wallpapers (eram idênticas);
+    01.png a 06.png duplicavam 01ciano.png a 06lima.png.
+  * CI: verificação das traduções, compilação, lintian e teste de instalação,
+    reinstalação, remoção e expurgo num Ubuntu 26.04 com o
+    kubuntu-settings-desktop instalado, mais um teste dos desvios nas duas
+    ordens de instalação.
+  * lintian: sobreposição justificada para package-contains-file-in-etc-skel
+    (a finalidade do pacote é a configuração inicial das contas).
+
+ -- ruscher <rruscher@gmail.com>  Tue, 17 Nov 2026 11:19:46 -0300
