@@ -31,8 +31,6 @@ Description: configuração padrão da área de trabalho Plasma do Mainuan
   - avatar do Mainuan, atalho do Painel de Controle e identidade visual do
     instalador Calamares.
  .
- /etc/skel/.face e /usr/share/plasma/avatars/kubuntu-bug.png, do
- kubuntu-settings-desktop, e /etc/skel/.config/Trolltech.conf, do
- xubuntu-default-settings, são desviados com dpkg-divert e voltam ao lugar
- quando este pacote é removido (.face e Trolltech.conf, que são arquivos de
- configuração, voltam no expurgo).
+ /etc/skel/.face e /usr/share/plasma/avatars/kubuntu-bug.png pertencem ao
+ kubuntu-settings-desktop: são desviados com dpkg-divert e voltam ao lugar
+ quando este pacote é removido.

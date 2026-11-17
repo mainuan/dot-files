@@ -1,21 +1,24 @@
 #!/bin/sh
 set -e
 
-# Arquivos de outros pacotes substituídos por este (dpkg-divert --rename).
-# O original é guardado em /usr/share/mainuan-desktop-defaults/diverted,
-# fora de /etc/skel (senão seria copiado para a pasta de cada novo usuário),
-# e continua recebendo as atualizações do pacote dono. O postrm o devolve.
+# Arquivos do kubuntu-settings-desktop substituídos por este pacote
+# (dpkg-divert --rename). O original é guardado em
+# /var/lib/mainuan-desktop-defaults/diverted, fora de /etc/skel (senão seria
+# copiado para a pasta de cada novo usuário), e continua recebendo as
+# atualizações do pacote dono. O postrm o devolve ao lugar.
 #
-#   /etc/skel/.face                            kubuntu-settings-desktop
-#   /etc/skel/.config/Trolltech.conf           xubuntu-default-settings
-#   /usr/share/plasma/avatars/kubuntu-bug.png  kubuntu-settings-desktop
+#   /etc/skel/.face                            imagem do usuário
+#   /usr/share/plasma/avatars/kubuntu-bug.png  avatar
+#
+# Este pacote instala /etc/skel/.face como link simbólico, não como arquivo
+# de configuração: assim o dpkg não confunde o conffile do Kubuntu com o
+# deste pacote.
 
 case "$1" in
     install|upgrade)
-        mkdir -p /usr/share/mainuan-desktop-defaults/diverted
-        dpkg-divert --package mainuan-desktop-defaults --add --rename --divert /usr/share/mainuan-desktop-defaults/diverted/skel.face /etc/skel/.face
-        dpkg-divert --package mainuan-desktop-defaults --add --rename --divert /usr/share/mainuan-desktop-defaults/diverted/skel.Trolltech.conf /etc/skel/.config/Trolltech.conf
-        dpkg-divert --package mainuan-desktop-defaults --add --rename --divert /usr/share/mainuan-desktop-defaults/diverted/kubuntu-bug.png /usr/share/plasma/avatars/kubuntu-bug.png
+        mkdir -p /var/lib/mainuan-desktop-defaults/diverted
+        dpkg-divert --package mainuan-desktop-defaults --add --rename --divert /var/lib/mainuan-desktop-defaults/diverted/skel.face /etc/skel/.face
+        dpkg-divert --package mainuan-desktop-defaults --add --rename --divert /var/lib/mainuan-desktop-defaults/diverted/kubuntu-bug.png /usr/share/plasma/avatars/kubuntu-bug.png
         ;;
 esac
 

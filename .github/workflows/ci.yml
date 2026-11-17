@@ -42,20 +42,21 @@ jobs:
         rm -f ../mainuan-desktop-defaults_*.dsc ../mainuan-desktop-defaults_*.tar.gz ../source-files.txt
       # kubuntu-settings-desktop owns /etc/skel/.face and the kubuntu-bug.png
       # avatar that this package diverts; it also brings plasma-workspace.
-      # The shared purge step checks that the diverted files are back.
+      # The shared remove/purge step checks that the diverted files are back.
       extra-install-packages: kubuntu-settings-desktop kpackagetool6 libkf6config-bin desktop-file-utils python3
       smoke-command: |
         cd "$HOME"
         dpkg-divert --list | grep ' by mainuan-desktop-defaults$' | tee diversions.txt
-        test "$(wc -l < diversions.txt)" -eq 3
-        for f in /etc/skel/.face /etc/skel/.config/Trolltech.conf /usr/share/plasma/avatars/kubuntu-bug.png; do
+        test "$(wc -l < diversions.txt)" -eq 2
+        for f in /etc/skel/.face /usr/share/plasma/avatars/kubuntu-bug.png; do
           test "$(dpkg-divert --listpackage "$f")" = mainuan-desktop-defaults
         done
         dpkg --verify mainuan-desktop-defaults kubuntu-settings-desktop
-        test -s /usr/share/mainuan-desktop-defaults/diverted/skel.face
-        test -s /usr/share/mainuan-desktop-defaults/diverted/kubuntu-bug.png
+        test -s /var/lib/mainuan-desktop-defaults/diverted/skel.face
+        test -s /var/lib/mainuan-desktop-defaults/diverted/kubuntu-bug.png
+        test "$(readlink /etc/skel/.face)" = /usr/share/mainuan-desktop-defaults/face.svg
+        test "$(readlink -f /etc/skel/.face.icon)" = /usr/share/mainuan-desktop-defaults/face.svg
         grep -q '<svg' /etc/skel/.face
-        test "$(readlink -f /etc/skel/.face.icon)" = /etc/skel/.face
         cmp /usr/share/plasma/avatars/kubuntu-bug.png /usr/share/plasma/avatars/logoMainuan.png
         python3 -I - <<'PY'
         import configparser, json, os, subprocess
@@ -68,7 +69,7 @@ jobs:
         ours = subprocess.run(["dpkg", "-L", "mainuan-desktop-defaults"], check=True,
                               capture_output=True, text=True).stdout.splitlines()
         configs = [p for p in ours if p.startswith("/etc/skel/.config/") or p == "/etc/xdg/kscreenlockerrc"]
-        assert len(configs) == 15, configs
+        assert len(configs) == 14, configs
         for path in configs:
             c = configparser.ConfigParser(interpolation=None, strict=False)
             c.optionxform = str
@@ -122,8 +123,9 @@ jobs:
           rm -f /etc/dpkg/dpkg.cfg.d/excludes
           (cd dist && sha256sum --check SHA256SUMS)
           deb="$(echo "$PWD"/dist/mainuan-desktop-defaults_*.deb)"
-          apt=(apt-get --yes --no-install-recommends -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold)
-          D=/usr/share/mainuan-desktop-defaults/diverted
+          # No --force-conf*: a conffile prompt (stdin is closed) fails the job.
+          apt=(apt-get --yes --no-install-recommends)
+          D=/var/lib/mainuan-desktop-defaults/diverted
           ours="$(mktemp -d)"
           dpkg-deb -x "$deb" "$ours"
           sum() { sha256sum < "$1" | cut -d' ' -f1; }
@@ -135,26 +137,27 @@ jobs:
           kbug="$(sum /usr/share/plasma/avatars/kubuntu-bug.png)"
 
           diverted() {  # Mainuan files in place, Kubuntu's kept aside
-            for f in /etc/skel/.face /etc/skel/.config/Trolltech.conf /usr/share/plasma/avatars/kubuntu-bug.png; do
+            for f in /etc/skel/.face /usr/share/plasma/avatars/kubuntu-bug.png; do
               test "$(dpkg-divert --listpackage "$f")" = mainuan-desktop-defaults
-              test "$(sum "$f")" = "$(sum "$ours$f")"
             done
+            test "$(readlink /etc/skel/.face)" = /usr/share/mainuan-desktop-defaults/face.svg
+            test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$(sum "$ours/usr/share/plasma/avatars/kubuntu-bug.png")"
             test "$(sum $D/skel.face)" = "$kface"
             test "$(sum $D/kubuntu-bug.png)" = "$kbug"
-            test ! -e $D/skel.Trolltech.conf
             dpkg --verify kubuntu-settings-desktop mainuan-desktop-defaults
           }
           restored() {  # Kubuntu files back, no diversion, nothing left
+            test -f /etc/skel/.face && test ! -L /etc/skel/.face
             test "$(sum /etc/skel/.face)" = "$kface"
             test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$kbug"
-            test ! -e /etc/skel/.config/Trolltech.conf
+            test "$(readlink -f /etc/skel/.face.icon)" = /etc/skel/.face
+            test ! -e /var/lib/mainuan-desktop-defaults
             test ! -e /usr/share/mainuan-desktop-defaults
             if dpkg-divert --list | grep mainuan; then exit 1; fi
-            test "$(readlink -f /etc/skel/.face.icon)" = /etc/skel/.face
             dpkg --verify kubuntu-settings-desktop
           }
 
-          step "Kubuntu first, then Mainuan"
+          step "Kubuntu first, then Mainuan; reinstall both"
           "${apt[@]}" install "$deb"
           diverted
           "${apt[@]}" install --reinstall kubuntu-settings-desktop
@@ -163,12 +166,9 @@ jobs:
           diverted
           echo "::endgroup::"
 
-          step "remove: the avatar returns, the conffiles stay until purge"
+          step "remove restores the Kubuntu files; purge leaves nothing"
           "${apt[@]}" remove mainuan-desktop-defaults
-          test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$kbug"
-          test -z "$(dpkg-divert --listpackage /usr/share/plasma/avatars/kubuntu-bug.png)"
-          test "$(sum /etc/skel/.face)" = "$(sum "$ours/etc/skel/.face")"
-          test "$(sum $D/skel.face)" = "$kface"
+          restored
           dpkg --purge mainuan-desktop-defaults
           restored
           echo "::endgroup::"
@@ -179,6 +179,8 @@ jobs:
           "${apt[@]}" install "$deb"
           test ! -e $D/skel.face
           "${apt[@]}" install kubuntu-settings-desktop
+          diverted
+          "${apt[@]}" install --reinstall kubuntu-settings-desktop
           diverted
           "${apt[@]}" remove mainuan-desktop-defaults
           dpkg --purge mainuan-desktop-defaults

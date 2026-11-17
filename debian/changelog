@@ -5,11 +5,14 @@ mainuan-desktop-defaults (2026.11.17) resolute; urgency=medium
     Desktop, o avatar, o atalho do Painel de Controle e a identidade visual
     do Calamares são instalados por um pacote versionado e verificável, em
     vez de uma cópia do repositório git sobre o sistema.
-  * /etc/skel/.face e /usr/share/plasma/avatars/kubuntu-bug.png
-    (kubuntu-settings-desktop) e /etc/skel/.config/Trolltech.conf
-    (xubuntu-default-settings) são desviados com dpkg-divert, sem
-    sobrescrever arquivos de outros pacotes; o original volta na remoção
-    (avatar) ou no expurgo (arquivos de configuração).
+  * /etc/skel/.face e /usr/share/plasma/avatars/kubuntu-bug.png, do
+    kubuntu-settings-desktop, são desviados com dpkg-divert, sem sobrescrever
+    arquivos de outro pacote; os originais voltam ao lugar na remoção.
+    /etc/skel/.face passa a ser um link para
+    /usr/share/mainuan-desktop-defaults/face.svg, para não haver dois
+    arquivos de configuração no mesmo caminho.
+  * Remove /etc/skel/.config/Trolltech.conf: o arquivo pertence ao
+    xubuntu-default-settings e o Plasma o gera a cada sessão.
   * Define o papel de parede padrão (01ciano.png) da área de trabalho em
     /etc/skel e da tela de bloqueio em /etc/xdg/kscreenlockerrc, em vez de
     trocar os arquivos dos pacotes de papéis de parede do Kubuntu.
@@ -20,5 +23,7 @@ mainuan-desktop-defaults (2026.11.17) resolute; urgency=medium
     reinstalação, remoção e expurgo num Ubuntu 26.04 com o
     kubuntu-settings-desktop instalado, mais um teste dos desvios nas duas
     ordens de instalação.
+  * lintian: sobreposição justificada para package-contains-file-in-etc-skel
+    (a finalidade do pacote é a configuração inicial das contas).
 
  -- ruscher <rruscher@gmail.com>  Tue, 17 Nov 2026 11:19:46 -0300
