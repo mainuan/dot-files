@@ -20,7 +20,7 @@ Recommends: mainuan-icon-themes,
             mainuan-plasma-themes,
             mainuan-user-avatar,
             mainuan-wallpapers,
-            painel-de-controle,
+            painel-de-controle (>= 1.1.1),
             plasma-workspace,
 Description: configuração padrão da área de trabalho Plasma do Mainuan
  Configuração inicial do KDE Plasma para as contas criadas no Mainuan Linux:

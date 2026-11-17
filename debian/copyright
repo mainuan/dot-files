@@ -14,8 +14,7 @@ Copyright: 2026 natanael-art <natanaelpix@gmail.com>
            2025-2026 Mainuan contributors
 License: GPL-3
 Comment: Configurações, imagens (avatar, .face, identidade visual do
- Calamares), atalho do Painel de Controle e traduções em po/. O arquivo
- LICENSE do repositório traz o texto da GNU GPL versão 3.
+ Calamares). O arquivo LICENSE do repositório traz o texto da GNU GPL versão 3.
 
 Files: rootfs/usr/share/plasma/plasmoids/ChatAI-Plasmoid/*
 Copyright: 2024 Denys Madureira <denysmb@zoho.com>

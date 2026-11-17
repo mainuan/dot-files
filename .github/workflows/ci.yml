@@ -23,13 +23,6 @@ jobs:
       package: mainuan-desktop-defaults
       release-title: Mainuan Desktop Defaults
       test-command: |
-        bash po/i18n.sh check-pot
-        bash po/i18n.sh validate
-        # The translations written into the menu entry must match po/.
-        out="$(po/apply-desktop-translations.sh)"
-        if [ -n "$out" ]; then
-          echo "$out"; echo "::error::run po/apply-desktop-translations.sh"; exit 1
-        fi
         sh -n debian/mainuan-user-avatar.preinst
         sh -n debian/mainuan-user-avatar.postrm
         # The source package must not carry .git or build leftovers.
@@ -86,7 +79,6 @@ jobs:
         for id in ChatAI-Plasmoid com.mike.desktop org.kde.plasma.powershowdesktop; do
           grep -qwF -- "$id" applets.txt || { cat applets.txt; exit 1; }
         done
-        desktop-file-validate /usr/share/applications/painel-controle.desktop
         if dpkg -L mainuan-desktop-defaults | grep -E '/plasmoids/[^/]+/(translate|locale|images|[^/]*\.plasmoid)$|/(LICENSE|README)[^/]*$'; then exit 1; fi
 
   # mainuan-user-avatar diverts two kubuntu-settings-desktop files. The
