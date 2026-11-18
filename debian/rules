@@ -2,24 +2,22 @@
 
 PKG := debian/mainuan-desktop-defaults
 AVATAR := debian/mainuan-user-avatar
+GRUBTHEME := debian/mainuan-grub-theme/usr/share/grub/themes/mainuan
 PLASMOIDS := $(PKG)/usr/share/plasma/plasmoids
 
 %:
 	dh $@
 
 execute_after_dh_install:
-	# Plymouth: the initramfs hook copies the theme directory without following
-	# links, so the Spinner animation is installed as real files (from
-	# plymouth-theme-spinner at build time) next to the Mainuan watermark.
-	# The Spinner watermark (Ubuntu logo) and BGRT fallback are not copied:
-	# the Mainuan watermark.png must stay.
-	for f in /usr/share/plymouth/themes/spinner/*.png; do \
-		case "$${f##*/}" in watermark.png|bgrt-fallback.png) continue ;; esac; \
-		cp "$$f" $(PKG)/usr/share/plymouth/themes/mainuan/; \
+	# Plymouth: every image of the theme is a real file of this package (the
+	# initramfs hook does not follow links out of the theme directory).
+	test -s $(PKG)/usr/share/plymouth/themes/mainuan/throbber-0048.png
+	if find $(PKG)/usr/share/plymouth -type l | grep .; then exit 1; fi
+	# GRUB theme fonts, generated from Noto Sans (names used by theme.txt).
+	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/noto $(GRUBTHEME)
+	for f in $$(grep -o '"Noto Sans[^"]*"' $(GRUBTHEME)/theme.txt | sort -u | tr -d '"' | tr 'A-Z ' 'a-z_'); do \
+		test -s $(GRUBTHEME)/$$f.pf2; \
 	done
-	test -s $(PKG)/usr/share/plymouth/themes/mainuan/throbber-0001.png
-	cmp rootfs/usr/share/plymouth/themes/mainuan/watermark.png \
-		$(PKG)/usr/share/plymouth/themes/mainuan/watermark.png
 	# Fontes de tradução, pacote .plasmoid, capturas do leia-me, leia-mes e
 	# licenças dos widgets ficam no pacote-fonte; as licenças estão em
 	# debian/copyright. Os catálogos usados pelo Plasma ficam em

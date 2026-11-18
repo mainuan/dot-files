@@ -1,30 +1,31 @@
 [Plymouth Theme]
 Name=Mainuan
 Name[pt_BR]=Mainuan
-Description=Tela de inicialização do Mainuan: logotipo e animação do tema Spinner.
+Description=Tela de inicialização do Mainuan: logotipo com um anel que gira ao redor.
 ModuleName=two-step
 
 [two-step]
-Font=Cantarell 12
-TitleFont=Cantarell Light 30
-# A animação vem do tema Spinner (links nesta pasta); a marca d'água é o
-# logotipo e o nome do Mainuan.
+Font=Noto Sans 12
+TitleFont=Noto Sans Light 24
+# Logo (watermark.png) and the ring (throbber-*.png) share the same centre;
+# both come from tools/boot-art/generate.py.
 ImageDir=/usr/share/plymouth/themes/mainuan
-DialogHorizontalAlignment=.5
-DialogVerticalAlignment=.382
-TitleHorizontalAlignment=.5
-TitleVerticalAlignment=.382
-HorizontalAlignment=.5
-VerticalAlignment=.75
 WatermarkHorizontalAlignment=.5
-WatermarkVerticalAlignment=.45
+WatermarkVerticalAlignment=.5
+HorizontalAlignment=.5
+VerticalAlignment=.5
+# Password prompt and messages below the logo, never over it.
+DialogHorizontalAlignment=.5
+DialogVerticalAlignment=.72
+TitleHorizontalAlignment=.5
+TitleVerticalAlignment=.28
+MessageBelowAnimation=true
 Transition=none
 TransitionDuration=0.0
-BackgroundStartColor=0x000000
-BackgroundEndColor=0x000000
-ProgressBarBackgroundColor=0x606060
-ProgressBarForegroundColor=0x06b6d4
-MessageBelowAnimation=true
+BackgroundStartColor=0x121a1e
+BackgroundEndColor=0x0a0f12
+ProgressBarBackgroundColor=0x1c272c
+ProgressBarForegroundColor=0x0dd8e3
 
 [boot-up]
 UseEndAnimation=false

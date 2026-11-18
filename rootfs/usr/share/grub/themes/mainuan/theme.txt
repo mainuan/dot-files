@@ -1,0 +1,73 @@
+# Mainuan GRUB theme
+#
+# Layout in percentages of the screen, tuned for 1920x1080 and still usable
+# from 1024x768. The images come from tools/boot-art/generate.py; the
+# fonts (*.pf2) are generated from Noto Sans when the package is built.
+# Without graphics, GRUB falls back to its text menu and this file is ignored.
+
+title-text: ""
+desktop-image: "background.png"
+desktop-image-scale-method: "stretch"
+desktop-color: "#0e1518"
+terminal-font: "Noto Sans Mono Regular 16"
+terminal-left: "10%"
+terminal-top: "10%"
+terminal-width: "80%"
+terminal-height: "80%"
+terminal-border: "0"
+
+# Logo and wordmark
++ image {
+    left = 50%-150
+    top = 11%
+    width = 300
+    height = 80
+    file = "logo.png"
+}
+
+# Menu of operating systems
++ boot_menu {
+    left = 50%-330
+    top = 27%
+    width = 660
+    height = 45%
+    menu_pixmap_style = "menu_*.png"
+    item_font = "Noto Sans Regular 18"
+    selected_item_font = "Noto Sans Bold 18"
+    item_color = "#c3d0d5"
+    selected_item_color = "#ffffff"
+    item_height = 46
+    item_padding = 12
+    item_spacing = 6
+    icon_width = 28
+    icon_height = 28
+    item_icon_space = 16
+    selected_item_pixmap_style = "select_*.png"
+    scrollbar = true
+    scrollbar_width = 4
+    scrollbar_thumb = "scrollbar_thumb_*.png"
+}
+
+# Countdown: GRUB's own translated text above a thin line that empties
++ progress_bar {
+    id = "__timeout__"
+    left = 50%-330
+    top = 75%
+    width = 660
+    height = 34
+    show_text = true
+    font = "Noto Sans Regular 14"
+    text_color = "#8fa3ab"
+    text = "@TIMEOUT_NOTIFICATION_MIDDLE@"
+    bar_style = "progress_bar_*.png"
+    highlight_style = "progress_highlight_*.png"
+}
+
+# Key hints (language-neutral): navigate, boot, edit, console
++ image {
+    left = 50%-172
+    top = 90%
+    width = 344
+    height = 34
+    file = "hints.png"
+}
