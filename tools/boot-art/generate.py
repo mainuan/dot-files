@@ -39,7 +39,7 @@ RING_PERIOD_FRAMES = 48   # Plymouth throbber frames per turn (about 1.6 s)
 
 GRUB = os.path.join(ROOT, "rootfs/usr/share/grub/themes/mainuan")
 PLYMOUTH = os.path.join(ROOT, "rootfs/usr/share/plymouth/themes/mainuan")
-SPLASH = os.path.join(ROOT, "rootfs/usr/share/plasma/look-and-feel/org.mainuan.splash/contents")
+SPLASH = os.path.join(ROOT, "rootfs/usr/share/plasma/look-and-feel/org.mainuan.desktop/contents")
 
 
 def hex_rgb(h):

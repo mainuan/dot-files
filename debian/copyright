@@ -65,7 +65,7 @@ License: GPL-3
 Files: tools/boot-art/*
        rootfs/usr/share/grub/themes/mainuan/*
        rootfs/usr/share/plymouth/themes/mainuan/*
-       rootfs/usr/share/plasma/look-and-feel/org.mainuan.splash/*
+       rootfs/usr/share/plasma/look-and-feel/org.mainuan.desktop/*
        rootfs/usr/lib/systemd/system/plymouth-quit.service.d/*
 Copyright: 2026 Mainuan contributors
 License: GPL-2+

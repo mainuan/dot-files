@@ -10,8 +10,12 @@ mainuan-desktop-defaults (2026.11.18) resolute; urgency=medium
       do logotipo;
     - a última imagem do Plymouth fica na tela até o login aparecer, sem o
       console de texto no meio (plymouth quit --retain-splash);
-    - novo pacote mainuan-plasma-splash: tela de apresentação do Plasma com o
-      mesmo logotipo e anel, padrão para as novas contas.
+    - novo pacote mainuan-plasma-splash: tema global "Mainuan"
+      (org.mainuan.desktop, a aparência padrão do Mainuan) com a tela de
+      apresentação do Plasma, com o mesmo logotipo e anel;
+    - /etc/xdg/kdeglobals: "Mainuan" passa a ser o tema global padrão do
+      sistema, no lugar do do Kubuntu, que não tem tela de apresentação (o
+      Plasma mostrava a do Breeze).
 
  -- ruscher <rruscher@gmail.com>  Wed, 18 Nov 2026 06:20:47 -0300
 

@@ -1,0 +1,24 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Mainuan contributors"
+            }
+        ],
+        "Category": "",
+        "Description": "Mainuan look: Dream cyan colors, Kora cyan icons, Lavanda window decoration and the Mainuan splash screen",
+        "Description[de]": "Mainuan-Erscheinungsbild: Dream-Farben in Cyan, Kora-Symbole in Cyan, Lavanda-Fensterdekoration und der Mainuan-Startbildschirm",
+        "Description[es]": "Aspecto de Mainuan: colores Dream cian, iconos Kora cian, decoración Lavanda y la pantalla de bienvenida de Mainuan",
+        "Description[fr]": "Apparence de Mainuan : couleurs Dream cyan, icônes Kora cyan, décoration Lavanda et l'écran de démarrage de Mainuan",
+        "Description[it]": "Aspetto di Mainuan: colori Dream ciano, icone Kora ciano, decorazione Lavanda e la schermata d'avvio di Mainuan",
+        "Description[pt]": "Aparência do Mainuan: cores Dream ciano, ícones Kora ciano, decoração Lavanda e o ecrã de apresentação do Mainuan",
+        "Description[pt_BR]": "Aparência do Mainuan: cores Dream ciano, ícones Kora ciano, decoração Lavanda e a tela de apresentação do Mainuan",
+        "Id": "org.mainuan.desktop",
+        "License": "GPL-2.0-or-later",
+        "Name": "Mainuan",
+        "Version": "1.0",
+        "Website": "https://github.com/mainuan/dot-files"
+    },
+    "X-Plasma-APIVersion": "2"
+}

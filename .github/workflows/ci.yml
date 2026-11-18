@@ -65,7 +65,7 @@ jobs:
         ours = subprocess.run(["dpkg", "-L", "mainuan-desktop-defaults"], check=True,
                               capture_output=True, text=True).stdout.splitlines()
         configs = [p for p in ours if p.startswith("/etc/skel/.config/") or p == "/etc/xdg/kscreenlockerrc"]
-        assert len(configs) == 15, configs
+        assert len(configs) == 14, configs
         # KConfig files (gtkrc and gtkrc-2.0 use the GTK syntax).
         for path in (p for p in configs if not os.path.basename(p).startswith("gtkrc")):
             # allow_no_value: KConfig deletion markers ("Key[$d]") have no "=".
@@ -96,8 +96,9 @@ jobs:
         # The last frame stays until SDDM takes the display.
         grep -qx 'ExecStart=-/usr/bin/plymouth quit --retain-splash' \
           /usr/lib/systemd/system/plymouth-quit.service.d/50-mainuan-retain-splash.conf
-        # New accounts start with the Mainuan Plasma splash.
-        grep -qx 'Theme=org.mainuan.splash' /etc/skel/.config/ksplashrc
+        # System default global theme (Kubuntu's comes after /etc/xdg).
+        grep -qx 'LookAndFeelPackage=org.mainuan.desktop' /etc/xdg/kdeglobals
+        test "$(XDG_CONFIG_DIRS=/etc/xdg:/usr/share/kubuntu-default-settings/kf5-settings kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)" = org.mainuan.desktop
         # Real files: the initramfs hook does not follow links out of the theme.
         if find /usr/share/plymouth/themes/mainuan -type l | grep .; then exit 1; fi
         update-alternatives --query text.plymouth | grep -qx 'Value: /usr/share/plymouth/themes/mainuan-text/mainuan-text.plymouth'
@@ -179,9 +180,11 @@ jobs:
               test "$GRUB_THEME" = /boot/grub/themes/mainuan/theme.txt
               test "$GRUB_TIMEOUT_STYLE" = menu )
             # Plasma splash: a LookAndFeel KPackage with a splash.
-            kpackagetool6 --type Plasma/LookAndFeel --list | grep -qx 'org.mainuan.splash'
-            test -s /usr/share/plasma/look-and-feel/org.mainuan.splash/contents/splash/Splash.qml
-            test -s /usr/share/plasma/look-and-feel/org.mainuan.splash/contents/previews/splash.png
+            kpackagetool6 --global --type Plasma/LookAndFeel --list | grep -qwF org.mainuan.desktop
+            test -s /usr/share/plasma/look-and-feel/org.mainuan.desktop/contents/splash/Splash.qml
+            test -s /usr/share/plasma/look-and-feel/org.mainuan.desktop/contents/previews/splash.png
+            test -s /usr/share/plasma/look-and-feel/org.mainuan.desktop/contents/previews/preview.png
+            grep -qx 'Theme=org.mainuan.desktop' /usr/share/plasma/look-and-feel/org.mainuan.desktop/contents/defaults
             dpkg --verify mainuan-grub-theme mainuan-plasma-splash
           }
 
@@ -196,8 +199,8 @@ jobs:
           ( . /etc/default/grub.d/60-mainuan-theme.cfg; test -z "${GRUB_THEME:-}" )
           dpkg --purge mainuan-grub-theme mainuan-plasma-splash
           test ! -e /etc/default/grub.d/60-mainuan-theme.cfg
-          test ! -e /usr/share/plasma/look-and-feel/org.mainuan.splash
-          if kpackagetool6 --type Plasma/LookAndFeel --list | grep -x 'org.mainuan.splash'; then exit 1; fi
+          test ! -e /usr/share/plasma/look-and-feel/org.mainuan.desktop
+          if kpackagetool6 --global --type Plasma/LookAndFeel --list | grep -wF org.mainuan.desktop; then exit 1; fi
 
   diversions:
     needs: package
