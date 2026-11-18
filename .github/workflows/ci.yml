@@ -65,7 +65,7 @@ jobs:
         ours = subprocess.run(["dpkg", "-L", "mainuan-desktop-defaults"], check=True,
                               capture_output=True, text=True).stdout.splitlines()
         configs = [p for p in ours if p.startswith("/etc/skel/.config/") or p == "/etc/xdg/kscreenlockerrc"]
-        assert len(configs) == 14, configs
+        assert len(configs) == 15, configs
         # KConfig files (gtkrc and gtkrc-2.0 use the GTK syntax).
         for path in (p for p in configs if not os.path.basename(p).startswith("gtkrc")):
             # allow_no_value: KConfig deletion markers ("Key[$d]") have no "=".
