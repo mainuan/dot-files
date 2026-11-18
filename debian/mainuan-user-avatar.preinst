@@ -1,30 +1,49 @@
+
 #!/bin/sh
 set -e
 
-# Arquivos do kubuntu-settings-desktop substituídos por este pacote
-# (dpkg-divert --rename). O original é guardado em
-# /var/lib/mainuan-user-avatar/diverted, fora de /etc/skel (senão seria
-# copiado para a pasta de cada novo usuário), e continua recebendo as
-# atualizações do pacote dono. O postrm o devolve ao lugar.
-#
-#   /etc/skel/.face                            imagem do usuário
-#   /usr/share/plasma/avatars/kubuntu-bug.png  avatar
-#
-# E um arquivo do sddm-theme-breeze:
-#
-#   /usr/share/sddm/themes/breeze/faces/.face.icon  rosto padrão da tela de
-#       login (o SDDM prefere o rosto do tema ao do FacesDir)
-#
-# Este pacote instala /etc/skel/.face como link simbólico, não como arquivo
-# de configuração: assim o dpkg não confunde o conffile do Kubuntu com o
-# deste pacote.
+PACKAGE="mainuan-user-avatar"
+DIVERT_DIR="/var/lib/mainuan-user-avatar/diverted"
+
+add_diversion() {
+    original="$1"
+    diverted="$2"
+
+    # Não registrar novamente uma diversion existente.
+    if dpkg-divert --list "$original" |
+        grep -Fq "diversion of $original to $diverted by $PACKAGE"; then
+        return 0
+    fi
+
+    mkdir -p "$DIVERT_DIR"
+
+    # Se o destino já estiver ocupado, usar outro nome.
+    if [ -e "$diverted" ] || [ -L "$diverted" ]; then
+        diverted="${diverted}.previous"
+    fi
+
+    # Registrar a diversion e mover o arquivo original.
+    dpkg-divert \
+        --package "$PACKAGE" \
+        --add \
+        --rename \
+        --divert "$diverted" \
+        "$original"
+}
 
 case "$1" in
     install|upgrade)
-        mkdir -p /var/lib/mainuan-user-avatar/diverted
-        dpkg-divert --package mainuan-user-avatar --add --rename --divert /var/lib/mainuan-user-avatar/diverted/skel.face /etc/skel/.face
-        dpkg-divert --package mainuan-user-avatar --add --rename --divert /var/lib/mainuan-user-avatar/diverted/kubuntu-bug.png /usr/share/plasma/avatars/kubuntu-bug.png
-        dpkg-divert --package mainuan-user-avatar --add --rename --divert /var/lib/mainuan-user-avatar/diverted/breeze.face.icon /usr/share/sddm/themes/breeze/faces/.face.icon
+        add_diversion \
+            /etc/skel/.face \
+            "$DIVERT_DIR/skel.face"
+
+        add_diversion \
+            /usr/share/plasma/avatars/kubuntu-bug.png \
+            "$DIVERT_DIR/kubuntu-bug.png"
+
+        add_diversion \
+            /usr/share/sddm/themes/breeze/faces/.face.icon \
+            "$DIVERT_DIR/breeze.face.icon"
         ;;
 esac
 
