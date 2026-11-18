@@ -26,19 +26,62 @@ Configuração inicial da área de trabalho Plasma do **Mainuan Linux**, empacot
 Este repositório define como a área de trabalho do Mainuan se apresenta numa
 conta nova: painéis e widgets, tema, cores, ícones, papel de parede, atalhos
 e as configurações iniciais do KWin, do Dolphin e do Kate. A árvore `rootfs/`
-é instalada por dois pacotes Debian:
+é instalada por quatro pacotes Debian:
 
-- **`mainuan-desktop-defaults`**: a configuração inicial e os widgets. Não
-  substitui nenhum arquivo de outro pacote.
+- **`mainuan-desktop-defaults`**: a configuração inicial, os widgets, a tela
+  de login e a tela de inicialização (Plymouth). Não substitui nenhum arquivo
+  de outro pacote.
 - **`mainuan-user-avatar`**: troca a imagem de usuário padrão do Kubuntu pelo
   logotipo do Mainuan, com `dpkg-divert` (veja abaixo).
+- **`mainuan-grub-theme`**: o tema do menu do GRUB.
+- **`mainuan-plasma-splash`**: o tema global "Mainuan" e a tela de
+  apresentação do Plasma.
 
-Os dois pacotes vêm instalados na ISO do Mainuan. Os temas, ícones e papéis de
+Os quatro pacotes vêm instalados na ISO do Mainuan. Os temas, ícones e papéis de
 parede referenciados pela configuração vêm de outros pacotes, recomendados
 pelo `mainuan-desktop-defaults`:
 [`mainuan-plasma-themes`](https://github.com/mainuan/plasma-themes),
 [`mainuan-icon-themes`](https://github.com/mainuan/icons) e
 [`mainuan-wallpapers`](https://github.com/mainuan/wallpapers).
+
+## Do ligar à área de trabalho
+
+| GRUB | Plymouth | Plasma |
+|---|---|---|
+| ![Menu do GRUB com o tema do Mainuan](docs/boot/grub.png) | ![Logotipo do Mainuan com o anel animado](docs/boot/plymouth.png) | ![Tela de apresentação do Plasma](docs/boot/splash.png) |
+
+As três telas usam a mesma arte, gerada por
+[`tools/boot-art/generate.py`](tools/boot-art/generate.py) a partir do
+logotipo oficial: fundo grafite (`#121a1e` → `#0a0f12`), destaque ciano
+(`#0dd8e3`) e um anel fino que gira em volta do logotipo.
+
+- **GRUB** (`mainuan-grub-theme`): logotipo e nome, menu com ícones por tipo
+  de sistema, contagem regressiva traduzida pelo próprio GRUB e dicas de
+  teclado só com símbolos. O tema é copiado para `/boot/grub/themes/mainuan`.
+  [`/etc/default/grub.d/60-mainuan-theme.cfg`](rootfs/etc/default/grub.d/60-mainuan-theme.cfg)
+  mostra o menu por 3 segundos, prefere 1920x1080 e procura outros sistemas,
+  mas só enquanto o tema estiver instalado. Sem modo gráfico, vale o menu em
+  texto do GRUB.
+- **Plymouth** (`mainuan-desktop-defaults`): tema two-step com o logotipo e
+  o anel (48 quadros), caixa de senha de disco abaixo do logotipo e tema texto
+  `mainuan-text`. A última imagem fica na tela até o login aparecer
+  (`plymouth quit --retain-splash`).
+- **Plasma** (`mainuan-plasma-splash`): tema global `org.mainuan.desktop`,
+  padrão do sistema em `/etc/xdg/kdeglobals`, com a tela de apresentação em
+  QML: o mesmo logotipo e anel, sem espera artificial, sem animação quando
+  as animações do Plasma estão desligadas.
+
+Para ver o tema do GRUB sem reiniciar: `tools/boot-art/preview-grub.sh
+saida.png uefi 1920x1080 dual` (QEMU, GRUB real, sem tocar no bootloader do
+computador).
+
+Para voltar ao padrão do Kubuntu:
+
+```bash
+sudo apt remove mainuan-grub-theme                          # menu do GRUB
+sudo update-alternatives --config default.plymouth && sudo update-initramfs -u
+# Plasma: Configurações do sistema > Cores e temas > Tema global / Tela de apresentação
+```
 
 ## O que a configuração define
 
@@ -78,10 +121,12 @@ os `.deb` e o `SHA256SUMS` da
 
 ```bash
 sha256sum --check --ignore-missing SHA256SUMS
-sudo apt install ./mainuan-desktop-defaults_*_all.deb ./mainuan-user-avatar_*_all.deb
+sudo apt install ./mainuan-desktop-defaults_*_all.deb ./mainuan-user-avatar_*_all.deb \
+                 ./mainuan-grub-theme_*_all.deb ./mainuan-plasma-splash_*_all.deb
 ```
 
-O `mainuan-user-avatar` é opcional. O GitHub Releases não é um repositório
+O `mainuan-user-avatar`, o `mainuan-grub-theme` e o `mainuan-plasma-splash`
+são opcionais. O GitHub Releases não é um repositório
 APT: as atualizações chegam por novas versões dos pacotes ou pela ISO.
 
 ## Convivência com o Kubuntu

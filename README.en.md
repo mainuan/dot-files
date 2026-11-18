@@ -31,6 +31,17 @@ packages ship with the Mainuan ISO:
   `/etc/xdg/kscreenlockerrc`, the ChatAI, Mike Desktop and Power Show Desktop
   widgets, the Mainuan avatar and the Calamares branding. It replaces no file
   of any other package.
+- **`mainuan-grub-theme`**: the Mainuan GRUB menu theme (logo, graphite
+  background, cyan selection, icons, translated countdown). It is copied to
+  `/boot/grub/themes/mainuan` and enabled by
+  `/etc/default/grub.d/60-mainuan-theme.cfg` only while it is installed.
+- **`mainuan-plasma-splash`**: the "Mainuan" global theme
+  (`org.mainuan.desktop`, the system default through `/etc/xdg/kdeglobals`)
+  and its Plasma splash screen.
+- The Plymouth boot screen (logo with a spinning ring, two-step) is part of
+  `mainuan-desktop-defaults`. All boot artwork comes from
+  `tools/boot-art/generate.py`; `tools/boot-art/preview-grub.sh` renders the
+  GRUB theme in QEMU.
 - **`mainuan-user-avatar`**: replaces Kubuntu's default user picture
   (`/etc/skel/.face`) and the `kubuntu-bug.png` avatar with the Mainuan logo
   using `dpkg-divert --rename`. The originals are kept in
@@ -47,8 +58,13 @@ Download the `.deb` files and `SHA256SUMS` from the
 
 ```bash
 sha256sum --check --ignore-missing SHA256SUMS
-sudo apt install ./mainuan-desktop-defaults_*_all.deb ./mainuan-user-avatar_*_all.deb
+sudo apt install ./mainuan-desktop-defaults_*_all.deb ./mainuan-user-avatar_*_all.deb \
+                 ./mainuan-grub-theme_*_all.deb ./mainuan-plasma-splash_*_all.deb
 ```
+
+| GRUB | Plymouth | Plasma |
+|---|---|---|
+| ![Mainuan GRUB theme](docs/boot/grub.png) | ![Mainuan logo with the spinning ring](docs/boot/plymouth.png) | ![Plasma splash screen](docs/boot/splash.png) |
 
 ## Build and tests
 
