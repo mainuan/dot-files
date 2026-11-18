@@ -30,7 +30,6 @@ jobs:
         sh -n rootfs/etc/default/grub.d/60-mainuan-theme.cfg
         # The boot artwork generator must keep working (run on a copy; the
         # committed images are the reviewed ones).
-        apt-get install --yes --no-install-recommends librsvg2-bin python3-pil fonts-noto-core >/dev/null
         rm -rf /tmp/boot-art && cp -r . /tmp/boot-art
         python3 /tmp/boot-art/tools/boot-art/generate.py
         test "$(ls /tmp/boot-art/rootfs/usr/share/plymouth/themes/mainuan/throbber-*.png | wc -l)" = 48

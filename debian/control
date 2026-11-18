@@ -8,6 +8,8 @@ Build-Depends: debhelper-compat (= 13),
                fonts-noto-mono,
                grub-common,
                gettext <!nocheck>,
+               librsvg2-bin <!nocheck>,
+               python3-pil <!nocheck>,
                python3 <!nocheck>,
 Standards-Version: 4.7.2
 Rules-Requires-Root: no
