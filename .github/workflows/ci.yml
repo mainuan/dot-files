@@ -111,6 +111,10 @@ jobs:
         test "$(ls $V/images/slide-*.png | wc -l)" = 5
         if ls $V/slides_*.png 2>/dev/null; then exit 1; fi
         test "$(ls $V/lang/calamares-vendor_*.qm | wc -l)" -ge 33
+        # Calamares catalogs with fixed %N placeholders (read before the
+        # built-in copies): pt_BR summary says "fuso horário para %1".
+        test "$(ls /usr/share/calamares/lang/calamares_*.qm | wc -l)" = 9
+        python3 -c "import sys; d=open('/usr/share/calamares/lang/calamares_pt_BR.qm','rb').read(); sys.exit(not ('Definir o fuso horário para %1.'.encode('utf-16-be') in d and 'Configure timezone para 1'.encode('utf-16-be') not in d))"
         # System default global theme (Kubuntu's comes after /etc/xdg).
         grep -qx 'LookAndFeelPackage=org.mainuan.desktop' /etc/xdg/kdeglobals
         test "$(XDG_CONFIG_DIRS=/etc/xdg:/usr/share/kubuntu-default-settings/kf5-settings kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)" = org.mainuan.desktop

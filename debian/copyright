@@ -84,6 +84,20 @@ Comment: Apresentação do instalador. As ilustrações são recortes das artes 
  papel de parede beija-flor1.png do pacote mainuan-wallpapers (GPL-3, daigo).
  Os textos ficam em show.qml e as traduções em tools/calamares-slides/lang.
 
+Files: tools/calamares-lang/lang/*
+Copyright: 2014-2025 Calamares translators (https://app.transifex.com/calamares/calamares/)
+           2014-2025 Calamares contributors (https://calamares.io)
+           2026 Mainuan contributors
+License: GPL-3+
+Comment: Catálogos do Calamares v3.3.14 (lang/calamares_<idioma>.ts), com os
+ marcadores %N perdidos corrigidos por tools/calamares-lang/fix-placeholders.py.
+ Instalados em /usr/share/calamares/lang, onde o Calamares os lê antes das
+ cópias embutidas.
+
+Files: tools/calamares-lang/fix-placeholders.py
+Copyright: 2026 Mainuan contributors
+License: GPL-2+
+
 Files: usr/share/grub/themes/mainuan/*.pf2
 Copyright: 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic)
 License: OFL-1.1
@@ -824,3 +838,12 @@ License: AGPL-3
  if any, to sign a "copyright disclaimer" for the program, if necessary.
  For more information on this, and how to apply and follow the GNU AGPL, see
  <https://www.gnu.org/licenses/>.
+
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 3 can be found in "/usr/share/common-licenses/GPL-3".
