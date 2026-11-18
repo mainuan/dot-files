@@ -133,7 +133,7 @@ DialogWidth=810
 [Containments][7][Applets][8][Configuration][General]
 applicationsDisplay=0
 favoritesPortedToKAstats=true
-icon=kde
+icon=mainuan
 showAppsByName=true
 systemFavorites=suspend\\,hibernate\\,reboot\\,shutdown
 
@@ -154,11 +154,13 @@ wallpaperplugin=org.kde.image
 
 [Containments][83][Applets][107]
 immutability=1
-plugin=KdeControlStation
+plugin=local.laetum.controlcenter
 
-[Containments][83][Applets][107][Configuration]
-popupHeight=419
-popupWidth=420
+[Containments][83][Applets][107][Configuration][General]
+showBatteryIndicator=false
+showNetworkIndicator=false
+showNotificationIndicator=false
+showVolumeIndicator=false
 
 [Containments][83][Applets][452]
 immutability=1

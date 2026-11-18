@@ -6,4 +6,6 @@ rootfs/usr/share/plasma/plasmoids usr/share/plasma
 rootfs/etc/sddm.conf.d etc
 rootfs/usr/share/sddm usr/share
 rootfs/usr/share/plymouth usr/share
+rootfs/usr/share/icons usr/share
+rootfs/usr/share/plasma/shells usr/share/plasma
 rootfs/usr/lib/systemd usr/lib

@@ -13,6 +13,12 @@ execute_after_dh_install:
 	# initramfs hook does not follow links out of the theme directory).
 	test -s $(PKG)/usr/share/plymouth/themes/mainuan/throbber-0048.png
 	if find $(PKG)/usr/share/plymouth -type l | grep .; then exit 1; fi
+	# Calamares slideshow translations (Qt): lang/calamares-vendor_<lang>.qm.
+	mkdir -p $(PKG)/etc/calamares/branding/vendor/lang
+	for ts in tools/calamares-slides/lang/calamares-vendor_*.ts; do \
+		/usr/lib/qt6/bin/lrelease -silent $$ts -qm $(PKG)/etc/calamares/branding/vendor/lang/$$(basename $$ts .ts).qm; \
+	done
+	test -s $(PKG)/etc/calamares/branding/vendor/lang/calamares-vendor_pt_BR.qm
 	# GRUB theme fonts, generated from Noto Sans (names used by theme.txt).
 	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/noto $(GRUBTHEME)
 	for f in $$(grep -o '"Noto Sans[^"]*"' $(GRUBTHEME)/theme.txt | sort -u | tr -d '"' | tr 'A-Z ' 'a-z_'); do \
