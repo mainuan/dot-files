@@ -19,6 +19,16 @@ execute_after_dh_install:
 		/usr/lib/qt6/bin/lrelease -silent $$ts -qm $(PKG)/etc/calamares/branding/vendor/lang/$$(basename $$ts .ts).qm; \
 	done
 	test -s $(PKG)/etc/calamares/branding/vendor/lang/calamares-vendor_pt_BR.qm
+	# Calamares 3.3.14 catalogs with lost %N placeholders fixed (pt_BR showed
+	# "Configure timezone para 1"). Calamares reads
+	# /usr/share/calamares/lang/calamares_<lang>.qm before the copy built
+	# into its binary; the other languages keep the built-in one.
+	python3 tools/calamares-lang/fix-placeholders.py --check
+	mkdir -p $(PKG)/usr/share/calamares/lang
+	for ts in tools/calamares-lang/lang/calamares_*.ts; do \
+		/usr/lib/qt6/bin/lrelease -silent $$ts -qm $(PKG)/usr/share/calamares/lang/$$(basename $$ts .ts).qm; \
+	done
+	test -s $(PKG)/usr/share/calamares/lang/calamares_pt_BR.qm
 	# GRUB theme fonts, generated from Noto Sans (names used by theme.txt).
 	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/noto $(GRUBTHEME)
 	for f in $$(grep -o '"Noto Sans[^"]*"' $(GRUBTHEME)/theme.txt | sort -u | tr -d '"' | tr 'A-Z ' 'a-z_'); do \

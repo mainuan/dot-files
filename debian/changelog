@@ -1,3 +1,13 @@
+mainuan-desktop-defaults (2026.11.18.2) resolute; urgency=medium
+
+  * Instalador: catálogos do Calamares 3.3.14 com marcadores %N corrigidos em
+    /usr/share/calamares/lang, lidos antes das cópias embutidas. Em pt_BR o
+    resumo mostrava "Configure timezone para 1" e "modelo teclado foi
+    configurado para 1"; em espanhol, francês, sueco, finlandês, romeno,
+    árabe, chinês e persa, partições e nomes apareciam como "1", "2" ou "% 1".
+
+ -- ruscher <rruscher@gmail.com>  Wed, 18 Nov 2026 17:30:00 -0300
+
 mainuan-desktop-defaults (2026.11.18.1) resolute; urgency=medium
 
   * Apresentação do instalador refeita em QML: os textos seguem o idioma
