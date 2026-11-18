@@ -192,6 +192,14 @@ ICONS = {
            + "".join(f'<path d="M{16 + 8 * math.cos(math.radians(a)):.2f},{16 + 8 * math.sin(math.radians(a)):.2f} '
                      f'L{16 + 12 * math.cos(math.radians(a)):.2f},{16 + 12 * math.sin(math.radians(a)):.2f}" '
                      f'stroke="{TEXT_MUTED}" stroke-width="2.5" stroke-linecap="round"/>' for a in range(0, 360, 45)),
+    # Restart: an open circle with an arrow head.
+    "restart": f'<path d="M24.5,11 A10,10 0 1 0 26,16" fill="none" stroke="{TEXT_MUTED}" stroke-width="2.2" '
+               f'stroke-linecap="round"/><path d="M26,5 V11.5 H19.5" fill="none" stroke="{TEXT_MUTED}" '
+               f'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+    # Shut down: the power symbol.
+    "shutdown": f'<path d="M10.5,9 A10,10 0 1 0 21.5,9" fill="none" stroke="{TEXT_MUTED}" stroke-width="2.2" '
+                f'stroke-linecap="round"/><path d="M16,4 V15" stroke="{TEXT_MUTED}" stroke-width="2.2" '
+                f'stroke-linecap="round"/>',
 }
 
 
