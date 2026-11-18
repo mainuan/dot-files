@@ -88,6 +88,10 @@ jobs:
         update-alternatives --query text.plymouth | grep -qx 'Value: /usr/share/plymouth/themes/mainuan-text/mainuan-text.plymouth'
         grep -qx 'title=Mainuan 2027.1' /usr/share/plymouth/themes/mainuan-text/mainuan-text.plymouth
         test -s /usr/share/plymouth/themes/mainuan/watermark.png
+        # The Mainuan logo, not the Spinner (Ubuntu) watermark.
+        if [ -e /usr/share/plymouth/themes/spinner/watermark.png ]; then
+          ! cmp -s /usr/share/plymouth/themes/{mainuan,spinner}/watermark.png
+        fi
         # Login screen: Breeze theme (after Kubuntu's 20-kubuntu.conf) and the
         # Mainuan logo as the default face.
         test "$(ls /etc/sddm.conf.d | tail -1)" = 30-mainuan.conf
@@ -138,9 +142,11 @@ jobs:
           step() { echo "::group::$*"; }
 
           apt-get update
-          "${apt[@]}" install kubuntu-settings-desktop
+          "${apt[@]}" install kubuntu-settings-desktop sddm-theme-breeze
           kface="$(sum /etc/skel/.face)"
           kbug="$(sum /usr/share/plasma/avatars/kubuntu-bug.png)"
+          bface=/usr/share/sddm/themes/breeze/faces/.face.icon
+          kbface="$(sum $bface)"
 
           diverted() {  # Mainuan files in place, Kubuntu's kept aside
             for f in /etc/skel/.face /usr/share/plasma/avatars/kubuntu-bug.png; do
@@ -152,17 +158,23 @@ jobs:
             test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$(sum "$ours/usr/share/plasma/avatars/kubuntu-bug.png")"
             test "$(sum $D/skel.face)" = "$kface"
             test "$(sum $D/kubuntu-bug.png)" = "$kbug"
-            dpkg --verify kubuntu-settings-desktop mainuan-user-avatar
+            # SDDM login face: Breeze's own face is diverted to the Mainuan logo.
+            test "$(dpkg-divert --listpackage $bface)" = mainuan-user-avatar
+            test "$(readlink -f $bface)" = /usr/share/plasma/avatars/kubuntu-bug.png
+            test "$(sum $D/breeze.face.icon)" = "$kbface"
+            dpkg --verify kubuntu-settings-desktop sddm-theme-breeze mainuan-user-avatar
           }
           restored() {  # Kubuntu files back, no diversion, nothing left
             test -f /etc/skel/.face && test ! -L /etc/skel/.face
             test "$(sum /etc/skel/.face)" = "$kface"
             test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$kbug"
             test "$(readlink -f /etc/skel/.face.icon)" = /etc/skel/.face
+            test -f $bface && test ! -L $bface
+            test "$(sum $bface)" = "$kbface"
             test ! -e /var/lib/mainuan-user-avatar
             test ! -e /usr/share/mainuan-user-avatar
             if dpkg-divert --list | grep mainuan; then exit 1; fi
-            dpkg --verify kubuntu-settings-desktop
+            dpkg --verify kubuntu-settings-desktop sddm-theme-breeze
           }
 
           step "Kubuntu first, then Mainuan (with mainuan-desktop-defaults); reinstall"

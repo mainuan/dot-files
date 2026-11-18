@@ -14,6 +14,13 @@ case "$1" in
         else
             dpkg-divert --package mainuan-user-avatar --remove --rename --divert /var/lib/mainuan-user-avatar/diverted/skel.face /etc/skel/.face
         fi
+        f=/usr/share/sddm/themes/breeze/faces/.face.icon
+        if [ -e "$f" ] || [ -L "$f" ]; then
+            echo "mainuan-user-avatar: $f existe; original mantido em /var/lib/mainuan-user-avatar/diverted" >&2
+            dpkg-divert --package mainuan-user-avatar --remove --no-rename --divert /var/lib/mainuan-user-avatar/diverted/breeze.face.icon "$f"
+        else
+            dpkg-divert --package mainuan-user-avatar --remove --rename --divert /var/lib/mainuan-user-avatar/diverted/breeze.face.icon "$f"
+        fi
         if [ -e /usr/share/plasma/avatars/kubuntu-bug.png ] || [ -L /usr/share/plasma/avatars/kubuntu-bug.png ]; then
             echo "mainuan-user-avatar: /usr/share/plasma/avatars/kubuntu-bug.png existe; original mantido em /var/lib/mainuan-user-avatar/diverted" >&2
             dpkg-divert --package mainuan-user-avatar --remove --no-rename --divert /var/lib/mainuan-user-avatar/diverted/kubuntu-bug.png /usr/share/plasma/avatars/kubuntu-bug.png

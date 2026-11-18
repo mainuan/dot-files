@@ -1,3 +1,13 @@
+mainuan-desktop-defaults (2026.11.17.4) resolute; urgency=medium
+
+  * Tela de inicialização: o watermark.png do Spinner (logotipo do Ubuntu)
+    não é mais copiado por cima do logotipo do Mainuan.
+  * mainuan-user-avatar: desvia também o rosto padrão do tema Breeze do SDDM
+    (/usr/share/sddm/themes/breeze/faces/.face.icon), que o SDDM prefere ao
+    FacesDir; a tela de login passa a mostrar o logotipo do Mainuan.
+
+ -- ruscher <rruscher@gmail.com>  Tue, 17 Nov 2026 20:57:17 -0300
+
 mainuan-desktop-defaults (2026.11.17.3) resolute; urgency=medium
 
   * Tela de inicialização: a animação do Spinner passa a ser instalada como

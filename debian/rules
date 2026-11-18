@@ -11,8 +11,15 @@ execute_after_dh_install:
 	# Plymouth: the initramfs hook copies the theme directory without following
 	# links, so the Spinner animation is installed as real files (from
 	# plymouth-theme-spinner at build time) next to the Mainuan watermark.
-	cp /usr/share/plymouth/themes/spinner/*.png $(PKG)/usr/share/plymouth/themes/mainuan/
+	# The Spinner watermark (Ubuntu logo) and BGRT fallback are not copied:
+	# the Mainuan watermark.png must stay.
+	for f in /usr/share/plymouth/themes/spinner/*.png; do \
+		case "$${f##*/}" in watermark.png|bgrt-fallback.png) continue ;; esac; \
+		cp "$$f" $(PKG)/usr/share/plymouth/themes/mainuan/; \
+	done
 	test -s $(PKG)/usr/share/plymouth/themes/mainuan/throbber-0001.png
+	cmp rootfs/usr/share/plymouth/themes/mainuan/watermark.png \
+		$(PKG)/usr/share/plymouth/themes/mainuan/watermark.png
 	# Fontes de tradução, pacote .plasmoid, capturas do leia-me, leia-mes e
 	# licenças dos widgets ficam no pacote-fonte; as licenças estão em
 	# debian/copyright. Os catálogos usados pelo Plasma ficam em
