@@ -1,3 +1,18 @@
+mainuan-desktop-defaults (2026.11.18.1) resolute; urgency=medium
+
+  * Apresentação do instalador refeita em QML: os textos seguem o idioma
+    escolhido no Calamares (33 idiomas, catálogos Qt compilados no build) e as
+    ilustrações não têm texto. Antes, as imagens traziam o texto em português.
+  * Painel: o botão do menu usa o logotipo do Mainuan (ícone "mainuan" do tema
+    hicolor), também nas contas existentes, por um script de atualização do
+    Plasma que só troca o ícone padrão do KDE/Kubuntu.
+  * Painel: Laetum Control Center no lugar do KDE Control Station, sem os
+    indicadores que a bandeja do sistema ao lado já mostra.
+  * Temas globais claro e escuro do sistema: Mainuan e Dream escuro, no lugar
+    dos do Kubuntu.
+
+ -- ruscher <rruscher@gmail.com>  Wed, 18 Nov 2026 10:11:33 -0300
+
 mainuan-desktop-defaults (2026.11.18) resolute; urgency=medium
 
   * Experiência de inicialização do Mainuan, com as imagens geradas por

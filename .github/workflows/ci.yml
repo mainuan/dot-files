@@ -96,6 +96,21 @@ jobs:
         # The last frame stays until SDDM takes the display.
         grep -qx 'ExecStart=-/usr/bin/plymouth quit --retain-splash' \
           /usr/lib/systemd/system/plymouth-quit.service.d/50-mainuan-retain-splash.conf
+        # Application launcher with the Mainuan logo and Laetum Control Center
+        # in place of KDE Control Station (new accounts); existing accounts get
+        # the logo once through a Plasma update script.
+        A=/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
+        grep -qx 'icon=mainuan' $A && grep -qx 'plugin=local.laetum.controlcenter' $A
+        if grep -q KdeControlStation $A; then exit 1; fi
+        test -s /usr/share/icons/hicolor/scalable/apps/mainuan.svg
+        test -s /usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/mainuan-launcher-icon.js
+        grep -qx 'DefaultDarkLookAndFeel=Dream-Dark-Color-Global-6' /etc/xdg/kdeglobals
+        # Installer slideshow: translatable QML, images without text, catalogs.
+        V=/etc/calamares/branding/vendor
+        grep -q 'qsTr("Welcome to Mainuan")' $V/show.qml
+        test "$(ls $V/images/slide-*.png | wc -l)" = 5
+        if ls $V/slides_*.png 2>/dev/null; then exit 1; fi
+        test "$(ls $V/lang/calamares-vendor_*.qm | wc -l)" -ge 33
         # System default global theme (Kubuntu's comes after /etc/xdg).
         grep -qx 'LookAndFeelPackage=org.mainuan.desktop' /etc/xdg/kdeglobals
         test "$(XDG_CONFIG_DIRS=/etc/xdg:/usr/share/kubuntu-default-settings/kf5-settings kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)" = org.mainuan.desktop

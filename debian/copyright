@@ -73,6 +73,17 @@ Comment: Experiência de inicialização do Mainuan (GRUB, Plymouth e tela de
  apresentação do Plasma). As imagens são geradas por
  tools/boot-art/generate.py a partir do logotipo oficial do Mainuan.
 
+Files: tools/calamares-slides/*
+       rootfs/etc/calamares/branding/vendor/show.qml
+       rootfs/etc/calamares/branding/vendor/images/*
+Copyright: 2025-2026 daigo <openwebosbr@gmail.com>
+           2026 Mainuan contributors
+License: GPL-3
+Comment: Apresentação do instalador. As ilustrações são recortes das artes dos
+ slides originais do Mainuan (tools/calamares-slides/source/slides_*.png) e do
+ papel de parede beija-flor1.png do pacote mainuan-wallpapers (GPL-3, daigo).
+ Os textos ficam em show.qml e as traduções em tools/calamares-slides/lang.
+
 Files: usr/share/grub/themes/mainuan/*.pf2
 Copyright: 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic)
 License: OFL-1.1
