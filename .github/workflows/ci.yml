@@ -25,6 +25,15 @@ jobs:
       test-command: |
         sh -n debian/mainuan-user-avatar.preinst
         sh -n debian/mainuan-user-avatar.postrm
+        sh -n debian/mainuan-grub-theme.postinst
+        sh -n debian/mainuan-grub-theme.postrm
+        sh -n rootfs/etc/default/grub.d/60-mainuan-theme.cfg
+        # The boot artwork generator must keep working (run on a copy; the
+        # committed images are the reviewed ones).
+        rm -rf /tmp/boot-art && cp -r . /tmp/boot-art
+        python3 /tmp/boot-art/tools/boot-art/generate.py
+        test "$(ls /tmp/boot-art/rootfs/usr/share/plymouth/themes/mainuan/throbber-*.png | wc -l)" = 48
+        rm -rf /tmp/boot-art
         # The source package must not carry .git or build leftovers.
         dpkg-source -Zgzip -z1 --build .
         tar -tzf ../mainuan-desktop-defaults_*.tar.gz > ../source-files.txt
@@ -83,6 +92,13 @@ jobs:
         # Boot splash: the Mainuan theme is the default and its animation exists.
         update-alternatives --query default.plymouth | grep -qx 'Value: /usr/share/plymouth/themes/mainuan/mainuan.plymouth'
         test -s /usr/share/plymouth/themes/mainuan/throbber-0001.png
+        test "$(ls /usr/share/plymouth/themes/mainuan/throbber-*.png | wc -l)" = 48
+        # The last frame stays until SDDM takes the display.
+        grep -qx 'ExecStart=-/usr/bin/plymouth quit --retain-splash' \
+          /usr/lib/systemd/system/plymouth-quit.service.d/50-mainuan-retain-splash.conf
+        # System default global theme (Kubuntu's comes after /etc/xdg).
+        grep -qx 'LookAndFeelPackage=org.mainuan.desktop' /etc/xdg/kdeglobals
+        test "$(XDG_CONFIG_DIRS=/etc/xdg:/usr/share/kubuntu-default-settings/kf5-settings kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)" = org.mainuan.desktop
         # Real files: the initramfs hook does not follow links out of the theme.
         if find /usr/share/plymouth/themes/mainuan -type l | grep .; then exit 1; fi
         update-alternatives --query text.plymouth | grep -qx 'Value: /usr/share/plymouth/themes/mainuan-text/mainuan-text.plymouth'
@@ -105,6 +121,87 @@ jobs:
   # does not understand diversion lines), so this job tests, as root and
   # without --force-conf*, both installation orders, reinstalling both
   # packages, and byte-for-byte restoration on remove and purge.
+  # mainuan-grub-theme and mainuan-plasma-splash: install next to their
+  # real consumers, check the files, the GRUB fonts named by theme.txt and
+  # the KPackage, then reinstall, remove and purge without leftovers.
+  boot-packages:
+    needs: package
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    container:
+      image: ubuntu:26.04@sha256:42527649dbc4f9197a6073f426f488cbff0e9cc9f2afce32d91c383e4875634a
+      options: --platform linux/amd64
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Download package artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: deb-mainuan-desktop-defaults-${{ github.sha }}
+          path: dist
+
+      - name: Install, check, remove and purge
+        run: |
+          set -euo pipefail
+          rm -f /etc/dpkg/dpkg.cfg.d/excludes
+          (cd dist && sha256sum --check SHA256SUMS)
+          grub="$(echo "$PWD"/dist/mainuan-grub-theme_*.deb)"
+          splash="$(echo "$PWD"/dist/mainuan-plasma-splash_*.deb)"
+          apt=(apt-get --yes --no-install-recommends)
+          apt-get update
+          "${apt[@]}" install grub-common plasma-workspace kpackagetool6
+          T=/usr/share/grub/themes/mainuan
+
+          check() {
+            # Fonts referenced by theme.txt exist and carry that exact name.
+            grep -o '"Noto Sans[^"]*"' $T/theme.txt | sort -u | tr -d '"' | while read -r font; do
+              f="$T/$(echo "$font" | tr 'A-Z ' 'a-z_').pf2"
+              test -s "$f"
+              head -c 120 "$f" | grep -aq "$font"
+            done
+            # Every file named by theme.txt exists.
+            grep -o '"[^"]*\.png"' $T/theme.txt | tr -d '"' | while read -r img; do
+              case $img in
+                *'*'*) ls $T/${img%%\**}*.png >/dev/null ;;
+                *) test -s "$T/$img" ;;
+              esac
+            done
+            test -s $T/icons/mainuan.png
+            # Copy in /boot (readable by GRUB) and the guarded options.
+            cmp $T/theme.txt /boot/grub/themes/mainuan/theme.txt
+            test "$(ls /boot/grub/themes/mainuan/*.pf2 | wc -l)" = 4
+            sh -n /etc/default/grub.d/60-mainuan-theme.cfg
+            ( . /etc/default/grub.d/60-mainuan-theme.cfg
+              test "$GRUB_THEME" = /boot/grub/themes/mainuan/theme.txt
+              test "$GRUB_TIMEOUT_STYLE" = menu )
+            # Plasma splash: a LookAndFeel KPackage with a splash.
+            kpackagetool6 --global --type Plasma/LookAndFeel --list | grep -qwF org.mainuan.desktop
+            test -s /usr/share/plasma/look-and-feel/org.mainuan.desktop/contents/splash/Splash.qml
+            test -s /usr/share/plasma/look-and-feel/org.mainuan.desktop/contents/previews/splash.png
+            test -s /usr/share/plasma/look-and-feel/org.mainuan.desktop/contents/previews/preview.png
+            grep -qx 'Theme=org.mainuan.desktop' /usr/share/plasma/look-and-feel/org.mainuan.desktop/contents/defaults
+            dpkg --verify mainuan-grub-theme mainuan-plasma-splash
+          }
+
+          "${apt[@]}" install "$grub" "$splash"
+          check
+          "${apt[@]}" install --reinstall "$grub" "$splash"
+          check
+          "${apt[@]}" remove mainuan-grub-theme mainuan-plasma-splash
+          test ! -e /boot/grub/themes/mainuan
+          test ! -e $T
+          # The conffile stays after remove, but without the theme it changes nothing.
+          ( . /etc/default/grub.d/60-mainuan-theme.cfg; test -z "${GRUB_THEME:-}" )
+          dpkg --purge mainuan-grub-theme mainuan-plasma-splash
+          test ! -e /etc/default/grub.d/60-mainuan-theme.cfg
+          test ! -e /usr/share/plasma/look-and-feel/org.mainuan.desktop
+          if kpackagetool6 --global --type Plasma/LookAndFeel --list | grep -wF org.mainuan.desktop; then exit 1; fi
+
   diversions:
     needs: package
     runs-on: ubuntu-26.04

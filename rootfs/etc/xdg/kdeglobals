@@ -1,0 +1,4 @@
+# Mainuan: tema global padrão do sistema (vem antes do do Kubuntu no
+# XDG_CONFIG_DIRS). O Plasma gera ~/.config/kdedefaults a partir dele.
+[KDE]
+LookAndFeelPackage=org.mainuan.desktop

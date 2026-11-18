@@ -1,3 +1,24 @@
+mainuan-desktop-defaults (2026.11.18) resolute; urgency=medium
+
+  * Experiência de inicialização do Mainuan, com as imagens geradas por
+    tools/boot-art/generate.py a partir do logotipo oficial:
+    - novo pacote mainuan-grub-theme: tema do GRUB (logotipo, fundo grafite,
+      destaque ciano, ícones, contagem regressiva e dicas de teclado), com
+      fontes Noto Sans geradas no build;
+    - tela de inicialização (Plymouth) refeita: logotipo com um anel animado
+      próprio, sem depender do tema Spinner; a senha de disco aparece abaixo
+      do logotipo;
+    - a última imagem do Plymouth fica na tela até o login aparecer, sem o
+      console de texto no meio (plymouth quit --retain-splash);
+    - novo pacote mainuan-plasma-splash: tema global "Mainuan"
+      (org.mainuan.desktop, a aparência padrão do Mainuan) com a tela de
+      apresentação do Plasma, com o mesmo logotipo e anel;
+    - /etc/xdg/kdeglobals: "Mainuan" passa a ser o tema global padrão do
+      sistema, no lugar do do Kubuntu, que não tem tela de apresentação (o
+      Plasma mostrava a do Breeze).
+
+ -- ruscher <rruscher@gmail.com>  Wed, 18 Nov 2026 06:20:47 -0300
+
 mainuan-desktop-defaults (2026.11.17.4) resolute; urgency=medium
 
   * Tela de inicialização: o watermark.png do Spinner (logotipo do Ubuntu)

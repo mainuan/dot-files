@@ -62,19 +62,22 @@ Files: debian/*
 Copyright: 2026 ruscher <rruscher@gmail.com>
 License: GPL-3
 
-Files: usr/share/plymouth/themes/mainuan/animation-*.png
-       usr/share/plymouth/themes/mainuan/throbber-*.png
-       usr/share/plymouth/themes/mainuan/bgrt-fallback.png
-       usr/share/plymouth/themes/mainuan/bullet.png
-       usr/share/plymouth/themes/mainuan/capslock.png
-       usr/share/plymouth/themes/mainuan/entry.png
-       usr/share/plymouth/themes/mainuan/keyboard.png
-       usr/share/plymouth/themes/mainuan/keymap-render.png
-       usr/share/plymouth/themes/mainuan/lock.png
-Copyright: Red Hat, Inc. and the Plymouth authors (Spinner theme by Jakub Steiner)
+Files: tools/boot-art/*
+       rootfs/usr/share/grub/themes/mainuan/*
+       rootfs/usr/share/plymouth/themes/mainuan/*
+       rootfs/usr/share/plasma/look-and-feel/org.mainuan.desktop/*
+       rootfs/usr/lib/systemd/system/plymouth-quit.service.d/*
+Copyright: 2026 Mainuan contributors
 License: GPL-2+
-Comment: Copiados no build do pacote plymouth-theme-spinner (tema Spinner do
- Plymouth), para que o initramfs leve a animação junto com o tema Mainuan.
+Comment: Experiência de inicialização do Mainuan (GRUB, Plymouth e tela de
+ apresentação do Plasma). As imagens são geradas por
+ tools/boot-art/generate.py a partir do logotipo oficial do Mainuan.
+
+Files: usr/share/grub/themes/mainuan/*.pf2
+Copyright: 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic)
+License: OFL-1.1
+Comment: Fontes do tema do GRUB, geradas no build com grub-mkfont a partir
+ de Noto Sans e Noto Sans Mono (pacotes fonts-noto-core e fonts-noto-mono).
 
 License: LicenseRef-ChatAI-provider-icons
  Do README do ChatAI-Plasmoid ("License and Assets"):

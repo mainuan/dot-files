@@ -1,0 +1,2 @@
+rootfs/usr/share/grub usr/share
+rootfs/etc/default/grub.d etc/default

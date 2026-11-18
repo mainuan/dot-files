@@ -4,8 +4,12 @@ Priority: optional
 Maintainer: Mainuan Packaging <openwebosbr@gmail.com>
 Uploaders: ruscher <rruscher@gmail.com>
 Build-Depends: debhelper-compat (= 13),
-               plymouth-theme-spinner,
+               fonts-noto-core,
+               fonts-noto-mono,
+               grub-common,
                gettext <!nocheck>,
+               librsvg2-bin <!nocheck>,
+               python3-pil <!nocheck>,
                python3 <!nocheck>,
 Standards-Version: 4.7.2
 Rules-Requires-Root: no
@@ -23,6 +27,8 @@ Recommends: mainuan-icon-themes,
             mainuan-plasma-themes,
             mainuan-user-avatar,
             mainuan-wallpapers,
+            mainuan-grub-theme,
+            mainuan-plasma-splash,
             painel-de-controle (>= 1.1.1),
             plasma-workspace,
 Description: configuração padrão da área de trabalho Plasma do Mainuan
@@ -34,8 +40,12 @@ Description: configuração padrão da área de trabalho Plasma do Mainuan
   - avatar do Mainuan e identidade visual do instalador Calamares;
   - tela de login (SDDM, tema Breeze) com o papel de parede e o logotipo do
     Mainuan, e o logotipo como imagem padrão de quem ainda não escolheu uma;
-  - tela de inicialização (Plymouth) "mainuan", registrada como padrão por
-    update-alternatives.
+  - tela de inicialização (Plymouth) "mainuan" (logotipo e um anel
+    animado), registrada como padrão por update-alternatives, e o modo texto
+    "mainuan-text"; a última imagem fica na tela até o login aparecer
+    (plymouth quit --retain-splash);
+  - tema global padrão do sistema "Mainuan" (/etc/xdg/kdeglobals), com a
+    tela de apresentação do Mainuan (pacote mainuan-plasma-splash).
  .
  Nenhum arquivo de outro pacote é substituído. A imagem de usuário padrão
  (/etc/skel/.face) vem do pacote mainuan-user-avatar.
@@ -53,3 +63,40 @@ Description: imagem de usuário padrão do Mainuan no lugar da do Kubuntu
  são desviados com dpkg-divert: os originais ficam em /var/lib/mainuan-user-avatar/diverted,
  continuam recebendo atualizações e voltam ao lugar quando este pacote é
  removido.
+
+Package: mainuan-grub-theme
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends},
+         grub-common
+Description: tema do GRUB do Mainuan
+ Menu de inicialização com o logotipo do Mainuan, fundo grafite, destaque
+ ciano, ícones por tipo de sistema, contagem regressiva traduzida pelo GRUB
+ e dicas de teclado sem texto. Funciona em BIOS e UEFI (com Secure Boot);
+ sem modo gráfico, o GRUB usa o menu em texto de sempre.
+ .
+ O tema é copiado para /boot/grub/themes/mainuan, que o GRUB lê mesmo com
+ /boot separado. /etc/default/grub.d/60-mainuan-theme.cfg o ativa, mostra o
+ menu por 3 segundos e procura outros sistemas (os-prober); essas opções
+ só valem enquanto o tema estiver instalado.
+
+Package: mainuan-plasma-splash
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Recommends: mainuan-icon-themes,
+            mainuan-plasma-themes,
+            plasma-workspace
+Description: tema global e tela de apresentação do Plasma do Mainuan
+ Tema global "Mainuan" (org.mainuan.desktop) com a aparência padrão do
+ Mainuan: cores Dream ciano, ícones Kora ciano, estilo Dream do Plasma,
+ decoração Lavanda e a tela de apresentação do Mainuan.
+ .
+ A tela de apresentação aparece entre o login e a área de trabalho: o
+ logotipo do Mainuan com o mesmo anel animado da tela de inicialização
+ (Plymouth). Feita em QML para o Plasma 6, respeita a escala da tela e a
+ opção de animações desligadas, e fecha assim que o Plasma termina de
+ carregar.
+ .
+ Ambos podem ser escolhidos em Configurações do sistema > Cores e temas
+ (Tema global e Tela de apresentação).
