@@ -15,6 +15,11 @@ Copyright: 2026 natanael-art <natanaelpix@gmail.com>
 License: GPL-3
 Comment: Configurações, imagens (avatar, .face, identidade visual do
  Calamares). O arquivo LICENSE do repositório traz o texto da GNU GPL versão 3.
+ identity/files/logo/mainuan-logo.svg é o logotipo oficial publicado em
+ https://github.com/mainuan/.github (profile/assets/mainuan-logo.svg);
+ identity/files/avatars/*.svg são os avatares do Mainuan também presentes,
+ como status/scalable/.face, nas variações do Kora de
+ https://github.com/mainuan/icons.
 
 Files: rootfs/usr/share/plasma/plasmoids/ChatAI-Plasmoid/*
 Copyright: 2024 Denys Madureira <denysmb@zoho.com>
@@ -97,6 +102,16 @@ Comment: Catálogos do Calamares v3.3.14 (lang/calamares_<idioma>.ts), com os
 Files: tools/calamares-lang/fix-placeholders.py
 Copyright: 2026 Mainuan contributors
 License: GPL-2+
+
+Files: identity/mainuan-identity-restore
+       identity/mainuan-identity-restore.service
+       identity/update-manifest.py
+       identity/test_restore.py
+       identity/files/manifest.json
+       identity/files/checksums.sha256
+Copyright: 2026 Mainuan contributors
+License: GPL-2+
+Comment: Restauração da identidade visual (pacote mainuan-identity).
 
 Files: usr/share/grub/themes/mainuan/*.pf2
 Copyright: 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic)

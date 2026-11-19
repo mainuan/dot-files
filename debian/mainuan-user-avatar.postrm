@@ -2,6 +2,9 @@
 set -e
 
 PACKAGE="mainuan-user-avatar"
+# sha256 de /usr/share/mainuan/identity/avatars/cyan.svg (o /etc/skel/.face
+# criado pelo postinst); conferido no CI.
+FACE_SHA256=25a743421756f49406bebc7f6384cbb1c418bec05e29a377a5ed0cddbd114c74
 
 remove_diversion() {
     original="$1"
@@ -38,6 +41,13 @@ remove_diversion() {
 
 case "$1" in
     remove|abort-install|disappear)
+        # O /etc/skel/.face do postinst não pertence a pacote nenhum: sai
+        # antes de o original do Kubuntu voltar ao lugar. Um arquivo alterado
+        # pelo administrador fica (e o original continua desviado).
+        if [ -f /etc/skel/.face ] && [ ! -L /etc/skel/.face ] &&
+            [ "$(sha256sum < /etc/skel/.face | cut -d' ' -f1)" = "$FACE_SHA256" ]; then
+            rm -f /etc/skel/.face
+        fi
         remove_diversion /etc/skel/.face
 
         remove_diversion \

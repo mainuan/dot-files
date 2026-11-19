@@ -1,0 +1,55 @@
+{
+  "format": 1,
+  "package": "mainuan-identity",
+  "description": "Arquivos de identidade do Mainuan restaurados no boot por mainuan-identity-restore.service. Cada entrada só vale enquanto o destino estiver desviado (diverted_by) ou instalado (owned_by) pelo pacote do Mainuan indicado.",
+  "entries": [
+    {
+      "source": "avatars/cyan.svg",
+      "destination": "/etc/skel/.face",
+      "mode": "0644",
+      "owner": "root",
+      "group": "root",
+      "sha256": "25a743421756f49406bebc7f6384cbb1c418bec05e29a377a5ed0cddbd114c74",
+      "policy": "restore",
+      "condition": {
+        "diverted_by": "mainuan-user-avatar"
+      }
+    },
+    {
+      "source": "logo/mainuan-logo.png",
+      "destination": "/usr/share/plasma/avatars/kubuntu-bug.png",
+      "mode": "0644",
+      "owner": "root",
+      "group": "root",
+      "sha256": "c917f0d90cef18f50616970c98619765d8cf726d54fbbc1b8ee6d05a2ba67a6f",
+      "policy": "restore",
+      "condition": {
+        "diverted_by": "mainuan-user-avatar"
+      }
+    },
+    {
+      "source": "logo/mainuan-logo.png",
+      "destination": "/usr/share/plasma/avatars/logoMainuan.png",
+      "mode": "0644",
+      "owner": "root",
+      "group": "root",
+      "sha256": "c917f0d90cef18f50616970c98619765d8cf726d54fbbc1b8ee6d05a2ba67a6f",
+      "policy": "restore",
+      "condition": {
+        "owned_by": "mainuan-desktop-defaults"
+      }
+    },
+    {
+      "source": "icons/mainuan.svg",
+      "destination": "/usr/share/icons/hicolor/scalable/apps/mainuan.svg",
+      "mode": "0644",
+      "owner": "root",
+      "group": "root",
+      "sha256": "e6489bb4ad6aedac1c386cf9dc4471564e6584f0f7f2cd695f876dc26541eec0",
+      "policy": "restore",
+      "condition": {
+        "owned_by": "mainuan-desktop-defaults"
+      }
+    }
+  ]
+}
