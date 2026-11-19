@@ -2,6 +2,7 @@
 
 PKG := debian/mainuan-desktop-defaults
 AVATAR := debian/mainuan-user-avatar
+IDENTITY := debian/mainuan-identity
 GRUBTHEME := debian/mainuan-grub-theme/usr/share/grub/themes/mainuan
 PLASMOIDS := $(PKG)/usr/share/plasma/plasmoids
 
@@ -44,15 +45,19 @@ execute_after_dh_install:
 	       $(PLASMOIDS)/org.kde.plasma.powershowdesktop/translate
 	find $(PLASMOIDS) \( -name 'LICENSE*' -o -name 'README*' -o -name '*~' \) \
 	    -type f -delete
-	# /etc/skel/.face pertence ao kubuntu-settings-desktop: vai para o
-	# mainuan-user-avatar, que o desvia. Lá a imagem fica fora de /etc e
-	# /etc/skel/.face é um link para ela (debian/mainuan-user-avatar.links):
-	# um conffile no lugar de um conffile desviado faria o dpkg perguntar
-	# sobre o arquivo nas instalações e atualizações dos dois pacotes.
-	rm $(PKG)/etc/skel/.face
-	install -D -m 0644 rootfs/etc/skel/.face $(AVATAR)/usr/share/mainuan-user-avatar/face.svg
+	# /etc/skel/.face pertence ao kubuntu-settings-desktop: o
+	# mainuan-user-avatar o desvia e o postinst cria um arquivo regular a partir
+	# de /usr/share/mainuan/identity/avatars/cyan.svg (mainuan-identity).
+	test ! -e $(PKG)/etc/skel/.face
+	test ! -e $(AVATAR)/etc/skel/.face
+	# Identidade: manifesto e somas em dia; nenhum link nem arquivo extra.
+	python3 identity/update-manifest.py --check
+	if find $(IDENTITY) -type l | grep .; then exit 1; fi
+	cd $(IDENTITY)/usr/share/mainuan/identity && sha256sum --quiet --check checksums.sha256
+	test "$$(find $(IDENTITY)/usr/share/mainuan/identity -type f | wc -l)" = "$$(($$(wc -l < identity/files/checksums.sha256) + 1))"
 
 execute_after_dh_fixperms:
 	# Configurações e widgets são dados: nenhum arquivo precisa ser executável.
-	find $(PKG) $(AVATAR) -path '*/DEBIAN' -prune -o -type f -perm /111 \
+	find $(PKG) $(AVATAR) $(IDENTITY)/usr/share -path '*/DEBIAN' -prune -o -type f -perm /111 \
 	    -exec chmod a-x {} +
+	chmod 0755 $(IDENTITY)/usr/libexec/mainuan-identity/mainuan-identity-restore

@@ -24,7 +24,21 @@ jobs:
       release-title: Mainuan Desktop Defaults
       test-command: |
         sh -n debian/mainuan-user-avatar.preinst
+        sh -n debian/mainuan-user-avatar.postinst
         sh -n debian/mainuan-user-avatar.postrm
+        # Identity: manifest, checksums and service in sync; the postrm knows
+        # the sha256 of the /etc/skel/.face it may delete.
+        python3 identity/update-manifest.py --check
+        python3 -I -c 'import ast, sys; [ast.parse(open(f).read(), f) for f in sys.argv[1:]]' \
+          identity/mainuan-identity-restore identity/update-manifest.py identity/test_restore.py
+        grep -qx "FACE_SHA256=$(sha256sum < identity/files/avatars/cyan.svg | cut -d' ' -f1)" \
+          debian/mainuan-user-avatar.postrm
+        # Unprivileged --check of a root with nothing installed: every entry
+        # is skipped (no Mainuan package owns or diverts the destinations).
+        mkdir -p /tmp/idroot/usr/share/mainuan && cp -r identity/files /tmp/idroot/usr/share/mainuan/identity
+        python3 -I identity/mainuan-identity-restore --check --root /tmp/idroot | tee /tmp/idcheck.txt
+        grep -q '4 ignoradas' /tmp/idcheck.txt
+        rm -rf /tmp/idroot /tmp/idcheck.txt
         sh -n debian/mainuan-grub-theme.postinst
         sh -n debian/mainuan-grub-theme.postrm
         sh -n rootfs/etc/default/grub.d/60-mainuan-theme.cfg
@@ -37,7 +51,7 @@ jobs:
         # The source package must not carry .git or build leftovers.
         dpkg-source -Zgzip -z1 --build .
         tar -tzf ../mainuan-desktop-defaults_*.tar.gz > ../source-files.txt
-        if grep -E '(^|/)\.git(/|$)|/debian/(\.debhelper|debhelper-build-stamp|files$|.*\.substvars$|mainuan-desktop-defaults/|mainuan-user-avatar/)' ../source-files.txt; then
+        if grep -E '(^|/)\.git(/|$)|/debian/(\.debhelper|debhelper-build-stamp|files$|.*\.substvars$|mainuan-desktop-defaults/|mainuan-user-avatar/|mainuan-identity/)' ../source-files.txt; then
           echo "::error::source package carries VCS or build files"; exit 1
         fi
         du -h ../mainuan-desktop-defaults_*.tar.gz
@@ -248,6 +262,7 @@ jobs:
           rm -f /etc/dpkg/dpkg.cfg.d/excludes
           (cd dist && sha256sum --check SHA256SUMS)
           deb="$(echo "$PWD"/dist/mainuan-user-avatar_*.deb)"
+          identity="$(echo "$PWD"/dist/mainuan-identity_*.deb)"
           main="$(echo "$PWD"/dist/mainuan-desktop-defaults_*.deb)"
           # No --force-conf*: a conffile prompt (stdin is closed) fails the job.
           apt=(apt-get --yes --no-install-recommends)
@@ -258,7 +273,11 @@ jobs:
           step() { echo "::group::$*"; }
 
           apt-get update
-          "${apt[@]}" install kubuntu-settings-desktop sddm-theme-breeze
+          "${apt[@]}" install kubuntu-settings-desktop sddm-theme-breeze curl ca-certificates
+          # Published version with /etc/skel/.face as a link (upgrade test).
+          OLD=/tmp/mainuan-user-avatar_2026.11.18.2_all.deb
+          curl -fsSL -o "$OLD" https://github.com/mainuan/dot-files/releases/download/v2026.11.18.2/mainuan-user-avatar_2026.11.18.2_all.deb
+          echo "93c97ae3fd1a10042227ebd25b04e936135647959eabffafa09d605462b3354e  $OLD" | sha256sum --check
           kface="$(sum /etc/skel/.face)"
           kbug="$(sum /usr/share/plasma/avatars/kubuntu-bug.png)"
           bface=/usr/share/sddm/themes/breeze/faces/.face.icon
@@ -268,9 +287,19 @@ jobs:
             for f in /etc/skel/.face /usr/share/plasma/avatars/kubuntu-bug.png; do
               test "$(dpkg-divert --listpackage "$f")" = mainuan-user-avatar
             done
-            test "$(readlink /etc/skel/.face)" = /usr/share/mainuan-user-avatar/face.svg
-            test "$(readlink -f /etc/skel/.face.icon)" = /usr/share/mainuan-user-avatar/face.svg
-            grep -q '<svg' /etc/skel/.face
+            # A regular root:root 0644 file (not a link out of the home),
+            # identical to the official avatar of mainuan-identity.
+            test -f /etc/skel/.face && test ! -L /etc/skel/.face
+            test "$(stat -c '%U:%G %a' /etc/skel/.face)" = 'root:root 644'
+            cmp /etc/skel/.face /usr/share/mainuan/identity/avatars/cyan.svg
+            test "$(readlink -f /etc/skel/.face.icon)" = /etc/skel/.face
+            if dpkg -S /etc/skel/.face | grep '^mainuan-user-avatar:'; then exit 1; fi
+            /usr/libexec/mainuan-identity/mainuan-identity-restore --check
+            # A new account gets a regular ~/.face it owns.
+            useradd --create-home --shell /bin/bash "u$((++users))"
+            test -f "/home/u$users/.face" && test ! -L "/home/u$users/.face"
+            test "$(stat -c %U "/home/u$users/.face")" = "u$users"
+            userdel --remove "u$users" 2>/dev/null || true
             test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$(sum "$ours/usr/share/plasma/avatars/kubuntu-bug.png")"
             test "$(sum $D/skel.face)" = "$kface"
             test "$(sum $D/kubuntu-bug.png)" = "$kbug"
@@ -289,13 +318,28 @@ jobs:
             test "$(sum $bface)" = "$kbface"
             test ! -e /var/lib/mainuan-user-avatar
             test ! -e /usr/share/mainuan-user-avatar
+            if ls -A /etc/skel | grep mainuan; then exit 1; fi
             if dpkg-divert --list | grep mainuan; then exit 1; fi
             dpkg --verify kubuntu-settings-desktop sddm-theme-breeze
           }
 
+          users=0
           step "Kubuntu first, then Mainuan (with mainuan-desktop-defaults); reinstall"
-          "${apt[@]}" install "$main" "$deb"
+          "${apt[@]}" install "$main" "$identity" "$deb"
           diverted
+          # Restoration: the boot service puts back a removed or altered
+          # file only where a Mainuan package installed or diverted it.
+          R=/usr/libexec/mainuan-identity/mainuan-identity-restore
+          rm /etc/skel/.face
+          echo corrompido > /usr/share/plasma/avatars/logoMainuan.png
+          chmod 0600 /usr/share/icons/hicolor/scalable/apps/mainuan.svg
+          rc=0; $R --check || rc=$?; test "$rc" = 1
+          $R | tee restore.log
+          grep -q '3 restauradas' restore.log
+          $R | tee restore.log
+          grep -q '4 conformes, 0 restauradas' restore.log
+          diverted
+          dpkg --verify mainuan-desktop-defaults
           "${apt[@]}" install --reinstall kubuntu-settings-desktop
           diverted
           "${apt[@]}" install --reinstall "$deb"
@@ -305,6 +349,10 @@ jobs:
           step "remove restores the Kubuntu files; purge leaves nothing"
           "${apt[@]}" remove mainuan-user-avatar
           restored
+          # Without mainuan-user-avatar the slot is Kubuntu's again: skipped.
+          $R | tee restore.log
+          grep -q '2 ignoradas' restore.log
+          restored
           dpkg --purge mainuan-user-avatar
           restored
           dpkg --verify mainuan-desktop-defaults
@@ -313,8 +361,9 @@ jobs:
           step "Mainuan first, then Kubuntu"
           "${apt[@]}" purge kubuntu-settings-desktop
           test ! -e /etc/skel/.face
-          "${apt[@]}" install "$deb"
+          "${apt[@]}" install "$identity" "$deb"
           test ! -e $D/skel.face
+          test -f /etc/skel/.face && cmp /etc/skel/.face /usr/share/mainuan/identity/avatars/cyan.svg
           "${apt[@]}" install kubuntu-settings-desktop
           diverted
           "${apt[@]}" install --reinstall kubuntu-settings-desktop
@@ -322,6 +371,153 @@ jobs:
           "${apt[@]}" remove mainuan-user-avatar
           dpkg --purge mainuan-user-avatar
           restored
+          echo "::endgroup::"
+
+          step "upgrade from the published 2026.11.18.2 (link in /etc/skel)"
+          "${apt[@]}" install "$OLD"
+          test "$(readlink /etc/skel/.face)" = /usr/share/mainuan-user-avatar/face.svg
+          "${apt[@]}" install "$identity" "$deb"
+          diverted
+          test ! -e /usr/share/mainuan-user-avatar
+          "${apt[@]}" remove mainuan-user-avatar mainuan-identity
+          dpkg --purge mainuan-user-avatar mainuan-identity
+          restored
+          test ! -e /usr/share/mainuan/identity
+          test ! -e /usr/libexec/mainuan-identity
+          echo "::endgroup::"
+
+  # mainuan-identity-restore as root on temporary roots (--root): missing,
+  # corrupted, intact (no write), wrong mode/owner, symlinks in the target
+  # and in parent directories, missing directory, rejected manifests,
+  # personal files in /home untouched, second run without changes.
+  identity-tests:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    container:
+      image: ubuntu:26.04@sha256:42527649dbc4f9197a6073f426f488cbff0e9cc9f2afce32d91c383e4875634a
+      options: --platform linux/amd64
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the triggering commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Restoration tests (root, temporary roots)
+        run: |
+          set -eu
+          apt-get update
+          apt-get install --yes --no-install-recommends python3
+          python3 -I identity/test_restore.py
+
+  # The real service under systemd (PID 1 in a privileged container): the
+  # hardened unit runs at install and at boot, restores, refuses a planted
+  # symlink, never touches /home; remove and purge leave nothing.
+  identity-systemd:
+    needs: package
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Download package artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: deb-mainuan-desktop-defaults-${{ github.sha }}
+          path: dist
+
+      - name: Boot Ubuntu 26.04 with systemd
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum --check SHA256SUMS)
+          cat > Dockerfile <<'EOF'
+          FROM ubuntu:26.04@sha256:42527649dbc4f9197a6073f426f488cbff0e9cc9f2afce32d91c383e4875634a
+          ENV DEBIAN_FRONTEND=noninteractive
+          RUN rm -f /etc/dpkg/dpkg.cfg.d/excludes /usr/sbin/policy-rc.d && apt-get update && \
+              apt-get install --yes --no-install-recommends systemd systemd-sysv dbus python3 passwd
+          STOPSIGNAL SIGRTMIN+3
+          CMD ["/sbin/init"]
+          EOF
+          docker build --platform linux/amd64 -t mainuan-systemd .
+          docker run -d --name sd --platform linux/amd64 --privileged --cgroupns=private \
+            --tmpfs /run --tmpfs /run/lock -v "$PWD/dist:/dist:ro" mainuan-systemd
+          for i in $(seq 60); do
+            state="$(docker exec sd systemctl is-system-running 2>/dev/null || true)"
+            case "$state" in running|degraded) break ;; esac
+            sleep 2
+          done
+          echo "system: $state"
+          docker exec sd systemctl --failed --no-pager || true
+
+      - name: Install, restore at boot, refuse a symlink, remove and purge
+        run: |
+          set -euxo pipefail
+          x() { docker exec sd bash -euo pipefail -c "$*"; }
+          U=mainuan-identity-restore.service
+          R=/usr/libexec/mainuan-identity/mainuan-identity-restore
+          result() { x "systemctl show -P Result $U"; }
+          x 'apt-get install --yes --no-install-recommends /dist/mainuan-identity_*.deb /dist/mainuan-user-avatar_*.deb'
+          echo "::group::installed: enabled, ran once, hardened"
+          test "$(x "systemctl is-enabled $U")" = enabled
+          # Started by the postinst (deb-systemd-invoke): it ran once.
+          test "$(result)" = success
+          test "$(x "systemctl show -P ExecMainStartTimestampMonotonic $U")" != 0
+          x "systemctl show -P Before $U" | tr ' ' '\n' | grep -qx display-manager.service
+          x "systemctl show -p ProtectSystem -p ProtectHome -p ReadWritePaths -p NoNewPrivileges -p PrivateTmp -p CapabilityBoundingSet $U"
+          x "systemd-analyze security --no-pager $U | tail -n 1"
+          x "journalctl -b -u $U --no-pager -o cat"
+          x 'test -f /etc/skel/.face && test ! -L /etc/skel/.face && cmp /etc/skel/.face /usr/share/mainuan/identity/avatars/cyan.svg'
+          echo "::endgroup::"
+
+          echo "::group::restore through the service; /home untouched; second run writes nothing"
+          x 'useradd --create-home ana && echo pessoal > /home/ana/.face && chown ana: /home/ana/.face'
+          before="$(x 'stat -c "%i %Y %Z %s" /home/ana/.face; sha256sum /home/ana/.face')"
+          x 'rm /etc/skel/.face; echo corrompido > /usr/share/plasma/avatars/kubuntu-bug.png'
+          x "systemctl start $U"
+          test "$(result)" = success
+          x "journalctl -u $U --no-pager -o cat | tail -n 4"
+          x "$R --check"
+          x "cmp /usr/share/plasma/avatars/kubuntu-bug.png /usr/share/mainuan/identity/logo/mainuan-logo.png"
+          stamp="$(x 'stat -c "%i %Y %Z" /etc/skel/.face /usr/share/plasma/avatars/kubuntu-bug.png')"
+          x "systemctl start $U"
+          last="$(x "journalctl -u $U --no-pager -o cat | grep entradas | tail -n 1")"
+          echo "$last" | grep '2 conformes, 0 restauradas'
+          test "$(x 'stat -c "%i %Y %Z" /etc/skel/.face /usr/share/plasma/avatars/kubuntu-bug.png')" = "$stamp"
+          test "$(x 'stat -c "%i %Y %Z %s" /home/ana/.face; sha256sum /home/ana/.face')" = "$before"
+          echo "::endgroup::"
+
+          echo "::group::planted symlink: refused, the target stays as it was"
+          x 'echo segredo > /root/alvo && rm /etc/skel/.face && ln -s /root/alvo /etc/skel/.face'
+          if x "systemctl start $U"; then exit 1; fi
+          test "$(result)" = exit-code
+          x "journalctl -u $U --no-pager -o cat | tail -n 3"
+          x 'test -L /etc/skel/.face && test "$(cat /root/alvo)" = segredo'
+          x 'rm /etc/skel/.face'
+          echo "::endgroup::"
+
+          echo "::group::runs at boot, before the login screen"
+          docker restart sd
+          for i in $(seq 60); do
+            state="$(docker exec sd systemctl is-system-running 2>/dev/null || true)"
+            case "$state" in running|degraded) break ;; esac
+            sleep 2
+          done
+          x "journalctl -b -u $U --no-pager -o cat"
+          test "$(result)" = success
+          x 'test -f /etc/skel/.face && test ! -L /etc/skel/.face'
+          test "$(x 'stat -c "%i %Y %Z %s" /home/ana/.face; sha256sum /home/ana/.face')" = "$before"
+          echo "::endgroup::"
+
+          echo "::group::remove and purge: service disabled, nothing left"
+          x 'apt-get remove --yes mainuan-user-avatar mainuan-identity'
+          x 'dpkg --purge mainuan-user-avatar mainuan-identity'
+          if x "systemctl cat $U" 2>/dev/null; then exit 1; fi
+          if x 'find /etc/systemd -name "mainuan-identity*" | grep .'; then exit 1; fi
+          if x 'dpkg-divert --list | grep mainuan'; then exit 1; fi
+          x 'test ! -e /usr/share/mainuan && test ! -e /usr/libexec/mainuan-identity && test ! -e /var/lib/mainuan-user-avatar'
+          x 'test ! -e /etc/skel/.face && ! ls -A /etc/skel | grep mainuan'
+          x 'test "$(cat /home/ana/.face)" = pessoal'
           echo "::endgroup::"
 
   # Installer slideshow: qmllint, files named by show.qml, every catalog

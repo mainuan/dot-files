@@ -26,18 +26,21 @@ Configuração inicial da área de trabalho Plasma do **Mainuan Linux**, empacot
 Este repositório define como a área de trabalho do Mainuan se apresenta numa
 conta nova: painéis e widgets, tema, cores, ícones, papel de parede, atalhos
 e as configurações iniciais do KWin, do Dolphin e do Kate. A árvore `rootfs/`
-é instalada por quatro pacotes Debian:
+e a pasta `identity/` são instaladas por cinco pacotes Debian:
 
 - **`mainuan-desktop-defaults`**: a configuração inicial, os widgets, a tela
   de login e a tela de inicialização (Plymouth). Não substitui nenhum arquivo
   de outro pacote.
 - **`mainuan-user-avatar`**: troca a imagem de usuário padrão do Kubuntu pelo
   logotipo do Mainuan, com `dpkg-divert` (veja abaixo).
+- **`mainuan-identity`**: a pasta oficial de identidade visual
+  (`/usr/share/mainuan/identity`) e o serviço que a restaura no boot (veja
+  abaixo).
 - **`mainuan-grub-theme`**: o tema do menu do GRUB.
 - **`mainuan-plasma-splash`**: o tema global "Mainuan" e a tela de
   apresentação do Plasma.
 
-Os quatro pacotes vêm instalados na ISO do Mainuan. Os temas, ícones e papéis de
+Os cinco pacotes vêm instalados na ISO do Mainuan. Os temas, ícones e papéis de
 parede referenciados pela configuração vêm de outros pacotes, recomendados
 pelo `mainuan-desktop-defaults`:
 [`mainuan-plasma-themes`](https://github.com/mainuan/plasma-themes),
@@ -122,11 +125,13 @@ os `.deb` e o `SHA256SUMS` da
 ```bash
 sha256sum --check --ignore-missing SHA256SUMS
 sudo apt install ./mainuan-desktop-defaults_*_all.deb ./mainuan-user-avatar_*_all.deb \
+                 ./mainuan-identity_*_all.deb \
                  ./mainuan-grub-theme_*_all.deb ./mainuan-plasma-splash_*_all.deb
 ```
 
-O `mainuan-user-avatar`, o `mainuan-grub-theme` e o `mainuan-plasma-splash`
-são opcionais. O GitHub Releases não é um repositório
+O `mainuan-user-avatar` (que depende do `mainuan-identity`), o
+`mainuan-identity`, o `mainuan-grub-theme` e o `mainuan-plasma-splash` são
+opcionais. O GitHub Releases não é um repositório
 APT: as atualizações chegam por novas versões dos pacotes ou pela ISO.
 
 ## Convivência com o Kubuntu
@@ -146,9 +151,12 @@ arquivos:
   imagens), usando `dpkg-divert --rename`:
   - os originais ficam em `/var/lib/mainuan-user-avatar/diverted` e continuam
     recebendo as atualizações do Kubuntu;
-  - `/etc/skel/.face` passa a ser um link para
-    `/usr/share/mainuan-user-avatar/face.svg`, para que o dpkg não confunda
-    dois arquivos de configuração no mesmo caminho;
+  - `/etc/skel/.face` passa a ser um arquivo regular (root:root 0644) criado
+    pelo postinst a partir de `/usr/share/mainuan/identity/avatars/cyan.svg`.
+    Ele não vai dentro do pacote, para que o dpkg não confunda dois arquivos
+    de configuração no mesmo caminho, e não é um link: um link para fora da
+    pasta pessoal viraria, nas contas novas, um `~/.face` que o Mainuan
+    Welcome recusa ao trocar o avatar;
   - ao remover o pacote, os originais voltam ao lugar.
 
 Para voltar à imagem de usuário do Kubuntu:
@@ -157,6 +165,40 @@ Para voltar à imagem de usuário do Kubuntu:
 sudo apt remove mainuan-user-avatar
 dpkg-divert --list | grep mainuan   # não mostra nada depois da remoção
 ```
+
+## Identidade visual e restauração no boot
+
+O `mainuan-identity` instala em `/usr/share/mainuan/identity` só os recursos
+de marca usados pelo sistema, todos arquivos regulares root:root 0644:
+
+| Arquivo | Uso |
+|---|---|
+| `logo/mainuan-logo.svg` | logotipo oficial ([mainuan/.github](https://github.com/mainuan/.github/blob/main/profile/assets/mainuan-logo.svg)) |
+| `logo/mainuan-logo.png` | logotipo 96×96 (avatares do Plasma, rosto do SDDM, Informações do sistema) |
+| `icons/mainuan.svg` | ícone do menu de aplicativos (`mainuan` no tema hicolor) |
+| `avatars/<cor>.svg` | avatar do Mainuan nas cores de destaque `brown`, `cyan`, `gray`, `lime`, `magenta` e `violet`; `cyan` é o padrão das contas novas |
+| `manifest.json` | o que restaurar: origem, destino, modo, dono, sha256, política e condição |
+| `checksums.sha256` | somas de todos os arquivos (`sha256sum -c` dentro da pasta) |
+
+O `mainuan-identity-restore.service` (oneshot, antes da tela de login) lê o
+manifesto e repõe, só quando ausentes ou diferentes, `/etc/skel/.face`,
+`kubuntu-bug.png` e `logoMainuan.png` em `/usr/share/plasma/avatars` e o
+ícone do menu. Cada entrada só vale enquanto um pacote do Mainuan instalou
+(`owned_by`) ou desviou (`diverted_by`) o arquivo: nada de outro pacote é
+sobrescrito. O script aceita só destinos de uma lista fixa de pastas do
+sistema, nunca segue links simbólicos (um link no destino ou numa pasta do
+caminho é recusado), escreve por arquivo temporário + `fsync` + `rename`,
+nunca toca em `/home` e registra no journal o que fez:
+
+```bash
+journalctl -b -u mainuan-identity-restore
+sudo /usr/libexec/mainuan-identity/mainuan-identity-restore --check   # só verifica; 1 = divergente
+```
+
+Para mudar um recurso: troque o arquivo em `identity/files/`, rode
+`python3 identity/update-manifest.py` (atualiza sha256 e `checksums.sha256`)
+e, se houver destino novo, inclua a pasta em `ReadWritePaths` do serviço e na
+lista de destinos permitidos do script.
 
 ## Alterar a configuração padrão
 
@@ -179,11 +221,11 @@ Para ver o resultado, instale o pacote gerado, crie uma conta de teste
 
 | Item | Valor |
 |---|---|
-| Pacotes | `mainuan-desktop-defaults`, `mainuan-user-avatar` (`Architecture: all`) |
+| Pacotes | `mainuan-desktop-defaults`, `mainuan-user-avatar`, `mainuan-identity`, `mainuan-grub-theme`, `mainuan-plasma-splash` (`Architecture: all`) |
 | Destino | `/etc/skel`, `/etc/xdg`, `/etc/calamares/branding/vendor`, `/usr/share/plasma` |
 | Base | Kubuntu 26.04 LTS, KDE Plasma 6.6 |
 | Empacotamento | debhelper 13, formato `3.0 (native)` |
-| Recomenda | `mainuan-plasma-themes`, `mainuan-icon-themes`, `mainuan-wallpapers`, `mainuan-user-avatar`, `painel-de-controle (>= 1.1.1)`, `plasma-workspace` |
+| Recomenda | `mainuan-plasma-themes`, `mainuan-icon-themes`, `mainuan-identity`, `mainuan-wallpapers`, `mainuan-user-avatar`, `painel-de-controle (>= 1.1.1)`, `plasma-workspace` |
 
 ## Compilação e testes
 
@@ -208,8 +250,18 @@ Ubuntu 26.04 e:
 4. reinstala, remove e expurga o pacote, sem sobras;
 5. num job separado, testa os desvios do `mainuan-user-avatar` nas duas ordens
    de instalação (Kubuntu antes e depois), com reinstalações, sem
-   `--force-conf*`, e confere que a remoção devolve os arquivos do Kubuntu
-   byte a byte.
+   `--force-conf*`, a atualização a partir da versão publicada com
+   `/etc/skel/.face` em link, e confere que a remoção devolve os arquivos do
+   Kubuntu byte a byte;
+6. roda os testes do `mainuan-identity-restore` como root em raízes
+   temporárias (`identity/test_restore.py`: ausente, corrompido, íntegro sem
+   escrita, modo e dono errados, links no destino e nas pastas, pasta
+   inexistente, manifestos inválidos, `/home` intocada, segunda execução sem
+   mudanças);
+7. instala o `mainuan-identity` num contêiner com systemd e confere o
+   serviço de verdade: roda na instalação e no boot, restaura, recusa um
+   link plantado, não toca em `/home`, e a remoção desabilita o serviço sem
+   deixar sobras.
 
 Uma tag `v<versão>` publica os dois `.deb` e o `SHA256SUMS` na release.
 

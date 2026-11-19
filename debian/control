@@ -26,6 +26,7 @@ Depends: ${misc:Depends},
          plymouth,
          sddm-theme-breeze
 Recommends: mainuan-icon-themes,
+            mainuan-identity,
             mainuan-plasma-themes,
             mainuan-user-avatar,
             mainuan-wallpapers,
@@ -55,16 +56,39 @@ Description: configuração padrão da área de trabalho Plasma do Mainuan
 Package: mainuan-user-avatar
 Architecture: all
 Multi-Arch: foreign
-Depends: ${misc:Depends}
+Depends: ${misc:Depends},
+         mainuan-identity (= ${source:Version})
 Description: imagem de usuário padrão do Mainuan no lugar da do Kubuntu
  Troca a imagem padrão das novas contas (/etc/skel/.face), o avatar
  kubuntu-bug.png do seletor de imagens do Plasma e o rosto padrão da tela de
  login (tema Breeze do SDDM) pelo logotipo do Mainuan.
  .
+ /etc/skel/.face é um arquivo regular (root:root 0644), cópia de
+ /usr/share/mainuan/identity/avatars/cyan.svg, e não um link: as novas
+ contas recebem uma imagem própria, que o Mainuan Welcome pode trocar.
+ .
  Os arquivos pertencem ao kubuntu-settings-desktop e ao sddm-theme-breeze e
  são desviados com dpkg-divert: os originais ficam em /var/lib/mainuan-user-avatar/diverted,
  continuam recebendo atualizações e voltam ao lugar quando este pacote é
  removido.
+
+Package: mainuan-identity
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends},
+         python3
+Description: identidade visual oficial do Mainuan e restauração no boot
+ Pasta /usr/share/mainuan/identity com os recursos de marca usados pelo
+ sistema: o logotipo oficial (SVG e PNG), o ícone do menu de aplicativos e
+ os avatares do Mainuan nas seis cores de destaque, mais manifest.json e
+ checksums.sha256.
+ .
+ O serviço mainuan-identity-restore roda no boot, antes da tela de login, e
+ restaura os arquivos do manifesto que estiverem ausentes, corrompidos ou com
+ modo ou dono errados (/etc/skel/.face, avatares do Plasma e ícone do menu).
+ Só escreve onde um pacote do Mainuan instalou ou desviou o arquivo, nunca
+ segue links simbólicos, nunca toca em /home e não escreve nada quando tudo
+ confere. "mainuan-identity-restore --check" só verifica.
 
 Package: mainuan-grub-theme
 Architecture: all
