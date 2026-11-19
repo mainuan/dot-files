@@ -118,6 +118,7 @@ jobs:
         if grep -q KdeControlStation $A; then exit 1; fi
         test -s /usr/share/icons/hicolor/scalable/apps/mainuan.svg
         test -s /usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/mainuan-launcher-icon.js
+        test -s /usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/mainuan-launcher-icon-2.js
         grep -qx 'DefaultDarkLookAndFeel=Dream-Dark-Color-Global-6' /etc/xdg/kdeglobals
         # Installer slideshow: translatable QML, images without text, catalogs.
         V=/etc/calamares/branding/vendor

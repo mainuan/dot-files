@@ -1,3 +1,26 @@
+mainuan-desktop-defaults (2026.11.19) resolute; urgency=medium
+
+  * Novo pacote mainuan-identity: recursos oficiais da marca em
+    /usr/share/mainuan/identity (logotipo, ícone do menu e avatares das seis
+    cores), com manifesto e somas SHA-256, e o serviço
+    mainuan-identity-restore, que no boot só repõe os arquivos de sistema
+    ausentes ou alterados que o manifesto lista. Nunca toca em /home nem em
+    escolhas do usuário e não segue links simbólicos.
+  * mainuan-user-avatar: /etc/skel/.face passa a ser um arquivo regular, não
+    um link. As contas novas recebiam um ~/.face em link, que o Mainuan
+    Welcome recusa ("source .face file missing, unreadable or unsafe").
+  * Instalador: os slides ocupam toda a área da apresentação (o Slide do
+    Calamares usava só 90% x 70%), com ilustrações recortadas de novo, mais
+    nítidas e mais leves (5,6 MB para 2,1 MB), texto traduzível ajustado ao
+    tamanho da janela e leitura da direita para a esquerda. Validação no CI
+    em todos os idiomas e em 7 tamanhos.
+  * Painel: o logotipo do Mainuan também nos lançadores Orbit, Tahoe, Deepin
+    e Plasma Drawer das contas existentes (mainuan-launcher-icon-2.js), e
+    desfaz a imagem "start-here-hexabee" gravada por layouts antigos do
+    Welcome. Ícones escolhidos pelo usuário são mantidos.
+
+ -- ruscher <rruscher@gmail.com>  Thu, 19 Nov 2026 12:00:00 -0300
+
 mainuan-desktop-defaults (2026.11.18.2) resolute; urgency=medium
 
   * Instalador: catálogos do Calamares 3.3.14 com marcadores %N corrigidos em
