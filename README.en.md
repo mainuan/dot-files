@@ -46,7 +46,17 @@ packages ship with the Mainuan ISO:
   (`/etc/skel/.face`) and the `kubuntu-bug.png` avatar with the Mainuan logo
   using `dpkg-divert --rename`. The originals are kept in
   `/var/lib/mainuan-user-avatar/diverted`, still receive Kubuntu updates and
-  are restored when the package is removed.
+  are restored when the package is removed. `/etc/skel/.face` is a regular
+  root:root 0644 file (copied from the official avatar by the postinst), not
+  a link, so new accounts get a `~/.face` of their own.
+- **`mainuan-identity`**: the official brand folder
+  `/usr/share/mainuan/identity` (official logo SVG/PNG, menu icon, Mainuan
+  avatars in the six accent colours `brown`, `cyan`, `gray`, `lime`,
+  `magenta`, `violet`, `manifest.json`, `checksums.sha256`) and the hardened
+  `mainuan-identity-restore.service`, which restores missing or altered
+  entries of the manifest before the login screen. It only writes where a
+  Mainuan package installed or diverted the file, never follows symlinks and
+  never touches `/home`; `mainuan-identity-restore --check` only verifies.
 
 `/etc/skel` is copied only when an account is created; existing accounts do
 not change.
@@ -59,6 +69,7 @@ Download the `.deb` files and `SHA256SUMS` from the
 ```bash
 sha256sum --check --ignore-missing SHA256SUMS
 sudo apt install ./mainuan-desktop-defaults_*_all.deb ./mainuan-user-avatar_*_all.deb \
+                 ./mainuan-identity_*_all.deb \
                  ./mainuan-grub-theme_*_all.deb ./mainuan-plasma-splash_*_all.deb
 ```
 

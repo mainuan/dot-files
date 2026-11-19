@@ -1,0 +1,3 @@
+identity/files/* usr/share/mainuan/identity
+identity/mainuan-identity-restore usr/libexec/mainuan-identity
+identity/mainuan-identity-restore.service usr/lib/systemd/system

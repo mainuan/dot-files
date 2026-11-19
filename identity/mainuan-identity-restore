@@ -1,0 +1,459 @@
+#!/usr/bin/python3
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""Restaura os arquivos de identidade visual do Mainuan a partir do manifesto.
+
+Lê /usr/share/mainuan/identity/manifest.json e, para cada entrada, compara o
+destino com a cópia oficial (sha256, modo e dono). Só escreve quando o destino
+está ausente ou diverge, por arquivo temporário no mesmo diretório + fsync +
+rename. Nunca segue links simbólicos: cada componente do caminho é aberto com
+O_NOFOLLOW a partir do descritor do diretório anterior.
+
+Limites (fixos aqui, não no manifesto):
+  - destinos só na allowlist de sistema abaixo; /home, /root e /run nunca;
+  - uma entrada só vale enquanto o lugar pertence a um pacote do Mainuan:
+    desviado por ele (dpkg-divert, "diverted_by") ou instalado por ele
+    ("owned_by"). Arquivos de outros pacotes nunca são sobrescritos;
+  - dono sempre root:root, modo sem execução, setuid ou escrita de terceiros.
+
+Saída: 0 tudo conforme (ou restaurado); 1 divergências (só com --check);
+2 erro, manifesto inválido ou entrada recusada por segurança.
+
+Uso: mainuan-identity-restore [--check] [--root DIR]
+"""
+
+import argparse
+import errno
+import hashlib
+import json
+import os
+import posixpath
+import re
+import secrets
+import stat
+import sys
+
+IDENTITY_DIR = "usr/share/mainuan/identity"
+MANIFEST = "manifest.json"
+DPKG_DIR = "var/lib/dpkg"
+FORMAT = 1
+MAX_BYTES = 32 * 1024 * 1024
+TEMP_PREFIX = ".mainuan-identity-"
+
+# Destinos permitidos: prefixos de diretório (terminados em /) ou caminhos
+# exatos. O service.ReadWritePaths precisa cobrir os diretórios usados.
+ALLOWED_PREFIXES = (
+    "/usr/share/plasma/avatars/",
+    "/usr/share/icons/hicolor/",
+    "/usr/share/sddm/themes/",
+    "/usr/share/plymouth/themes/",
+    "/usr/share/pixmaps/",
+)
+ALLOWED_EXACT = (
+    "/etc/skel/.face",
+)
+FORBIDDEN_PREFIXES = ("/home/", "/root/", "/run/", "/var/home/", "/proc/",
+                      "/sys/", "/dev/", "/tmp/", "/var/tmp/")
+ALLOWED_MODES = (0o644, 0o444)
+POLICIES = ("restore", "verify")
+ENTRY_KEYS = {"source", "destination", "mode", "owner", "group", "sha256",
+              "policy", "condition"}
+PACKAGE_RE = re.compile(r"^mainuan-[a-z0-9][a-z0-9.+-]*$")
+SHA_RE = re.compile(r"^[0-9a-f]{64}$")
+SEGMENT_RE = re.compile(r"^[A-Za-z0-9_.+@-]+$")
+
+USE_PRIORITY = "JOURNAL_STREAM" in os.environ
+
+
+def log(level, message):
+    # Prefixos sd-daemon: o journald usa a prioridade; no terminal ficam de fora.
+    prefix = {"err": "<3>", "warning": "<4>", "notice": "<5>", "info": "<6>"}[level]
+    print((prefix if USE_PRIORITY else "") + message, flush=True)
+
+
+class ManifestError(Exception):
+    pass
+
+
+class Unsafe(Exception):
+    pass
+
+
+class Missing(Exception):
+    pass
+
+
+def _no_duplicates(pairs):
+    seen = {}
+    for key, value in pairs:
+        if key in seen:
+            raise ManifestError(f"chave repetida no manifesto: {key}")
+        seen[key] = value
+    return seen
+
+
+def _clean_relative(path, what):
+    if not isinstance(path, str) or not path or "\0" in path:
+        raise ManifestError(f"{what}: caminho inválido")
+    if path.startswith("/") or posixpath.normpath(path) != path:
+        raise ManifestError(f"{what}: {path!r} não é um caminho relativo normalizado")
+    parts = path.split("/")
+    for part in parts:
+        if part in ("", ".", "..") or not SEGMENT_RE.match(part):
+            raise ManifestError(f"{what}: componente proibido em {path!r}")
+    return parts
+
+
+def validate_destination(dest):
+    if not isinstance(dest, str) or "\0" in dest or not dest.startswith("/"):
+        raise ManifestError(f"destino {dest!r}: precisa ser um caminho absoluto")
+    if posixpath.normpath(dest) != dest or dest.startswith("//") or dest.endswith("/"):
+        raise ManifestError(f"destino {dest!r}: caminho não normalizado")
+    parts = dest[1:].split("/")
+    for part in parts:
+        if part in ("", ".", "..") or not SEGMENT_RE.match(part):
+            raise ManifestError(f"destino {dest!r}: componente proibido")
+    if any(dest.startswith(p) for p in FORBIDDEN_PREFIXES):
+        raise ManifestError(f"destino {dest!r}: área pessoal ou volátil, nunca tocada")
+    if dest not in ALLOWED_EXACT and not any(dest.startswith(p) for p in ALLOWED_PREFIXES):
+        raise ManifestError(f"destino {dest!r}: fora da allowlist")
+    return parts
+
+
+def load_manifest(identity_fd):
+    try:
+        fd = os.open(MANIFEST, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC, dir_fd=identity_fd)
+    except OSError as e:
+        raise ManifestError(f"manifesto ilegível: {e.strerror}") from None
+    try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode) or info.st_size > 1024 * 1024:
+            raise ManifestError("manifesto não é um arquivo regular pequeno")
+        data = read_all(fd, 1024 * 1024)
+    finally:
+        os.close(fd)
+    try:
+        manifest = json.loads(data.decode("utf-8"), object_pairs_hook=_no_duplicates)
+    except (UnicodeDecodeError, ValueError) as e:
+        raise ManifestError(f"manifesto não é JSON válido: {e}") from None
+    if not isinstance(manifest, dict) or manifest.get("format") != FORMAT:
+        raise ManifestError(f"manifesto sem \"format\": {FORMAT}")
+    entries = manifest.get("entries")
+    if not isinstance(entries, list) or not entries:
+        raise ManifestError("manifesto sem entradas")
+    seen = set()
+    checked = []
+    for index, entry in enumerate(entries):
+        where = f"entrada {index}"
+        if not isinstance(entry, dict) or set(entry) != ENTRY_KEYS:
+            raise ManifestError(f"{where}: campos esperados {sorted(ENTRY_KEYS)}")
+        source = _clean_relative(entry["source"], f"{where} (origem)")
+        if source[0] in (MANIFEST, "checksums.sha256"):
+            raise ManifestError(f"{where}: origem reservada")
+        dest = entry["destination"]
+        dest_parts = validate_destination(dest)
+        if dest in seen:
+            raise ManifestError(f"{where}: destino repetido {dest}")
+        seen.add(dest)
+        mode = entry["mode"]
+        if not isinstance(mode, str) or not re.match(r"^0[0-7]{3}$", mode) \
+                or int(mode, 8) not in ALLOWED_MODES:
+            raise ManifestError(f"{where}: modo {mode!r} não permitido")
+        if entry["owner"] != "root" or entry["group"] != "root":
+            raise ManifestError(f"{where}: dono precisa ser root:root")
+        if not isinstance(entry["sha256"], str) or not SHA_RE.match(entry["sha256"]):
+            raise ManifestError(f"{where}: sha256 inválido")
+        if entry["policy"] not in POLICIES:
+            raise ManifestError(f"{where}: política {entry['policy']!r} desconhecida")
+        cond = entry["condition"]
+        if not isinstance(cond, dict) or len(cond) != 1 \
+                or next(iter(cond)) not in ("diverted_by", "owned_by"):
+            raise ManifestError(f"{where}: condição precisa ser diverted_by ou owned_by")
+        (kind, package), = cond.items()
+        if not isinstance(package, str) or not PACKAGE_RE.match(package):
+            raise ManifestError(f"{where}: condição só aceita pacotes mainuan-*")
+        checked.append({
+            "source": source, "source_name": entry["source"], "dest": dest,
+            "dest_parts": dest_parts, "mode": int(mode, 8), "uid": 0, "gid": 0,
+            "sha256": entry["sha256"], "policy": entry["policy"],
+            "cond_kind": kind, "cond_package": package,
+        })
+    return checked
+
+
+def read_all(fd, limit):
+    chunks = []
+    total = 0
+    while True:
+        chunk = os.read(fd, 65536)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > limit:
+            raise Unsafe("arquivo grande demais")
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
+def open_dir_chain(base_fd, parts, create=False, check_owner=True):
+    """Abre parts como diretórios a partir de base_fd, sem seguir links."""
+    fd = os.dup(base_fd)
+    try:
+        for part in parts:
+            try:
+                nfd = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC,
+                              dir_fd=fd)
+            except FileNotFoundError:
+                if not create:
+                    raise Missing(part) from None
+                os.mkdir(part, 0o755, dir_fd=fd)
+                nfd = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC,
+                              dir_fd=fd)
+                os.fchown(nfd, 0, 0)
+                os.fchmod(nfd, 0o755)
+                log("notice", f"diretório criado: {part}")
+            except OSError as e:
+                if e.errno in (errno.ELOOP, errno.ENOTDIR):
+                    raise Unsafe(f"{part} é um link simbólico ou não é diretório") from None
+                raise
+            info = os.fstat(nfd)
+            if check_owner and (info.st_uid != 0 or info.st_mode & 0o022):
+                os.close(nfd)
+                raise Unsafe(f"diretório {part} não pertence ao root ou aceita escrita de terceiros")
+            os.close(fd)
+            fd = nfd
+        return fd
+    except BaseException:
+        os.close(fd)
+        raise
+
+
+def read_source(identity_fd, entry):
+    parent = open_dir_chain(identity_fd, entry["source"][:-1], check_owner=False)
+    try:
+        fd = os.open(entry["source"][-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC,
+                     dir_fd=parent)
+    except OSError as e:
+        raise Unsafe(f"origem {entry['source_name']} ilegível ou link simbólico ({e.strerror})") from None
+    finally:
+        os.close(parent)
+    try:
+        if not stat.S_ISREG(os.fstat(fd).st_mode):
+            raise Unsafe(f"origem {entry['source_name']} não é um arquivo regular")
+        data = read_all(fd, MAX_BYTES)
+    finally:
+        os.close(fd)
+    if hashlib.sha256(data).hexdigest() != entry["sha256"]:
+        raise Unsafe(f"origem {entry['source_name']} não confere com o sha256 do manifesto")
+    return data
+
+
+def read_diversions(root_fd):
+    try:
+        fd = os.open(f"{DPKG_DIR}/diversions", os.O_RDONLY | os.O_CLOEXEC, dir_fd=root_fd)
+    except FileNotFoundError:
+        return {}
+    try:
+        lines = read_all(fd, 8 * 1024 * 1024).decode("utf-8", "replace").split("\n")
+    finally:
+        os.close(fd)
+    result = {}
+    for i in range(0, len(lines) - 2, 3):
+        result[lines[i]] = lines[i + 2]
+    return result
+
+
+def package_owns(root_fd, package, dest, cache):
+    """Confere em /var/lib/dpkg/info/<pacote>.list se o pacote instalou dest."""
+    if package not in cache:
+        files = set()
+        try:
+            info_fd = open_dir_chain(root_fd, f"{DPKG_DIR}/info".split("/"), check_owner=False)
+        except (Missing, Unsafe):
+            info_fd = None
+        if info_fd is not None:
+            try:
+                for name in os.listdir(info_fd):
+                    if name != f"{package}.list" and not (
+                            name.startswith(f"{package}:") and name.endswith(".list")):
+                        continue
+                    fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC, dir_fd=info_fd)
+                    try:
+                        files.update(read_all(fd, 64 * 1024 * 1024).decode("utf-8", "replace").split("\n"))
+                    finally:
+                        os.close(fd)
+            finally:
+                os.close(info_fd)
+        cache[package] = files
+    return dest in cache[package]
+
+
+def condition_holds(root_fd, entry, diversions, owned_cache):
+    package = entry["cond_package"]
+    if entry["cond_kind"] == "diverted_by":
+        return diversions.get(entry["dest"]) == package
+    return package_owns(root_fd, package, entry["dest"], owned_cache)
+
+
+def cleanup_temporaries(parent_fd, dest):
+    for name in os.listdir(parent_fd):
+        if not name.startswith(TEMP_PREFIX) or not name.endswith(".tmp"):
+            continue
+        try:
+            info = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+            if stat.S_ISREG(info.st_mode) and info.st_uid == 0:
+                os.unlink(name, dir_fd=parent_fd)
+                log("notice", f"{dest}: temporário antigo removido ({name})")
+        except FileNotFoundError:
+            pass
+
+
+def write_atomic(parent_fd, name, data, entry):
+    temp = f"{TEMP_PREFIX}{secrets.token_hex(8)}.tmp"
+    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600,
+                 dir_fd=parent_fd)
+    try:
+        try:
+            view = memoryview(data)
+            while view:
+                written = os.write(fd, view)
+                view = view[written:]
+            os.fchown(fd, entry["uid"], entry["gid"])
+            os.fchmod(fd, entry["mode"])
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        # rename substitui a entrada do diretório; nunca segue um link.
+        os.rename(temp, name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
+    except BaseException:
+        try:
+            os.unlink(temp, dir_fd=parent_fd)
+        except FileNotFoundError:
+            pass
+        raise
+    os.fsync(parent_fd)
+
+
+def inspect(parent_fd, name, entry):
+    """Retorna (estado, fd aberto ou None). estado: ok, absent, content, meta."""
+    try:
+        info = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        return "absent", None
+    if stat.S_ISLNK(info.st_mode):
+        raise Unsafe("o destino é um link simbólico; nada foi alterado")
+    if not stat.S_ISREG(info.st_mode):
+        raise Unsafe("o destino não é um arquivo regular; nada foi alterado")
+    fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC, dir_fd=parent_fd)
+    opened = os.fstat(fd)
+    if (opened.st_dev, opened.st_ino) != (info.st_dev, info.st_ino) or not stat.S_ISREG(opened.st_mode):
+        os.close(fd)
+        raise Unsafe("o destino mudou durante a verificação")
+    if opened.st_size > MAX_BYTES:
+        return "content", fd
+    if hashlib.sha256(read_all(fd, MAX_BYTES)).hexdigest() != entry["sha256"]:
+        return "content", fd
+    if stat.S_IMODE(opened.st_mode) != entry["mode"] or opened.st_uid != entry["uid"] \
+            or opened.st_gid != entry["gid"]:
+        return "meta", fd
+    return "ok", fd
+
+
+def process(root_fd, identity_fd, entry, check, diversions, owned_cache):
+    """Retorna 'ok', 'changed', 'diverges', 'skipped' ou 'error'."""
+    dest = entry["dest"]
+    if not condition_holds(root_fd, entry, diversions, owned_cache):
+        kind = "desviado por" if entry["cond_kind"] == "diverted_by" else "instalado por"
+        log("info", f"{dest}: ignorado (não está {kind} {entry['cond_package']})")
+        return "skipped"
+    data = read_source(identity_fd, entry)
+    *dirs, name = entry["dest_parts"]
+    create = not check and entry["policy"] == "restore"
+    try:
+        parent = open_dir_chain(root_fd, dirs, create=create)
+    except Missing as e:
+        log("warning", f"{dest}: diretório ausente ({e})")
+        return "diverges"
+    try:
+        state, fd = inspect(parent, name, entry)
+        try:
+            if state == "ok":
+                return "ok"
+            reason = {"absent": "ausente", "content": "conteúdo diferente",
+                      "meta": "modo ou dono diferente"}[state]
+            if check or entry["policy"] == "verify":
+                log("warning", f"{dest}: diverge ({reason})")
+                return "diverges"
+            cleanup_temporaries(parent, dest)
+            if state == "meta":
+                os.fchown(fd, entry["uid"], entry["gid"])
+                os.fchmod(fd, entry["mode"])
+                os.fsync(fd)
+            else:
+                write_atomic(parent, name, data, entry)
+            log("notice", f"{dest}: restaurado ({reason}) a partir de {entry['source_name']}")
+            return "changed"
+        finally:
+            if fd is not None:
+                os.close(fd)
+    finally:
+        os.close(parent)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Restaura a identidade visual do Mainuan.")
+    parser.add_argument("--check", action="store_true",
+                        help="só verifica; sai com 1 se algum destino divergir")
+    parser.add_argument("--root", default="/",
+                        help="raiz do sistema (testes e chroot); padrão /")
+    args = parser.parse_args(argv)
+
+    if not args.check and os.geteuid() != 0:
+        log("err", "a restauração precisa do root (use --check para só verificar)")
+        return 2
+    try:
+        root_fd = os.open(args.root, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    except OSError as e:
+        log("err", f"raiz {args.root} inacessível: {e.strerror}")
+        return 2
+    try:
+        try:
+            identity_fd = open_dir_chain(root_fd, IDENTITY_DIR.split("/"), check_owner=False)
+        except (Missing, Unsafe, OSError) as e:
+            log("err", f"/{IDENTITY_DIR} ausente ou inseguro: {e}")
+            return 2
+        try:
+            try:
+                entries = load_manifest(identity_fd)
+            except ManifestError as e:
+                log("err", f"manifesto recusado, nada foi alterado: {e}")
+                return 2
+            diversions = read_diversions(root_fd)
+            owned_cache = {}
+            counts = {"ok": 0, "changed": 0, "diverges": 0, "skipped": 0, "error": 0}
+            for entry in entries:
+                try:
+                    result = process(root_fd, identity_fd, entry, args.check, diversions, owned_cache)
+                except Unsafe as e:
+                    log("err", f"{entry['dest']}: recusado: {e}")
+                    result = "error"
+                except OSError as e:
+                    log("err", f"{entry['dest']}: falha: {e}")
+                    result = "error"
+                counts[result] += 1
+        finally:
+            os.close(identity_fd)
+    finally:
+        os.close(root_fd)
+
+    summary = (f"{len(entries)} entradas: {counts['ok']} conformes, {counts['changed']} restauradas, "
+               f"{counts['diverges']} divergentes, {counts['skipped']} ignoradas, {counts['error']} recusadas")
+    log("err" if counts["error"] else "info", summary)
+    if counts["error"]:
+        return 2
+    if counts["diverges"] and args.check:
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

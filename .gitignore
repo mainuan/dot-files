@@ -5,3 +5,6 @@
 /debian/*.substvars
 /debian/mainuan-desktop-defaults/
 /debian/mainuan-user-avatar/
+/debian/mainuan-identity/
+/debian/mainuan-grub-theme/
+/debian/mainuan-plasma-splash/

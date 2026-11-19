@@ -1,0 +1,45 @@
+#!/bin/sh
+set -e
+
+# /etc/skel/.face: arquivo regular (root:root 0644), cópia do avatar oficial.
+# Não vai no pacote: um conffile no lugar do conffile desviado do
+# kubuntu-settings-desktop faria o dpkg perguntar sobre ele; e um link para
+# fora da pasta pessoal viraria, nas novas contas, um ~/.face que o Mainuan
+# Welcome recusa ("not a safe regular file"). O mainuan-identity-restore
+# repõe o arquivo no boot se ele sumir ou mudar.
+FACE=/etc/skel/.face
+SOURCE=/usr/share/mainuan/identity/avatars/cyan.svg
+LEGACY=/usr/share/mainuan-user-avatar/face.svg
+
+install_face() {
+    # Link das versões até 2026.11.18.2 (o dpkg já o remove na atualização).
+    if [ -L "$FACE" ] && [ "$(readlink "$FACE")" = "$LEGACY" ]; then
+        rm -f "$FACE"
+    fi
+    if [ -L "$FACE" ] || { [ -e "$FACE" ] && [ ! -f "$FACE" ]; }; then
+        echo "mainuan-user-avatar: $FACE não é um arquivo regular; mantido como está" >&2
+        return 0
+    fi
+    if [ -f "$FACE" ] && cmp -s "$SOURCE" "$FACE"; then
+        chown root:root "$FACE"
+        chmod 0644 "$FACE"
+        return 0
+    fi
+    tmp=$(mktemp /etc/skel/.mainuan-user-avatar.XXXXXX)
+    if cat "$SOURCE" > "$tmp" && chown root:root "$tmp" && chmod 0644 "$tmp" &&
+        sync "$tmp" && mv -fT "$tmp" "$FACE"; then
+        return 0
+    fi
+    rm -f "$tmp"
+    return 1
+}
+
+case "$1" in
+    configure)
+        install_face
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
