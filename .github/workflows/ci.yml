@@ -434,7 +434,7 @@ jobs:
           cat > Dockerfile <<'EOF'
           FROM ubuntu:26.04@sha256:42527649dbc4f9197a6073f426f488cbff0e9cc9f2afce32d91c383e4875634a
           ENV DEBIAN_FRONTEND=noninteractive
-          RUN rm -f /etc/dpkg/dpkg.cfg.d/excludes && apt-get update && \
+          RUN rm -f /etc/dpkg/dpkg.cfg.d/excludes /usr/sbin/policy-rc.d && apt-get update && \
               apt-get install --yes --no-install-recommends systemd systemd-sysv dbus python3 passwd
           STOPSIGNAL SIGRTMIN+3
           CMD ["/sbin/init"]
@@ -452,7 +452,7 @@ jobs:
 
       - name: Install, restore at boot, refuse a symlink, remove and purge
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           x() { docker exec sd bash -euo pipefail -c "$*"; }
           U=mainuan-identity-restore.service
           R=/usr/libexec/mainuan-identity/mainuan-identity-restore
@@ -460,7 +460,9 @@ jobs:
           x 'apt-get install --yes --no-install-recommends /dist/mainuan-identity_*.deb /dist/mainuan-user-avatar_*.deb'
           echo "::group::installed: enabled, ran once, hardened"
           test "$(x "systemctl is-enabled $U")" = enabled
+          # Started by the postinst (deb-systemd-invoke): it ran once.
           test "$(result)" = success
+          test "$(x "systemctl show -P ExecMainStartTimestampMonotonic $U")" != 0
           x "systemctl show -P Before $U" | tr ' ' '\n' | grep -qx display-manager.service
           x "systemctl show -p ProtectSystem -p ProtectHome -p ReadWritePaths -p NoNewPrivileges -p PrivateTmp -p CapabilityBoundingSet $U"
           x "systemd-analyze security --no-pager $U | tail -n 1"
@@ -479,7 +481,8 @@ jobs:
           x "cmp /usr/share/plasma/avatars/kubuntu-bug.png /usr/share/mainuan/identity/logo/mainuan-logo.png"
           stamp="$(x 'stat -c "%i %Y %Z" /etc/skel/.face /usr/share/plasma/avatars/kubuntu-bug.png')"
           x "systemctl start $U"
-          x "journalctl -u $U --no-pager -o cat | tail -n 1" | grep -q '2 conformes, 0 restauradas'
+          last="$(x "journalctl -u $U --no-pager -o cat | grep entradas | tail -n 1")"
+          echo "$last" | grep '2 conformes, 0 restauradas'
           test "$(x 'stat -c "%i %Y %Z" /etc/skel/.face /usr/share/plasma/avatars/kubuntu-bug.png')" = "$stamp"
           test "$(x 'stat -c "%i %Y %Z %s" /home/ana/.face; sha256sum /home/ana/.face')" = "$before"
           echo "::endgroup::"
