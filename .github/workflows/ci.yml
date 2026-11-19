@@ -118,6 +118,7 @@ jobs:
         if grep -q KdeControlStation $A; then exit 1; fi
         test -s /usr/share/icons/hicolor/scalable/apps/mainuan.svg
         test -s /usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/mainuan-launcher-icon.js
+        test -s /usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/mainuan-launcher-icon-2.js
         grep -qx 'DefaultDarkLookAndFeel=Dream-Dark-Color-Global-6' /etc/xdg/kdeglobals
         # Installer slideshow: translatable QML, images without text, catalogs.
         V=/etc/calamares/branding/vendor
@@ -519,3 +520,48 @@ jobs:
           x 'test ! -e /etc/skel/.face && ! ls -A /etc/skel | grep mainuan'
           x 'test "$(cat /home/ana/.face)" = pessoal'
           echo "::endgroup::"
+
+  # Installer slideshow: qmllint, files named by show.qml, every catalog
+  # compiled with no unfinished message, and show.qml loaded with the
+  # calamares.slideshow module of the Ubuntu calamares-data package, in every
+  # language and at the sizes of the slideshow area (800x600 screen to a
+  # maximized window): images loaded, no text cut or outside the area.
+  slideshow:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    container:
+      image: ubuntu:26.04@sha256:42527649dbc4f9197a6073f426f488cbff0e9cc9f2afce32d91c383e4875634a
+      options: --platform linux/amd64
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check the slideshow
+        run: |
+          set -euo pipefail
+          apt-get update
+          apt-get install --yes --no-install-recommends qml-qt6 qt6-declarative-dev-tools \
+            qt6-l10n-tools qml6-module-qtquick qml6-module-qtquick-window \
+            qml6-module-qtqml-workerscript qt6-svg-plugins fonts-noto-core fonts-noto-cjk
+          # Only the QML module of Calamares (calamares-data, as on the ISO).
+          (cd /tmp && apt-get download calamares-data && dpkg-deb -x calamares-data_*.deb calamares)
+          Q=/tmp/calamares/usr/share/calamares/qml
+          test -s $Q/calamares/slideshow/Slide.qml
+          tools/calamares-slides/check.sh $Q
+          tools/calamares-slides/check.sh $Q captures en pt_BR ar
+
+      - name: Upload captures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: calamares-slideshow-${{ github.sha }}
+          path: captures
+          if-no-files-found: ignore
