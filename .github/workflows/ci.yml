@@ -326,7 +326,7 @@ jobs:
 
   # Installer slideshow: qmllint, files named by show.qml, every catalog
   # compiled with no unfinished message, and show.qml loaded with the
-  # calamares.slideshow module of the Ubuntu Calamares package, in every
+  # calamares.slideshow module of the Ubuntu calamares-data package, in every
   # language and at the sizes of the slideshow area (800x600 screen to a
   # maximized window): images loaded, no text cut or outside the area.
   slideshow:
@@ -354,8 +354,8 @@ jobs:
           apt-get install --yes --no-install-recommends qml-qt6 qt6-declarative-dev-tools \
             qt6-l10n-tools qml6-module-qtquick qml6-module-qtquick-window \
             qml6-module-qtqml-workerscript qt6-svg-plugins fonts-noto-core fonts-noto-cjk
-          # Only the QML module of Calamares (same as the ISO), not the installer.
-          (cd /tmp && apt-get download calamares && dpkg-deb -x calamares_*.deb calamares)
+          # Only the QML module of Calamares (calamares-data, as on the ISO).
+          (cd /tmp && apt-get download calamares-data && dpkg-deb -x calamares-data_*.deb calamares)
           Q=/tmp/calamares/usr/share/calamares/qml
           test -s $Q/calamares/slideshow/Slide.qml
           tools/calamares-slides/check.sh $Q
