@@ -323,3 +323,48 @@ jobs:
           dpkg --purge mainuan-user-avatar
           restored
           echo "::endgroup::"
+
+  # Installer slideshow: qmllint, files named by show.qml, every catalog
+  # compiled with no unfinished message, and show.qml loaded with the
+  # calamares.slideshow module of the Ubuntu Calamares package, in every
+  # language and at the sizes of the slideshow area (800x600 screen to a
+  # maximized window): images loaded, no text cut or outside the area.
+  slideshow:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    container:
+      image: ubuntu:26.04@sha256:42527649dbc4f9197a6073f426f488cbff0e9cc9f2afce32d91c383e4875634a
+      options: --platform linux/amd64
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check the slideshow
+        run: |
+          set -euo pipefail
+          apt-get update
+          apt-get install --yes --no-install-recommends qml-qt6 qt6-declarative-dev-tools \
+            qt6-l10n-tools qml6-module-qtquick qml6-module-qtquick-window \
+            qml6-module-qtqml-workerscript qt6-svg-plugins fonts-noto-core fonts-noto-cjk
+          # Only the QML module of Calamares (same as the ISO), not the installer.
+          (cd /tmp && apt-get download calamares && dpkg-deb -x calamares_*.deb calamares)
+          Q=/tmp/calamares/usr/share/calamares/qml
+          test -s $Q/calamares/slideshow/Slide.qml
+          tools/calamares-slides/check.sh $Q
+          tools/calamares-slides/check.sh $Q captures en pt_BR ar
+
+      - name: Upload captures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: calamares-slideshow-${{ github.sha }}
+          path: captures
+          if-no-files-found: ignore
