@@ -21,7 +21,7 @@ plugin=org.kde.plasma.icontasks
 launchers=applications:org.kde.kdeconnect.app.desktop,applications:org.kde.discover.desktop,applications:onlyoffice-desktopeditors.desktop,preferred://filemanager,applications:firefox.desktop
 
 [Containments][2][Applets][5][Configuration][General]
-launchers=applications:org.kde.kdeconnect.app.desktop,applications:org.kde.discover.desktop,applications:onlyoffice-desktopeditors.desktop,preferred://filemanager,applications:firefox.desktop
+launchers=applications:org.kde.kdeconnect.app.desktop,applications:mainuan-store.desktop,applications:onlyoffice-desktopeditors.desktop,preferred://filemanager,applications:firefox.desktop
 
 [Containments][2][General]
 AppletOrder=5
@@ -62,20 +62,16 @@ showSeconds=false
 [Containments][31][General]
 AppletOrder=51;453
 
-[Containments][455]
-ItemGeometries-1366x680=
+[Containments][456]
+ItemGeometries-1366x768=
 ItemGeometriesHorizontal=
-activityId=688eb0b5-c444-4d3d-87ba-a378699116b8
+activityId=1f6923c0-4f9b-4288-b2f8-6673e1a082bc
 formfactor=0
 immutability=1
 lastScreen=0
 location=0
 plugin=org.kde.plasma.folder
 wallpaperplugin=org.kde.image
-
-[Containments][455][Wallpaper][org.kde.image][General]
-Image=file:///usr/share/wallpapers/01ciano.png
-PreviewImage=file:///usr/share/wallpapers/01ciano.png
 
 [Containments][55]
 activityId=
@@ -85,6 +81,14 @@ lastScreen=0
 location=4
 plugin=org.kde.panel
 wallpaperplugin=org.kde.image
+
+[Containments][55][Applets][457]
+immutability=1
+plugin=org.kde.milou
+
+[Containments][55][Applets][457][Configuration]
+popupHeight=400
+popupWidth=560
 
 [Containments][55][Applets][81]
 immutability=1
@@ -103,7 +107,7 @@ popupHeight=400
 popupWidth=560
 
 [Containments][55][General]
-AppletOrder=82;81
+AppletOrder=82;457;81
 
 [Containments][7]
 activityId=
@@ -155,6 +159,10 @@ wallpaperplugin=org.kde.image
 [Containments][83][Applets][107]
 immutability=1
 plugin=local.laetum.controlcenter
+
+[Containments][83][Applets][107][Configuration]
+popupHeight=650
+popupWidth=459
 
 [Containments][83][Applets][107][Configuration][General]
 showBatteryIndicator=false
@@ -280,4 +288,4 @@ AppletOrder=452;88;107
 
 [ScreenMapping]
 itemsOnDisabledScreens=
-screenMapping=desktop:/kubuntu-calamares.desktop,0,d2c6f9d7-7ecf-4096-90d9-c0649bb60ec0,desktop:/kubuntu-calamares.desktop,0,e92bb8cc-047f-430a-9dcf-d7497efb55f2
+screenMapping=desktop:/kubuntu-calamares.desktop,0,1f6923c0-4f9b-4288-b2f8-6673e1a082bc,desktop:/kubuntu-calamares.desktop,0,d2c6f9d7-7ecf-4096-90d9-c0649bb60ec0,desktop:/kubuntu-calamares.desktop,0,e92bb8cc-047f-430a-9dcf-d7497efb55f2
