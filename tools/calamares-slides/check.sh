@@ -45,6 +45,15 @@ for lang in "$@"; do
     fi
     case $lang in ar|fa|he|ur) set -- "$@" -reverse ;; esac
     QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=${QT_QPA_PLATFORM:-offscreen} QT_QUICK_BACKEND=${QT_QUICK_BACKEND:-software} \
-        $bin/qml "$@" -I "$qmldir" "$here/render.qml" -- "$show" "$out" "$lang" "$sizes" || status=1
+    timeout --signal=TERM --kill-after=5s 90s \
+    "$bin/qml" "$@" -I "$qmldir" "$here/render.qml" -- "$show" "$out" "$lang" "$sizes" || {
+        rc=$?
+        if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
+            echo "$lang: renderer timed out after 90s" >&2
+        else
+            echo "$lang: renderer failed (exit $rc)" >&2
+            status=1
+        fi
+    }
 done
 exit $status
