@@ -113,6 +113,13 @@ e o leiaute dos painéis). O pacote também instala:
 O ChatAI abre, a partir do painel, serviços de chat na web escolhidos pelo
 usuário.
 
+O leiaute também referencia o **Laetum Control Center** (`local.laetum.controlcenter`),
+fornecido por `painel-de-controle` (recomendado por este pacote), e o **Chaac Complete
+Weather** (`Chaac.Complete.Weather`), um widget externo do KDE Store que deve estar
+presente na imagem final. Esses dois componentes não são distribuídos por este
+repositório. O verificador `tools/check-plasma-layout.py` mantém o inventário dos
+widgets externos e valida os três widgets empacotados aqui.
+
 O conteúdo de `/etc/skel` é copiado para a pasta pessoal **só quando uma conta
 é criada**. Contas que já existem não mudam ao instalar ou atualizar o pacote.
 
@@ -205,7 +212,9 @@ lista de destinos permitidos do script.
 1. Edite o arquivo em `rootfs/` (por exemplo,
    `rootfs/etc/skel/.config/kdeglobals`). Os arquivos seguem o formato do
    KConfig; não inclua dados pessoais (nomes de redes, caminhos como
-   `/home/<usuário>`).
+   `/home/<usuário>`). Para validar o leiaute, rode também
+   `python3 tools/check-plasma-layout.py` com o arquivo de configuração e
+   `--plasmoid-root rootfs/usr/share/plasma/plasmoids`.
 2. Um arquivo novo em `rootfs/etc/skel/.config` muda a contagem esperada pelo
    teste de fumaça em `.github/workflows/ci.yml` (`len(configs) == 14`).
 3. Um widget de terceiros novo precisa de uma entrada `Files:` com autor e
@@ -250,9 +259,9 @@ Ubuntu 26.04 e:
 4. reinstala, remove e expurga o pacote, sem sobras;
 5. num job separado, testa os desvios do `mainuan-user-avatar` nas duas ordens
    de instalação (Kubuntu antes e depois), com reinstalações, sem
-   `--force-conf*`, a atualização a partir da versão publicada com
-   `/etc/skel/.face` em link, e confere que a remoção devolve os arquivos do
-   Kubuntu byte a byte;
+   `--force-conf*`, a recuperação de falhas parciais do `preinst` (`abort-install`),
+   a atualização a partir da versão publicada com `/etc/skel/.face` em link,
+   e confere que a remoção devolve os arquivos do Kubuntu byte a byte;
 6. roda os testes do `mainuan-identity-restore` como root em raízes
    temporárias (`identity/test_restore.py`: ausente, corrompido, íntegro sem
    escrita, modo e dono errados, links no destino e nas pastas, pasta

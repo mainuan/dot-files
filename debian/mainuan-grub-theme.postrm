@@ -6,7 +6,6 @@ set -e
 case "$1" in
     remove|purge)
         rm -rf /boot/grub/themes/mainuan /boot/grub/themes/mainuan.dpkg-new
-        rmdir /boot/grub/themes 2>/dev/null || true
         if [ -e /boot/grub/grub.cfg ] && command -v update-grub >/dev/null 2>&1; then
             update-grub || echo "mainuan-grub-theme: update-grub falhou; rode-o de novo" >&2
         fi
