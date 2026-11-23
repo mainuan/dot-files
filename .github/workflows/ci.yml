@@ -370,30 +370,30 @@ jobs:
             shim="$(mktemp -d)"
             count_file="/tmp/mainuan-divert-count-$fail_at"
             rm -f "$count_file"
-            cat > "$shim/dpkg-divert" <<SH
-            #!/bin/sh
-            set -eu
-            is_add=no
-            for arg in "$@"; do [ "$arg" != "--add" ] || is_add=yes; done
-            if [ "$is_add" = yes ]; then
-              n=0
-              [ ! -f "$MAINUAN_DIVERT_COUNT_FILE" ] || n=$(cat "$MAINUAN_DIVERT_COUNT_FILE")
-              n=$((n + 1))
-              printf '%s\n' "$n" > "$MAINUAN_DIVERT_COUNT_FILE"
-              if [ "$n" -eq "$MAINUAN_DIVERT_FAIL_AT" ]; then
-                echo "injected dpkg-divert failure at add $n" >&2
-                exit 42
-              fi
+            cat > "$shim/dpkg-divert" <<'SH'
+          #!/bin/sh
+          set -eu
+          is_add=no
+          for arg in "$@"; do [ "$arg" != "--add" ] || is_add=yes; done
+          if [ "$is_add" = yes ]; then
+            n=0
+            [ ! -f "$MAINUAN_DIVERT_COUNT_FILE" ] || n=$(cat "$MAINUAN_DIVERT_COUNT_FILE")
+            n=$((n + 1))
+            printf '%s\n' "$n" > "$MAINUAN_DIVERT_COUNT_FILE"
+            if [ "$n" -eq "$MAINUAN_DIVERT_FAIL_AT" ]; then
+              echo "injected dpkg-divert failure at add $n" >&2
+              exit 42
             fi
-            exec /usr/bin/dpkg-divert "$@"
-            SH
+          fi
+          exec /usr/bin/dpkg-divert "$@"
+          SH
             chmod 0755 "$shim/dpkg-divert"
             rc=0
             PATH="$shim:$PATH" MAINUAN_DIVERT_COUNT_FILE="$count_file" \
               MAINUAN_DIVERT_FAIL_AT="$fail_at" \
-              "$GITHUB_WORKSPACE/debian/mainuan-user-avatar.preinst" install || rc=$?
+              sh "$GITHUB_WORKSPACE/debian/mainuan-user-avatar.preinst" install || rc=$?
             test "$rc" -eq 42
-            "$GITHUB_WORKSPACE/debian/mainuan-user-avatar.postrm" abort-install
+            sh "$GITHUB_WORKSPACE/debian/mainuan-user-avatar.postrm" abort-install
             test "$(sum /etc/skel/.face)" = "$kface"
             test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$kbug"
             test "$(sum "$bface")" = "$kbface"
