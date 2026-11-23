@@ -1,11 +1,9 @@
-mainuan-desktop-defaults (2026.11.23.1) resolute; urgency=medium
+mainuan-desktop-defaults (2026.11.22) resolute; urgency=medium
 
-  * Plasma: define explicitamente o papel de parede do containment de desktop
+  * Plasma: Corrige papel de parede do Plasma
     e localiza esse containment pelo plugin, não por seu identificador numérico.
-  * CI: valida o leiaute, o papel de parede e o inventário dos widgets externos;
-    testa também a recuperação do preinst após falhas em cada etapa de dpkg-divert.
-  * GRUB: verifica previamente a presença das fontes Noto Sans exigidas e evita
-    remover o diretório compartilhado /boot/grub/themes na desinstalação.
+  * CI: Corrige heredoc no teste de dpkg-divert e 
+    Atualiza workflow Debian compartilhada
 
  -- Daigo <openwebosbr@gmail.com>  Mon, 23 Nov 2026 09:00:00 -0300
 
