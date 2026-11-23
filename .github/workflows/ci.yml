@@ -370,19 +370,20 @@ jobs:
             shim="$(mktemp -d)"
             count_file="/tmp/mainuan-divert-count-$fail_at"
             rm -f "$count_file"
-            cat > "$shim/dpkg-divert" <<'SH'
-          #!/bin/sh
-          set -eu
-          is_add=no
-          for arg in "$@"; do [ "$arg" != "--add" ] || is_add=yes; done
-          if [ "$is_add" = yes ]; then
-            n=0
-            [ ! -f "$MAINUAN_DIVERT_COUNT_FILE" ] || n=$(cat "$MAINUAN_DIVERT_COUNT_FILE")
-            n=$((n + 1))
-            printf '%s\n' "$n" > "$MAINUAN_DIVERT_COUNT_FILE"
-            if [ "$n" -eq "$MAINUAN_DIVERT_FAIL_AT" ]; then
-              echo "injected dpkg-divert failure at add $n" >&2
-              exit 42
+            cat > "$shim/dpkg-divert" <<SH
+            #!/bin/sh
+            set -eu
+            is_add=no
+            for arg in "$@"; do [ "$arg" != "--add" ] || is_add=yes; done
+            if [ "$is_add" = yes ]; then
+              n=0
+              [ ! -f "$MAINUAN_DIVERT_COUNT_FILE" ] || n=$(cat "$MAINUAN_DIVERT_COUNT_FILE")
+              n=$((n + 1))
+              printf '%s\n' "$n" > "$MAINUAN_DIVERT_COUNT_FILE"
+              if [ "$n" -eq "$MAINUAN_DIVERT_FAIL_AT" ]; then
+                echo "injected dpkg-divert failure at add $n" >&2
+                exit 42
+              fi
             fi
           fi
           exec /usr/bin/dpkg-divert "$@"
