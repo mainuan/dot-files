@@ -73,6 +73,10 @@ location=0
 plugin=org.kde.plasma.folder
 wallpaperplugin=org.kde.image
 
+[Containments][456][Wallpaper][org.kde.image][General]
+Image=file:///usr/share/wallpapers/01ciano.png
+PreviewImage=file:///usr/share/wallpapers/01ciano.png
+
 [Containments][55]
 activityId=
 formfactor=2
