@@ -1,3 +1,14 @@
+mainuan-desktop-defaults (2026.11.23.1) resolute; urgency=medium
+
+  * Plasma: define explicitamente o papel de parede do containment de desktop
+    e localiza esse containment pelo plugin, não por seu identificador numérico.
+  * CI: valida o leiaute, o papel de parede e o inventário dos widgets externos;
+    testa também a recuperação do preinst após falhas em cada etapa de dpkg-divert.
+  * GRUB: verifica previamente a presença das fontes Noto Sans exigidas e evita
+    remover o diretório compartilhado /boot/grub/themes na desinstalação.
+
+ -- Daigo <openwebosbr@gmail.com>  Mon, 23 Nov 2026 09:00:00 -0300
+
 mainuan-desktop-defaults (2026.11.19) resolute; urgency=medium
 
   * Novo pacote mainuan-identity: recursos oficiais da marca em
