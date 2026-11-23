@@ -370,7 +370,7 @@ jobs:
             shim="$(mktemp -d)"
             count_file="/tmp/mainuan-divert-count-$fail_at"
             rm -f "$count_file"
-            cat > "$shim/dpkg-divert" <<'SH'
+            cat > "$shim/dpkg-divert" <<SH
             #!/bin/sh
             set -eu
             is_add=no
