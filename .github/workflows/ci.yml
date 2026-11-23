@@ -18,7 +18,7 @@ jobs:
   package:
     permissions:
       contents: write # only the release job uses it, and only for v* tags
-    uses: uses: mainuan/.github/.github/workflows/debian-package.yml@main
+    uses: mainuan/.github/.github/workflows/debian-package.yml@main
     with:
       package: mainuan-desktop-defaults
       release-title: Mainuan Desktop Defaults
