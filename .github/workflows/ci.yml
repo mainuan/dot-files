@@ -42,6 +42,10 @@ jobs:
         sh -n debian/mainuan-grub-theme.postinst
         sh -n debian/mainuan-grub-theme.postrm
         sh -n rootfs/etc/default/grub.d/60-mainuan-theme.cfg
+        # Plasma: validar o desktop, o papel de parede e os provedores dos widgets externos.
+        python3 -I tools/check-plasma-layout.py \
+          rootfs/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc \
+          --plasmoid-root rootfs/usr/share/plasma/plasmoids
         # The boot artwork generator must keep working (run on a copy; the
         # committed images are the reviewed ones).
         rm -rf /tmp/boot-art && cp -r . /tmp/boot-art
@@ -88,6 +92,22 @@ jobs:
             with open(path, encoding="utf-8") as f:
                 c.read_file(f)
             print(path, len(c.sections()), "groups")
+        # Locate the desktop containment by plugin, never by its volatile ID.
+        layout = configparser.ConfigParser(interpolation=None, strict=False, allow_no_value=True)
+        layout.optionxform = str
+        layout_path = "/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc"
+        with open(layout_path, encoding="utf-8") as f:
+            layout.read_file(f)
+        desktops = [s for s in layout.sections()
+                    if s.startswith("Containments][") and s.count("][") == 1
+                    and layout.get(s, "plugin", fallback="") == "org.kde.plasma.folder"]
+        assert len(desktops) == 1, desktops
+        desktop_id = desktops[0].split("][", 1)[1]
+        wallpaper = f"Containments][{desktop_id}][Wallpaper][org.kde.image][General"
+        assert layout.get(desktops[0], "wallpaperplugin", fallback="") == "org.kde.image"
+        assert layout.get(wallpaper, "Image", fallback="") == "file:///usr/share/wallpapers/01ciano.png"
+        assert layout.get(wallpaper, "PreviewImage", fallback="") == "file:///usr/share/wallpapers/01ciano.png"
+        print("desktop containment", desktop_id, "wallpaper verified")
         PY
         # Effective values with Kubuntu's configuration directory in the
         # cascade, as in a Kubuntu session.
@@ -95,8 +115,21 @@ jobs:
         img="$(kreadconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General --key Image)"
         echo "lock screen: $img"
         test "$img" = file:///usr/share/wallpapers/01ciano.png
-        img="$(kreadconfig6 --file /etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc --group Containments --group 455 --group Wallpaper --group org.kde.image --group General --key Image)"
-        echo "desktop: $img"
+        A=/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
+        desktop_id="$(python3 -I - "$A" <<'PY'
+        import configparser, sys
+        c = configparser.ConfigParser(interpolation=None, strict=False, allow_no_value=True)
+        c.optionxform = str
+        with open(sys.argv[1], encoding="utf-8") as f:
+            c.read_file(f)
+        desktops = [s for s in c.sections() if s.startswith("Containments][") and s.count("][") == 1
+                    and c.get(s, "plugin", fallback="") == "org.kde.plasma.folder"]
+        assert len(desktops) == 1, desktops
+        print(desktops[0].split("][", 1)[1])
+        PY
+        )"
+        img="$(kreadconfig6 --file "$A" --group Containments --group "$desktop_id" --group Wallpaper --group org.kde.image --group General --key Image)"
+        echo "desktop ($desktop_id): $img"
         test "$img" = file:///usr/share/wallpapers/01ciano.png
         kpackagetool6 --global --type Plasma/Applet --list > applets.txt
         for id in ChatAI-Plasmoid com.mike.desktop org.kde.plasma.powershowdesktop; do
@@ -325,6 +358,44 @@ jobs:
             if dpkg-divert --list | grep mainuan; then exit 1; fi
             dpkg --verify kubuntu-settings-desktop sddm-theme-breeze
           }
+
+          # Partial preinst failure: simulate dpkg-divert errors on add #2 and #3.
+          # The abort-install cleanup must restore every original Kubuntu file.
+          for fail_at in 2 3; do
+            shim="$(mktemp -d)"
+            count_file="/tmp/mainuan-divert-count-$fail_at"
+            rm -f "$count_file"
+            cat > "$shim/dpkg-divert" <<'SH'
+#!/bin/sh
+set -eu
+is_add=no
+for arg in "$@"; do [ "$arg" != "--add" ] || is_add=yes; done
+if [ "$is_add" = yes ]; then
+  n=0
+  [ ! -f "$MAINUAN_DIVERT_COUNT_FILE" ] || n=$(cat "$MAINUAN_DIVERT_COUNT_FILE")
+  n=$((n + 1))
+  printf '%s\\n' "$n" > "$MAINUAN_DIVERT_COUNT_FILE"
+  if [ "$n" -eq "$MAINUAN_DIVERT_FAIL_AT" ]; then
+    echo "injected dpkg-divert failure at add $n" >&2
+    exit 42
+  fi
+fi
+exec /usr/bin/dpkg-divert "$@"
+SH
+            chmod 0755 "$shim/dpkg-divert"
+            rc=0
+            PATH="$shim:$PATH" MAINUAN_DIVERT_COUNT_FILE="$count_file" \
+              MAINUAN_DIVERT_FAIL_AT="$fail_at" \
+              "$GITHUB_WORKSPACE/debian/mainuan-user-avatar.preinst" install || rc=$?
+            test "$rc" -eq 42
+            "$GITHUB_WORKSPACE/debian/mainuan-user-avatar.postrm" abort-install
+            test "$(sum /etc/skel/.face)" = "$kface"
+            test "$(sum /usr/share/plasma/avatars/kubuntu-bug.png)" = "$kbug"
+            test "$(sum "$bface")" = "$kbface"
+            if dpkg-divert --list | grep -q ' by mainuan-user-avatar'; then exit 1; fi
+            test ! -e /var/lib/mainuan-user-avatar
+            rm -rf "$shim" "$count_file"
+          done
 
           users=0
           step "Kubuntu first, then Mainuan (with mainuan-desktop-defaults); reinstall"
