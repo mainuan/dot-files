@@ -22,10 +22,11 @@ python3 tools/calamares-slides/validate-translations.py
 ## Compilar as traduções
 
 ```bash
-bash tools/calamares-slides/build-translations.sh
+bash tools/calamares-slides/build-translations.sh \
+  "/caminho/para/Mainuan/build/base/chroot/etc/calamares/branding/vendor/lang"
 ```
 
-O destino padrão é `build/base/chroot/etc/calamares/branding/vendor/lang`. Um destino alternativo pode ser passado como primeiro argumento.
+O destino é obrigatório para evitar compilar acidentalmente em uma árvore de build diferente da que está sendo testada.
 
 ## Corrigir a tela inicial do Calamares
 
@@ -46,9 +47,9 @@ bash tools/calamares-slides/sync-approved-assets.sh \
   "/caminho/para/Mainuan"
 ```
 
-A rotina copia `show.qml` e `images/slide-1.png` até `images/slide-5.png` do chroot testado para `rootfs/etc/calamares/branding/vendor/`. Também copia os 34 arquivos `.ts` do diretório `Mainuan/tools/calamares-slides/lang/` para este repositório. Antes de substituir qualquer recurso, cria um backup local em `~/Downloads` por padrão e, ao final, executa o validador de traduções.
+A rotina usa exclusivamente os artefatos do chroot testado: copia o `show.qml` aprovado para `rootfs/` e `tools/`, as cinco imagens para `rootfs/etc/calamares/branding/vendor/images/`, os 34 catálogos compilados para `rootfs/etc/calamares/branding/vendor/lang/`, as fontes `.ts` de `Mainuan/tools/calamares-slides/lang/` para `tools/`, e o catálogo interno `calamares_pt_BR.qm` já corrigido para `rootfs/usr/share/calamares/lang/`. Antes de substituir qualquer recurso, cria um backup local em `~/Downloads` por padrão e valida os catálogos comparando as chaves com as chamadas `qsTr()` do próprio QML aprovado.
 
-Depois da sincronização, revise o diff e confira os cinco PNGs antes de criar o commit. O catálogo interno `calamares_pt_BR.qm` faz parte do pacote binário do Calamares; a correção dele é aplicada ao chroot pelo script específico acima.
+Depois da sincronização, revise o diff e confira os cinco PNGs antes de criar o commit.
 
 ## Idiomas
 
