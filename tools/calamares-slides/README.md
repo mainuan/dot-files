@@ -13,7 +13,7 @@ Este diretório contém a fonte QML do slideshow final, os catálogos Qt Linguis
 
 ## Validar os catálogos
 
-Na raiz do repositório:
+Depois de sincronizar os 34 arquivos-fonte com `sync-approved-assets.sh`, execute na raiz do repositório:
 
 ```bash
 python3 tools/calamares-slides/validate-translations.py
