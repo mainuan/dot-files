@@ -2,9 +2,14 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
 SOURCE_DIR="$SCRIPT_DIR/lang"
-TARGET_DIR="${1:-$PROJECT_ROOT/build/base/chroot/etc/calamares/branding/vendor/lang}"
+
+if [[ $# -ne 1 ]]; then
+    echo "Uso: $0 /caminho/para/branding/vendor/lang" >&2
+    echo "Informe o diretório lang do branding do Calamares no chroot ou rootfs." >&2
+    exit 2
+fi
+TARGET_DIR="$(realpath -m -- "$1")"
 
 find_lrelease() {
     local candidate
