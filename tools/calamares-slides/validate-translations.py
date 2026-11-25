@@ -19,7 +19,7 @@ if not QML.is_file():
 qml_text = QML.read_text(encoding="utf-8")
 # QML strings used by qsTr() are ordinary quoted literals. Decode their
 # escaped newline sequences so they can be compared with Qt Linguist keys.
-pattern = re.compile(r'qsTr\("((?:\\\\.|[^"\\\\])*)"\)', re.DOTALL)
+pattern = re.compile(r'qsTr\("((?:\\.|[^"\\])*)"\)', re.DOTALL)
 qml_sources = {ast.literal_eval('"' + match.group(1) + '"') for match in pattern.finditer(qml_text)}
 if len(qml_sources) != 10:
     raise SystemExit(
