@@ -1,57 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" sourcelanguage="en_US" language="fa">
+<TS version="2.1" language="fa">
 <context>
     <name>show</name>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="131"/>
-        <source>Welcome to Mainuan</source>
-        <translation>به Mainuan خوش آمدید</translation>
+        <source>A familiar, refined interface, designed specifically to eliminate the learning curve. Whether at the office or at home, the transition to Mainuan is natural, smooth and immediate.
+
+• Intuitive navigation: An intelligently organised applications menu, with essential tools always just a few clicks away.
+
+• High-performance environment: A clean, elegant design that minimises visual distractions, supporting concentration and mental clarity during use.</source>
+        <translation>رابطی آشنا و پرداخت‌شده که به‌طور ویژه برای حذف دشواری‌های یادگیری طراحی شده است. چه در دفتر کار باشید و چه در خانه، انتقال به Mainuan طبیعی، روان و فوری است.
+
+• پیمایش منطقی: منوی برنامه‌ها به شکلی هوشمندانه سازمان‌دهی شده و ابزارهای ضروری همیشه با چند کلیک در دسترس هستند.
+
+• محیطی با کارایی بالا: طراحی تمیز و زیبا حواس‌پرتی‌های بصری را کاهش می‌دهد و هنگام استفاده به تمرکز و شفافیت ذهن کمک می‌کند.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="132"/>
-        <source>A modern and secure system based on Kubuntu 26.04 LTS, made for work, school and home. The installation takes a few minutes; you can keep reading meanwhile.</source>
-        <translation>سیستمی مدرن و امن بر پایهٔ Kubuntu 26.04 LTS، ساخته‌شده برای کار، مدرسه و خانه. نصب چند دقیقه طول می‌کشد؛ در این مدت می‌توانید به خواندن ادامه دهید.</translation>
+        <source>Strong protection against digital threats, combined with an uncompromising ethical stance on your data. In Mainuan, the security of your business and the privacy of your home are treated as top priorities.
+
+• Zero telemetry: Completely free from hidden tracking, data collection and intrusive advertisements. Mainuan respects you! Your information belongs exclusively to you.</source>
+        <translation>محافظتی قدرتمند در برابر تهدیدهای دیجیتال، همراه با رویکردی اخلاقی و سازش‌ناپذیر نسبت به داده‌های شما. در Mainuan، امنیت کسب‌وکار و حریم خصوصی خانه شما در بالاترین اولویت قرار دارند.
+
+• بدون تله‌متری: کاملاً عاری از ردیابی پنهان، جمع‌آوری داده و تبلیغات مزاحم. Mainuan به شما احترام می‌گذارد! اطلاعات شما فقط متعلق به خودتان است.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="137"/>
-        <source>KDE Plasma, your way</source>
-        <translation>KDE Plasma، به سلیقهٔ شما</translation>
+        <source>Absolute privacy</source>
+        <translation>حریم خصوصی مطلق</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="138"/>
-        <source>KDE Plasma 6 on Wayland, with the Mainuan themes, colors and icons. After the installation, Mainuan Welcome helps you choose the look and the layout of your desktop.</source>
-        <translation>KDE Plasma 6 روی Wayland، با پوسته‌ها، رنگ‌ها و نمادهای Mainuan. پس از نصب، Mainuan Welcome به شما کمک می‌کند ظاهر و چیدمان میزکار خود را انتخاب کنید.</translation>
+        <source>Mainuan maximises the return on your technology investment. It gets the most performance from the hardware you already own, smoothly extending the useful life of computers considered obsolete.
+
+• Real sustainability: We fight digital waste and electronic waste by avoiding artificial hardware requirements, such as TPM 2 or Secure Boot.
+
+• Intelligent resource use: Optimised memory and processor management generates real savings in energy and infrastructure, both for your home and your company.</source>
+        <translation>Mainuan بازده سرمایه‌گذاری فناوری شما را به حداکثر می‌رساند. این سیستم بیشترین کارایی را از سخت‌افزاری که هم‌اکنون دارید استخراج می‌کند و عمر مفید رایانه‌های قدیمی را به‌صورت روان افزایش می‌دهد.
+
+• پایداری واقعی: با کنار گذاشتن نیازهای مصنوعی به سخت‌افزار جدید، مانند تراشه TPM 2 یا Secure Boot، با هدررفت دیجیتال و زباله الکترونیکی مقابله می‌کنیم.
+
+• استفاده هوشمندانه از منابع: مدیریت بهینه حافظه و پردازنده، صرفه‌جویی واقعی در انرژی و زیرساخت را هم در خانه و هم در شرکت شما به همراه دارد.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="143"/>
-        <source>Ready for everyday work</source>
-        <translation>آمادهٔ کارهای روزمره</translation>
+        <source>Mainuan stands for predictability and solidity. It builds on the legacy, solidity, security and technical maturity developed over 19 years of TigerOS development, offering a robust platform ready for the future.
+
+• Continuity first: A system strategically designed so your team’s workflow or activities at home never suffer interruptions.
+
+• Secure updates: A predictable maintenance cycle that ensures long-term stability, free from unexpected system failures.</source>
+        <translation>Mainuan نماد پیش‌بینی‌پذیری و استحکام است. این سیستم بر میراث، پایداری، امنیت و بلوغ فنی حاصل از ۱۹ سال توسعه پروژه TigerOS تکیه دارد و بستری قدرتمند و آماده برای آینده ارائه می‌دهد.
+
+• تداوم در اولویت: سیستمی که به‌صورت راهبردی طراحی شده تا روند کاری تیم شما یا فعالیت‌های خانه هرگز متوقف نشود.
+
+• به‌روزرسانی‌های امن: چرخه نگهداری قابل پیش‌بینی، پایداری بلندمدت را بدون خرابی‌های غیرمنتظره سیستم تضمین می‌کند.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="144"/>
-        <source>ONLYOFFICE, Firefox and the KDE applications are ready to use. Install more from Discover, Flathub, AppImage or .deb packages with the Mainuan installers.</source>
-        <translation>ONLYOFFICE، Firefox و برنامه‌های KDE آمادهٔ استفاده‌اند. برنامه‌های بیشتری را از Discover، Flathub، AppImage یا بسته‌های ‎.deb با نصب‌کننده‌های Mainuan نصب کنید.</translation>
+        <source>Proven long-term stability</source>
+        <translation>پایداری اثبات‌شده در بلندمدت</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="149"/>
-        <source>Updates and security</source>
-        <translation>به‌روزرسانی‌ها و امنیت</translation>
+        <source>A modern and secure operating system, designed to boost your productivity.
+
+Built to meet the demands of the corporate world with excellence, while also being suited to personal use.</source>
+        <translation>یک سیستم‌عامل مدرن و امن که برای افزایش بهره‌وری شما طراحی شده است.
+
+این سیستم با بالاترین کیفیت نیازهای محیط‌های سازمانی را برآورده می‌کند و برای استفاده شخصی نیز مناسب است.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="150"/>
-        <source>A long-term support base with security updates. Mainuan lets you know when updates are available and what is new in the system.</source>
-        <translation>پایه‌ای با پشتیبانی بلندمدت و به‌روزرسانی‌های امنیتی. وقتی به‌روزرسانی در دسترس باشد، Mainuan به شما اطلاع می‌دهد و تازه‌های سیستم را نشان می‌دهد.</translation>
+        <source>Economic efficiency</source>
+        <translation>کارایی اقتصادی</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="155"/>
-        <source>Made by a community</source>
-        <translation>ساختهٔ یک جامعه</translation>
+        <source>Easy adaptation, without barriers</source>
+        <translation>سازگاری آسان و بدون مانع</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="156"/>
-        <source>Mainuan is free software, developed in the open on GitHub. Ask questions, share ideas, report problems and help translate it: github.com/mainuan and t.me/mainuan_comunidade</source>
-        <translation>Mainuan نرم‌افزاری آزاد است که به‌صورت باز در GitHub توسعه می‌یابد. پرسش بپرسید، ایده‌هایتان را به اشتراک بگذارید، مشکلات را گزارش دهید و در ترجمه کمک کنید: github.com/mainuan و t.me/mainuan_comunidade</translation>
+        <source>Welcome to Mainuan!</source>
+        <translation>به Mainuan خوش آمدید!</translation>
     </message>
 </context>
 </TS>

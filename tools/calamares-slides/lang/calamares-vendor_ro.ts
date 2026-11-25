@@ -1,57 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" sourcelanguage="en_US" language="ro">
+<TS version="2.1" language="ro">
 <context>
     <name>show</name>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="131"/>
-        <source>Welcome to Mainuan</source>
-        <translation>Bun venit în Mainuan</translation>
+        <source>A familiar, refined interface, designed specifically to eliminate the learning curve. Whether at the office or at home, the transition to Mainuan is natural, smooth and immediate.
+
+• Intuitive navigation: An intelligently organised applications menu, with essential tools always just a few clicks away.
+
+• High-performance environment: A clean, elegant design that minimises visual distractions, supporting concentration and mental clarity during use.</source>
+        <translation>O interfață familiară și rafinată, concepută special pentru a elimina dificultățile de învățare. La birou sau acasă, trecerea la Mainuan este naturală, fluidă și imediată.
+
+• Navigare logică: Un meniu de aplicații organizat inteligent, cu instrumentele esențiale mereu la câteva clicuri distanță.
+
+• Mediu de înaltă performanță: Un design curat și elegant care reduce distragerile vizuale și favorizează concentrarea și claritatea mentală în timpul utilizării.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="132"/>
-        <source>A modern and secure system based on Kubuntu 26.04 LTS, made for work, school and home. The installation takes a few minutes; you can keep reading meanwhile.</source>
-        <translation>Un sistem modern și sigur, bazat pe Kubuntu 26.04 LTS, creat pentru serviciu, școală și acasă. Instalarea durează câteva minute; între timp, puteți citi mai departe.</translation>
+        <source>Strong protection against digital threats, combined with an uncompromising ethical stance on your data. In Mainuan, the security of your business and the privacy of your home are treated as top priorities.
+
+• Zero telemetry: Completely free from hidden tracking, data collection and intrusive advertisements. Mainuan respects you! Your information belongs exclusively to you.</source>
+        <translation>Protecție robustă împotriva amenințărilor digitale, combinată cu o atitudine etică fermă față de datele dumneavoastră. În Mainuan, securitatea afacerii și intimitatea locuinței dumneavoastră sunt priorități maxime.
+
+• Zero telemetrie: Fără urmărire ascunsă, colectare de date sau reclame intruzive. Mainuan vă respectă! Informațiile vă aparțin exclusiv.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="137"/>
-        <source>KDE Plasma, your way</source>
-        <translation>KDE Plasma, așa cum vă place</translation>
+        <source>Absolute privacy</source>
+        <translation>Confidențialitate absolută</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="138"/>
-        <source>KDE Plasma 6 on Wayland, with the Mainuan themes, colors and icons. After the installation, Mainuan Welcome helps you choose the look and the layout of your desktop.</source>
-        <translation>KDE Plasma 6 pe Wayland, cu temele, culorile și pictogramele Mainuan. După instalare, Mainuan Welcome vă ajută să alegeți aspectul și aranjamentul spațiului de lucru.</translation>
+        <source>Mainuan maximises the return on your technology investment. It gets the most performance from the hardware you already own, smoothly extending the useful life of computers considered obsolete.
+
+• Real sustainability: We fight digital waste and electronic waste by avoiding artificial hardware requirements, such as TPM 2 or Secure Boot.
+
+• Intelligent resource use: Optimised memory and processor management generates real savings in energy and infrastructure, both for your home and your company.</source>
+        <translation>Mainuan maximizează randamentul investiției dumneavoastră în tehnologie. Valorifică la maximum hardware-ul pe care îl aveți deja și prelungește fără probleme durata de viață a calculatoarelor considerate învechite.
+
+• Sustenabilitate reală: Combatem risipa digitală și deșeurile electronice evitând cerințele artificiale pentru hardware recent, precum cipurile TPM 2 sau Secure Boot.
+
+• Utilizarea inteligentă a resurselor: Gestionarea optimizată a memoriei și procesorului generează economii reale de energie și infrastructură, atât acasă, cât și în companie.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="143"/>
-        <source>Ready for everyday work</source>
-        <translation>Gata pentru munca de zi cu zi</translation>
+        <source>Mainuan stands for predictability and solidity. It builds on the legacy, solidity, security and technical maturity developed over 19 years of TigerOS development, offering a robust platform ready for the future.
+
+• Continuity first: A system strategically designed so your team’s workflow or activities at home never suffer interruptions.
+
+• Secure updates: A predictable maintenance cycle that ensures long-term stability, free from unexpected system failures.</source>
+        <translation>Mainuan înseamnă predictibilitate și fiabilitate. Continuă moștenirea, stabilitatea, securitatea și maturitatea tehnică dobândite în 19 ani de dezvoltare a proiectului TigerOS, oferind o platformă robustă, pregătită pentru viitor.
+
+• Continuitatea pe primul loc: Un sistem planificat strategic astfel încât fluxul de lucru al echipei sau activitățile de acasă să nu fie întrerupte.
+
+• Actualizări sigure: Un ciclu de mentenanță previzibil asigură stabilitate pe termen lung, fără defecțiuni neașteptate ale sistemului.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="144"/>
-        <source>ONLYOFFICE, Firefox and the KDE applications are ready to use. Install more from Discover, Flathub, AppImage or .deb packages with the Mainuan installers.</source>
-        <translation>ONLYOFFICE, Firefox și aplicațiile KDE sunt gata de utilizare. Instalați altele din Discover, Flathub, AppImage sau pachete .deb cu instalatoarele Mainuan.</translation>
+        <source>Proven long-term stability</source>
+        <translation>Stabilitate dovedită pe termen lung</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="149"/>
-        <source>Updates and security</source>
-        <translation>Actualizări și securitate</translation>
+        <source>A modern and secure operating system, designed to boost your productivity.
+
+Built to meet the demands of the corporate world with excellence, while also being suited to personal use.</source>
+        <translation>Un sistem de operare modern și sigur, conceput pentru a vă crește productivitatea.
+
+Este construit pentru a răspunde excelent cerințelor mediului corporativ, fiind în același timp potrivit și pentru uz personal.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="150"/>
-        <source>A long-term support base with security updates. Mainuan lets you know when updates are available and what is new in the system.</source>
-        <translation>O bază cu suport pe termen lung și actualizări de securitate. Mainuan vă anunță când sunt disponibile actualizări și ce este nou în sistem.</translation>
+        <source>Economic efficiency</source>
+        <translation>Eficiență economică</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="155"/>
-        <source>Made by a community</source>
-        <translation>Creat de o comunitate</translation>
+        <source>Easy adaptation, without barriers</source>
+        <translation>Adaptare imediată, fără bariere</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="156"/>
-        <source>Mainuan is free software, developed in the open on GitHub. Ask questions, share ideas, report problems and help translate it: github.com/mainuan and t.me/mainuan_comunidade</source>
-        <translation>Mainuan este software liber, dezvoltat deschis pe GitHub. Puneți întrebări, împărtășiți idei, raportați probleme și ajutați la traducere: github.com/mainuan și t.me/mainuan_comunidade</translation>
+        <source>Welcome to Mainuan!</source>
+        <translation>Bun venit în Mainuan!</translation>
     </message>
 </context>
 </TS>

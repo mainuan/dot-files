@@ -2,20 +2,9 @@
     SPDX-FileCopyrightText: 2026 Mainuan contributors
     SPDX-License-Identifier: GPL-2.0-or-later
 
-    Mainuan installer slideshow (Calamares slideshow API 1: loaded when the
-    installation starts, after the language was chosen).
-
-    The text is QML (qsTr) and follows the language chosen in the installer:
-    Calamares loads lang/calamares-vendor_<language>.qm from this branding
-    directory (sources in dot-files/tools/calamares-slides/lang/*.ts). The
-    illustrations are images without text (images/slide-N.png).
-
-    Two layers fill the whole slideshow area at any size:
-    * picture: a graphite background and, on one side, the illustration
-      covering its pane from edge to edge (PreserveAspectCrop: cropped, never
-      stretched), with the inner edge faded into the background;
-    * content: logo, title, text and page dots, sized from the area.
-    Wide areas put the picture beside the text; narrow ones put it on top.
+    Mainuan Calamares slideshow. English is the source language; Qt Linguist
+    catalogs are loaded from lang/calamares-vendor_<locale>.qm.
+    Locales without a catalog automatically display the English source text.
 */
 
 pragma ComponentBehavior: Bound
@@ -26,21 +15,8 @@ import calamares.slideshow 1.0
 Presentation {
     id: presentation
 
-    // Arabic, Hebrew, Persian and Urdu: text on the right, picture on the left.
-    // qmllint disable missing-property
-    LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
-    // qmllint enable missing-property
-    LayoutMirroring.childrenInherit: true
-
-    // Mainuan colors (dot-files/tools/boot-art/generate.py): graphite and cyan.
-    readonly property color background: "#10181c"
-    readonly property color ink: "#e8f1f3"
-    readonly property color inkMuted: "#c3d0d5"
-    readonly property color accent: "#0dd8e3"
-    readonly property color fade: Qt.rgba(background.r, background.g, background.b, 0.55)
-
-    // Next slide every 12 s (false: only by click or keyboard, as in the
-    // offline renderer, tools/calamares-slides/render.qml).
+    readonly property color ink: "#202d3c"
+    readonly property color accent: "#0d8ea8"
     property bool autoAdvance: true
 
     Timer {
@@ -53,237 +29,184 @@ Presentation {
     Rectangle {
         anchors.fill: parent
         z: -1
-        color: presentation.background
+        color: "#d9f2f8"
     }
 
     component MainuanSlide: Slide {
         id: slide
+
         property string heading
         property string body
         property url picture
         property int index
+        property real leftRatio: 0.043
+        property real topRatio: 0.285
+        property real widthRatio: 0.465
+        property real titleRatio: 0.039
+        property real bodyRatio: 0.024
+        property real bottomRatio: 0.055
+        property color headingColor: presentation.ink
+        // The QML type metadata may not expose this documented QGuiApplication property.
+        // qmllint disable missing-property
+        readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
+        // qmllint enable missing-property
 
-        // Calamares' Slide is only a "content area" (90 % x 70 % of the
-        // slideshow, 20 % from the top): use the whole area instead.
+        // Fill the slideshow canvas: Calamares' Slide default area is smaller.
         x: 0
         y: 0
         width: presentation.width
         height: presentation.height
 
-        readonly property bool rtl: presentation.LayoutMirroring.enabled
-        // Narrow area (taller than wide, or nearly): picture on top.
-        readonly property bool stacked: width < height * 1.15
-        readonly property real unit: Math.min(height, width * 0.6)
-        readonly property int margin: Math.round(Math.max(20, Math.min(width, height * 1.6) * 0.055))
-        readonly property int titleSize: Math.round(Math.max(20, Math.min(64, unit * 0.064)))
-        readonly property int bodySize: Math.round(Math.max(14, Math.min(30, unit * 0.034)))
-        readonly property int ruleHeight: Math.max(3, Math.round(bodySize * 0.2))
-        // Side by side, the pane is about as wide as the pictures (4:5),
-        // between 36 % and 46 % of the width.
-        readonly property int paneSize: stacked
-            ? Math.round(height * 0.42)
-            : Math.round(Math.min(width * 0.46, Math.max(width * 0.36, height * 0.82)))
+        readonly property int margin: Math.max(12, Math.round(height * 0.018))
+        readonly property int titlePixels: Math.max(21, Math.round(height * titleRatio))
+        readonly property int bodyPixels: Math.max(13, Math.round(height * bodyRatio))
 
-        // Discreet fade-in when the slide is shown (Presentation only toggles
-        // visible).
         onVisibleChanged: if (visible) fadeIn.restart()
         NumberAnimation {
             id: fadeIn
-            target: layers
+            target: slideLayers
             property: "opacity"
             from: 0
             to: 1
-            duration: 450
+            duration: 400
             easing.type: Easing.OutCubic
         }
 
         Item {
-            id: layers
+            id: slideLayers
             anchors.fill: parent
 
-            // Picture layer: the illustration fills its pane completely.
-            Item {
-                id: pane
-                clip: true
-                // Geometry instead of conditional anchors: an anchor reset to
-                // undefined while the window is resized can stay attached.
-                // LayoutMirroring does not mirror x, so it is done here.
-                x: slide.stacked || slide.rtl ? 0 : parent.width - width
-                y: 0
-                width: slide.stacked ? parent.width : slide.paneSize
-                height: slide.stacked ? slide.paneSize : parent.height
-
-                Image {
-                    anchors.fill: parent
-                    source: slide.picture
-                    fillMode: Image.PreserveAspectCrop
-                    mirror: slide.rtl
-                    smooth: true
-                    mipmap: true
-                    asynchronous: true
-                }
-
-                // Inner edge fading into the background: left of the pane
-                // (right when mirrored), or its bottom when stacked.
-                Rectangle {
-                    visible: !slide.stacked
-                    x: slide.rtl ? parent.width - width : 0
-                    width: Math.round(parent.width * 0.38)
-                    height: parent.height
-                    gradient: Gradient {
-                        orientation: Gradient.Horizontal
-                        GradientStop { position: 0.0; color: slide.rtl ? "transparent" : presentation.background }
-                        GradientStop { position: 0.5; color: presentation.fade }
-                        GradientStop { position: 1.0; color: slide.rtl ? presentation.background : "transparent" }
-                    }
-                }
-                Rectangle {
-                    visible: slide.stacked
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    height: Math.round(parent.height * 0.45)
-                    gradient: Gradient {
-                        GradientStop { position: 0.0; color: "transparent" }
-                        GradientStop { position: 0.5; color: presentation.fade }
-                        GradientStop { position: 1.0; color: presentation.background }
-                    }
-                }
+            Image {
+                anchors.fill: parent
+                source: slide.picture
+                // Keep the artwork in its original orientation for every locale.
+                fillMode: Image.PreserveAspectCrop
+                smooth: true
+                mipmap: true
+                asynchronous: true
             }
 
-            // Content layer: the space left by the picture.
-            Item {
-                id: textArea
-                // Outer margin on the edge side, half of it next to the picture.
-                readonly property int near: slide.stacked ? slide.margin : Math.round(slide.margin * 0.5)
-                x: slide.stacked ? slide.margin
-                   : slide.rtl ? pane.width + near : slide.margin
-                y: slide.stacked ? pane.height : slide.margin
-                width: (slide.stacked ? parent.width : parent.width - pane.width) - slide.margin - near
-                height: dots.y - Math.round(slide.margin * 0.5) - y
+            Column {
+                id: copy
+                // The artwork reserves the text panel on the left in every locale.
+                // RTL changes text alignment, not the position of the panel.
+                x: Math.round(parent.width * slide.leftRatio)
+                y: Math.round(parent.height * slide.topRatio)
+                width: Math.round(parent.width * slide.widthRatio)
+                height: Math.max(0, parent.height - y - Math.round(parent.height * slide.bottomRatio))
+                spacing: Math.max(7, Math.round(parent.height * 0.014))
 
-                // Natural height of the text at full size; the visible copy
-                // shrinks only when a long translation does not fit.
                 Text {
-                    id: bodyMeasure
-                    visible: false
-                    width: column.width
-                    text: slide.body
-                    font.pixelSize: slide.bodySize
-                    wrapMode: Text.Wrap
-                    lineHeight: 1.2
+                    id: title
+                    width: parent.width
+                    text: slide.heading
+                    color: slide.headingColor
+                    font.family: "Noto Sans"
+                    font.pixelSize: slide.titlePixels
+                    font.weight: Font.Bold
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 3
+                    lineHeight: 1.05
+                    horizontalAlignment: slide.rtl ? Text.AlignRight : Text.AlignLeft
                 }
 
-                Column {
-                    id: column
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    // Comfortable line length: about 34 em of the text size.
-                    width: Math.min(parent.width, slide.bodySize * 34)
-                    spacing: Math.round(slide.bodySize * 0.9)
-
-                    Image {
-                        id: logo
-                        source: "logo.svg"
-                        width: Math.round(Math.max(36, Math.min(72, slide.unit * 0.085)))
-                        height: width
-                        sourceSize.width: width
-                        sourceSize.height: height
-                        smooth: true
-                    }
-
-                    Text {
-                        id: title
-                        width: parent.width
-                        text: slide.heading
-                        color: presentation.ink
-                        font.weight: Font.DemiBold
-                        font.pixelSize: slide.titleSize
-                        wrapMode: Text.Wrap
-                        maximumLineCount: 3
-                        elide: Text.ElideRight
-                        lineHeight: 1.05
-                        horizontalAlignment: Text.AlignLeft
-                    }
-
-                    Rectangle {
-                        width: Math.round(slide.titleSize * 1.2)
-                        height: slide.ruleHeight
-                        radius: height / 2
-                        color: presentation.accent
-                    }
-
-                    Text {
-                        width: parent.width
-                        height: Math.min(bodyMeasure.implicitHeight,
-                                         Math.max(slide.bodySize * 2,
-                                                  textArea.height - logo.height - title.height
-                                                  - slide.ruleHeight - 3 * column.spacing))
-                        text: slide.body
-                        color: presentation.inkMuted
-                        font.pixelSize: slide.bodySize
-                        fontSizeMode: Text.Fit
-                        minimumPixelSize: 11
-                        wrapMode: Text.Wrap
-                        lineHeight: 1.2
-                        horizontalAlignment: Text.AlignLeft
-                    }
+                Text {
+                    id: description
+                    width: parent.width
+                    height: Math.max(0, parent.height - title.height - copy.spacing)
+                    text: slide.body
+                    color: presentation.ink
+                    font.family: "Noto Sans"
+                    font.pixelSize: slide.bodyPixels
+                    fontSizeMode: Text.Fit
+                    minimumPixelSize: 12
+                    wrapMode: Text.WordWrap
+                    lineHeight: 1.16
+                    textFormat: Text.PlainText
+                    horizontalAlignment: slide.rtl ? Text.AlignRight : Text.AlignLeft
+                    verticalAlignment: Text.AlignTop
                 }
             }
 
             Row {
                 id: dots
-                anchors.left: textArea.left
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: slide.margin
-                spacing: Math.round(slide.bodySize * 0.45)
+                x: Math.round(parent.width * 0.045)
+                y: parent.height - height - Math.round(parent.height * 0.035)
+                spacing: Math.max(5, Math.round(parent.height * 0.009))
+
                 Repeater {
                     model: presentation.slides.length
                     delegate: Rectangle {
                         required property int index
                         readonly property bool current: index === slide.index
-                        width: current ? Math.round(slide.bodySize * 1.4) : height
-                        height: Math.max(6, Math.round(slide.bodySize * 0.4))
+                        width: current ? Math.round(parent.height * 0.020) : height
+                        height: Math.max(5, Math.round(slide.height * 0.009))
                         radius: height / 2
-                        color: current ? presentation.accent : Qt.rgba(1, 1, 1, 0.28)
+                        color: current ? presentation.accent : Qt.rgba(0.05, 0.28, 0.36, 0.30)
                     }
                 }
             }
         }
     }
 
+    // Slide 1: the text sits inside the empty rounded panel in the artwork.
     MainuanSlide {
         index: 0
-        heading: qsTr("Welcome to Mainuan")
-        body: qsTr("A modern and secure system based on Kubuntu 26.04 LTS, made for work, school and home. The installation takes a few minutes; you can keep reading meanwhile.")
+        heading: qsTr("Welcome to Mainuan!")
+        body: qsTr("A modern and secure operating system, designed to boost your productivity.\n\nBuilt to meet the demands of the corporate world with excellence, while also being suited to personal use.")
         picture: "images/slide-1.png"
+        leftRatio: 0.095
+        topRatio: 0.49
+        widthRatio: 0.56
+        titleRatio: 0.045
+        bodyRatio: 0.026
+        // Keep both paragraphs fully inside the rounded panel, even with
+        // longer translations (Spanish, Italian, Portuguese, German, etc.).
+        bottomRatio: 0.245
+        headingColor: "#43b3d3"
     }
 
     MainuanSlide {
         index: 1
-        heading: qsTr("KDE Plasma, your way")
-        body: qsTr("KDE Plasma 6 on Wayland, with the Mainuan themes, colors and icons. After the installation, Mainuan Welcome helps you choose the look and the layout of your desktop.")
+        heading: qsTr("Proven long-term stability")
+        body: qsTr("Mainuan stands for predictability and solidity. It builds on the legacy, solidity, security and technical maturity developed over 19 years of TigerOS development, offering a robust platform ready for the future.\n\n• Continuity first: A system strategically designed so your team’s workflow or activities at home never suffer interruptions.\n\n• Secure updates: A predictable maintenance cycle that ensures long-term stability, free from unexpected system failures.")
         picture: "images/slide-2.png"
+        topRatio: 0.285
+        widthRatio: 0.39
+        titleRatio: 0.039
+        bodyRatio: 0.023
     }
 
     MainuanSlide {
         index: 2
-        heading: qsTr("Ready for everyday work")
-        body: qsTr("ONLYOFFICE, Firefox and the KDE applications are ready to use. Install more from Discover, Flathub, AppImage or .deb packages with the Mainuan installers.")
+        heading: qsTr("Easy adaptation, without barriers")
+        body: qsTr("A familiar, refined interface, designed specifically to eliminate the learning curve. Whether at the office or at home, the transition to Mainuan is natural, smooth and immediate.\n\n• Intuitive navigation: An intelligently organised applications menu, with essential tools always just a few clicks away.\n\n• High-performance environment: A clean, elegant design that minimises visual distractions, supporting concentration and mental clarity during use.")
         picture: "images/slide-3.png"
+        topRatio: 0.285
+        widthRatio: 0.385
+        titleRatio: 0.039
+        bodyRatio: 0.023
     }
 
     MainuanSlide {
         index: 3
-        heading: qsTr("Updates and security")
-        body: qsTr("A long-term support base with security updates. Mainuan lets you know when updates are available and what is new in the system.")
+        heading: qsTr("Economic efficiency")
+        body: qsTr("Mainuan maximises the return on your technology investment. It gets the most performance from the hardware you already own, smoothly extending the useful life of computers considered obsolete.\n\n• Real sustainability: We fight digital waste and electronic waste by avoiding artificial hardware requirements, such as TPM 2 or Secure Boot.\n\n• Intelligent resource use: Optimised memory and processor management generates real savings in energy and infrastructure, both for your home and your company.")
         picture: "images/slide-4.png"
+        topRatio: 0.295
+        widthRatio: 0.37
+        titleRatio: 0.037
+        bodyRatio: 0.0225
     }
 
     MainuanSlide {
         index: 4
-        heading: qsTr("Made by a community")
-        body: qsTr("Mainuan is free software, developed in the open on GitHub. Ask questions, share ideas, report problems and help translate it: github.com/mainuan and t.me/mainuan_comunidade")
+        heading: qsTr("Absolute privacy")
+        body: qsTr("Strong protection against digital threats, combined with an uncompromising ethical stance on your data. In Mainuan, the security of your business and the privacy of your home are treated as top priorities.\n\n• Zero telemetry: Completely free from hidden tracking, data collection and intrusive advertisements. Mainuan respects you! Your information belongs exclusively to you.")
         picture: "images/slide-5.png"
+        topRatio: 0.295
+        widthRatio: 0.34
+        titleRatio: 0.039
+        bodyRatio: 0.023
     }
 }

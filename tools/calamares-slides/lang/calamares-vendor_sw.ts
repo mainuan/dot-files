@@ -1,57 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" sourcelanguage="en_US" language="sw">
+<TS version="2.1" language="sw">
 <context>
     <name>show</name>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="131"/>
-        <source>Welcome to Mainuan</source>
-        <translation>Karibu Mainuan</translation>
+        <source>A familiar, refined interface, designed specifically to eliminate the learning curve. Whether at the office or at home, the transition to Mainuan is natural, smooth and immediate.
+
+• Intuitive navigation: An intelligently organised applications menu, with essential tools always just a few clicks away.
+
+• High-performance environment: A clean, elegant design that minimises visual distractions, supporting concentration and mental clarity during use.</source>
+        <translation>Muonekano unaofahamika na ulioboreshwa, ulioundwa mahsusi kuondoa ugumu wa kujifunza. Ofisini au nyumbani, kuhamia Mainuan ni jambo la kawaida, laini na la haraka.
+
+• Uelekezaji ulio wazi: Menyu ya programu iliyopangwa kwa akili, huku zana muhimu zikiwa umbali wa mibofyo michache tu.
+
+• Mazingira yenye utendaji wa juu: Muundo safi na wa kuvutia hupunguza vikengeushi vya kuona na kusaidia umakini na uwazi wa fikra wakati wa matumizi.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="132"/>
-        <source>A modern and secure system based on Kubuntu 26.04 LTS, made for work, school and home. The installation takes a few minutes; you can keep reading meanwhile.</source>
-        <translation>Mfumo wa kisasa na salama unaotegemea Kubuntu 26.04 LTS, uliotengenezwa kwa ajili ya kazi, shule na nyumbani. Usakinishaji huchukua dakika chache; wakati huo unaweza kuendelea kusoma.</translation>
+        <source>Strong protection against digital threats, combined with an uncompromising ethical stance on your data. In Mainuan, the security of your business and the privacy of your home are treated as top priorities.
+
+• Zero telemetry: Completely free from hidden tracking, data collection and intrusive advertisements. Mainuan respects you! Your information belongs exclusively to you.</source>
+        <translation>Ulinzi thabiti dhidi ya vitisho vya kidijitali, pamoja na msimamo wa kimaadili usio na maelewano kuhusu data yako. Katika Mainuan, usalama wa biashara yako na faragha ya nyumbani kwako ni vipaumbele vya juu.
+
+• Hakuna telemetry: Hauna ufuatiliaji uliofichwa, ukusanyaji wa data au matangazo yanayoingilia. Mainuan inakuheshimu! Taarifa zako ni zako pekee.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="137"/>
-        <source>KDE Plasma, your way</source>
-        <translation>KDE Plasma, kwa mtindo wako</translation>
+        <source>Absolute privacy</source>
+        <translation>Faragha kamili</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="138"/>
-        <source>KDE Plasma 6 on Wayland, with the Mainuan themes, colors and icons. After the installation, Mainuan Welcome helps you choose the look and the layout of your desktop.</source>
-        <translation>KDE Plasma 6 kwenye Wayland, pamoja na mandhari, rangi na aikoni za Mainuan. Baada ya usakinishaji, Mainuan Welcome hukusaidia kuchagua mwonekano na mpangilio wa eneo-kazi lako.</translation>
+        <source>Mainuan maximises the return on your technology investment. It gets the most performance from the hardware you already own, smoothly extending the useful life of computers considered obsolete.
+
+• Real sustainability: We fight digital waste and electronic waste by avoiding artificial hardware requirements, such as TPM 2 or Secure Boot.
+
+• Intelligent resource use: Optimised memory and processor management generates real savings in energy and infrastructure, both for your home and your company.</source>
+        <translation>Mainuan huongeza thamani ya uwekezaji wako wa teknolojia. Hupata utendaji bora kutoka kwa vifaa ulivyonavyo tayari na kuongeza kwa urahisi muda wa matumizi wa kompyuta zinazochukuliwa kuwa zimepitwa na wakati.
+
+• Uendelevu halisi: Tunapambana na upotevu wa kidijitali na taka za kielektroniki kwa kuepuka masharti yasiyo ya lazima ya vifaa vipya, kama chipu za TPM 2 au Secure Boot.
+
+• Matumizi bora ya rasilimali: Usimamizi ulioboreshwa wa kumbukumbu na kichakataji huleta akiba halisi ya nishati na miundombinu, nyumbani na katika kampuni yako.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="143"/>
-        <source>Ready for everyday work</source>
-        <translation>Tayari kwa kazi za kila siku</translation>
+        <source>Mainuan stands for predictability and solidity. It builds on the legacy, solidity, security and technical maturity developed over 19 years of TigerOS development, offering a robust platform ready for the future.
+
+• Continuity first: A system strategically designed so your team’s workflow or activities at home never suffer interruptions.
+
+• Secure updates: A predictable maintenance cycle that ensures long-term stability, free from unexpected system failures.</source>
+        <translation>Mainuan inawakilisha utabirikaji na uimara. Inajenga juu ya urithi, uthabiti, usalama na ukomavu wa kiufundi uliopatikana katika miaka 19 ya maendeleo ya mradi wa TigerOS, na kutoa jukwaa imara lililo tayari kwa siku zijazo.
+
+• Mwendelezo kwanza: Mfumo umepangwa kimkakati ili mtiririko wa kazi wa timu yako au shughuli za nyumbani zisiingiliwe.
+
+• Masasisho salama: Mzunguko wa matengenezo unaotabirika huhakikisha uthabiti wa muda mrefu bila hitilafu zisizotarajiwa za mfumo.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="144"/>
-        <source>ONLYOFFICE, Firefox and the KDE applications are ready to use. Install more from Discover, Flathub, AppImage or .deb packages with the Mainuan installers.</source>
-        <translation>ONLYOFFICE, Firefox na programu za KDE ziko tayari kutumika. Sakinisha zaidi kutoka Discover, Flathub, AppImage au vifurushi vya .deb kwa visakinishi vya Mainuan.</translation>
+        <source>Proven long-term stability</source>
+        <translation>Uthabiti wa muda mrefu uliothibitishwa</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="149"/>
-        <source>Updates and security</source>
-        <translation>Masasisho na usalama</translation>
+        <source>A modern and secure operating system, designed to boost your productivity.
+
+Built to meet the demands of the corporate world with excellence, while also being suited to personal use.</source>
+        <translation>Mfumo wa uendeshaji wa kisasa na salama ulioundwa ili kuongeza tija yako.
+
+Umetengenezwa kukidhi mahitaji ya mazingira ya kampuni kwa ubora, na pia unafaa kwa matumizi binafsi.</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="150"/>
-        <source>A long-term support base with security updates. Mainuan lets you know when updates are available and what is new in the system.</source>
-        <translation>Msingi wenye usaidizi wa muda mrefu na masasisho ya usalama. Mainuan hukujulisha masasisho yanapopatikana na yaliyo mapya kwenye mfumo.</translation>
+        <source>Economic efficiency</source>
+        <translation>Ufanisi wa kiuchumi</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="155"/>
-        <source>Made by a community</source>
-        <translation>Imetengenezwa na jumuiya</translation>
+        <source>Easy adaptation, without barriers</source>
+        <translation>Kuzoea haraka bila vikwazo</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="156"/>
-        <source>Mainuan is free software, developed in the open on GitHub. Ask questions, share ideas, report problems and help translate it: github.com/mainuan and t.me/mainuan_comunidade</source>
-        <translation>Mainuan ni programu huria, inayotengenezwa kwa uwazi kwenye GitHub. Uliza maswali, shiriki mawazo, ripoti matatizo na usaidie kuitafsiri: github.com/mainuan na t.me/mainuan_comunidade</translation>
+        <source>Welcome to Mainuan!</source>
+        <translation>Karibu kwenye Mainuan!</translation>
     </message>
 </context>
 </TS>

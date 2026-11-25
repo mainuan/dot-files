@@ -1,57 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" sourcelanguage="en_US" language="zh_CN">
+<TS version="2.1" language="zh_CN">
 <context>
     <name>show</name>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="131"/>
-        <source>Welcome to Mainuan</source>
-        <translation>欢迎使用 Mainuan</translation>
+        <source>A familiar, refined interface, designed specifically to eliminate the learning curve. Whether at the office or at home, the transition to Mainuan is natural, smooth and immediate.
+
+• Intuitive navigation: An intelligently organised applications menu, with essential tools always just a few clicks away.
+
+• High-performance environment: A clean, elegant design that minimises visual distractions, supporting concentration and mental clarity during use.</source>
+        <translation>熟悉且精致的界面，专为消除学习和适应过程中的障碍而设计。无论在办公室还是家中，切换到 Mainuan 都自然、流畅且即时。
+
+• 逻辑清晰的导航：应用程序菜单经过智能整理，常用工具只需点击几次即可访问。
+
+• 高性能环境：简洁优雅的设计减少视觉干扰，有助于在使用过程中保持专注和思路清晰。</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="132"/>
-        <source>A modern and secure system based on Kubuntu 26.04 LTS, made for work, school and home. The installation takes a few minutes; you can keep reading meanwhile.</source>
-        <translation>基于 Kubuntu 26.04 LTS 的现代、安全的系统，适用于工作、学习和家庭。安装需要几分钟，期间您可以继续阅读。</translation>
+        <source>Strong protection against digital threats, combined with an uncompromising ethical stance on your data. In Mainuan, the security of your business and the privacy of your home are treated as top priorities.
+
+• Zero telemetry: Completely free from hidden tracking, data collection and intrusive advertisements. Mainuan respects you! Your information belongs exclusively to you.</source>
+        <translation>强大的数字威胁防护，并坚持对您的数据采取毫不妥协的道德立场。在 Mainuan，企业安全和家庭隐私始终是最高优先事项。
+
+• 零遥测：完全没有隐藏跟踪、数据收集或侵入式广告。Mainuan 尊重您！您的信息完全属于您自己。</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="137"/>
-        <source>KDE Plasma, your way</source>
-        <translation>随心定制 KDE Plasma</translation>
+        <source>Absolute privacy</source>
+        <translation>绝对隐私</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="138"/>
-        <source>KDE Plasma 6 on Wayland, with the Mainuan themes, colors and icons. After the installation, Mainuan Welcome helps you choose the look and the layout of your desktop.</source>
-        <translation>运行在 Wayland 上的 KDE Plasma 6，搭配 Mainuan 的主题、颜色和图标。安装完成后，Mainuan Welcome 可帮助您选择桌面的外观和布局。</translation>
+        <source>Mainuan maximises the return on your technology investment. It gets the most performance from the hardware you already own, smoothly extending the useful life of computers considered obsolete.
+
+• Real sustainability: We fight digital waste and electronic waste by avoiding artificial hardware requirements, such as TPM 2 or Secure Boot.
+
+• Intelligent resource use: Optimised memory and processor management generates real savings in energy and infrastructure, both for your home and your company.</source>
+        <translation>Mainuan 最大限度地提高您的技术投资回报。它充分发挥现有硬件的性能，并流畅地延长被认为已经过时的计算机的使用寿命。
+
+• 真正的可持续性：通过避免 TPM 2 芯片或 Secure Boot 等人为设置的最新硬件要求，我们减少数字浪费和电子垃圾。
+
+• 智能资源利用：优化内存和处理器管理，在家庭和企业环境中切实节省能源与基础设施成本。</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="143"/>
-        <source>Ready for everyday work</source>
-        <translation>为日常工作做好准备</translation>
+        <source>Mainuan stands for predictability and solidity. It builds on the legacy, solidity, security and technical maturity developed over 19 years of TigerOS development, offering a robust platform ready for the future.
+
+• Continuity first: A system strategically designed so your team’s workflow or activities at home never suffer interruptions.
+
+• Secure updates: A predictable maintenance cycle that ensures long-term stability, free from unexpected system failures.</source>
+        <translation>Mainuan 代表着可预测性与可靠性。它继承了 TigerOS 项目 19 年开发历程所积累的传统、稳定性、安全性和技术成熟度，提供一个稳健且面向未来的平台。
+
+• 持续运行为先：系统经过战略性规划，确保团队工作流程或家庭日常活动不会中断。
+
+• 安全更新：可预测的维护周期确保长期稳定，避免意外的系统故障。</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="144"/>
-        <source>ONLYOFFICE, Firefox and the KDE applications are ready to use. Install more from Discover, Flathub, AppImage or .deb packages with the Mainuan installers.</source>
-        <translation>ONLYOFFICE、Firefox 和 KDE 应用程序均可直接使用。您还可以借助 Mainuan 安装器，通过 Discover、Flathub、AppImage 或 .deb 软件包安装更多软件。</translation>
+        <source>Proven long-term stability</source>
+        <translation>经得起时间考验的稳定性</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="149"/>
-        <source>Updates and security</source>
-        <translation>更新与安全</translation>
+        <source>A modern and secure operating system, designed to boost your productivity.
+
+Built to meet the demands of the corporate world with excellence, while also being suited to personal use.</source>
+        <translation>一款现代、安全的操作系统，旨在提升您的工作效率。
+
+它能够出色地满足企业环境的需求，同时也非常适合个人使用。</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="150"/>
-        <source>A long-term support base with security updates. Mainuan lets you know when updates are available and what is new in the system.</source>
-        <translation>长期支持的基础系统，提供安全更新。有可用更新时 Mainuan 会通知您，并介绍系统的新变化。</translation>
+        <source>Economic efficiency</source>
+        <translation>经济效率</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="155"/>
-        <source>Made by a community</source>
-        <translation>由社区打造</translation>
+        <source>Easy adaptation, without barriers</source>
+        <translation>轻松适应，没有障碍</translation>
     </message>
     <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="156"/>
-        <source>Mainuan is free software, developed in the open on GitHub. Ask questions, share ideas, report problems and help translate it: github.com/mainuan and t.me/mainuan_comunidade</source>
-        <translation>Mainuan 是自由软件，在 GitHub 上公开开发。欢迎提问、分享想法、报告问题并帮助翻译：github.com/mainuan 和 t.me/mainuan_comunidade</translation>
+        <source>Welcome to Mainuan!</source>
+        <translation>欢迎使用 Mainuan！</translation>
     </message>
 </context>
 </TS>
