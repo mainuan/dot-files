@@ -67,7 +67,7 @@ import xml.etree.ElementTree as ET
 
 qml_path, ts_dir = Path(sys.argv[1]), Path(sys.argv[2])
 qml_text = qml_path.read_text(encoding="utf-8")
-pattern = re.compile(r'qsTr\("((?:\\\\.|[^"\\\\])*)"\)', re.DOTALL)
+pattern = re.compile(r'qsTr\("((?:\\.|[^"\\])*)"\)', re.DOTALL)
 qml_sources = {ast.literal_eval('"' + m.group(1) + '"') for m in pattern.finditer(qml_text)}
 if len(qml_sources) != 10:
     raise SystemExit(f"ERRO: esperadas 10 chamadas qsTr() no QML; encontradas {len(qml_sources)}.")
