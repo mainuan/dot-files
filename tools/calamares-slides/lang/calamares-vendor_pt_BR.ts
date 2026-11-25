@@ -1,57 +1,78 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="pt_BR" sourcelanguage="en_US">
-<context>
-    <name>show</name>
-    <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="131"/>
-        <source>Welcome to Mainuan</source>
-        <translation>Boas-vindas ao Mainuan</translation>
-    </message>
-    <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="132"/>
-        <source>A modern and secure system based on Kubuntu 26.04 LTS, made for work, school and home. The installation takes a few minutes; you can keep reading meanwhile.</source>
-        <translation>Um sistema moderno e seguro, baseado no Kubuntu 26.04 LTS, feito para o trabalho, a escola e a casa. A instalação leva poucos minutos; enquanto isso, conheça um pouco do Mainuan.</translation>
-    </message>
-    <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="137"/>
-        <source>KDE Plasma, your way</source>
-        <translation>O KDE Plasma do seu jeito</translation>
-    </message>
-    <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="138"/>
-        <source>KDE Plasma 6 on Wayland, with the Mainuan themes, colors and icons. After the installation, Mainuan Welcome helps you choose the look and the layout of your desktop.</source>
-        <translation>KDE Plasma 6 em Wayland, com os temas, as cores e os ícones do Mainuan. Depois da instalação, o Mainuan Welcome ajuda você a escolher a aparência e o layout da sua área de trabalho.</translation>
-    </message>
-    <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="143"/>
-        <source>Ready for everyday work</source>
-        <translation>Pronto para o dia a dia</translation>
-    </message>
-    <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="144"/>
-        <source>ONLYOFFICE, Firefox and the KDE applications are ready to use. Install more from Discover, Flathub, AppImage or .deb packages with the Mainuan installers.</source>
-        <translation>ONLYOFFICE, Firefox e os aplicativos do KDE já vêm prontos para usar. Instale mais pelo Discover, pelo Flathub, ou a partir de AppImage e pacotes .deb com os instaladores do Mainuan.</translation>
-    </message>
-    <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="149"/>
-        <source>Updates and security</source>
-        <translation>Atualizações e segurança</translation>
-    </message>
-    <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="150"/>
-        <source>A long-term support base with security updates. Mainuan lets you know when updates are available and what is new in the system.</source>
-        <translation>Uma base com suporte de longo prazo e atualizações de segurança. O Mainuan avisa quando há atualizações e mostra as novidades do sistema.</translation>
-    </message>
-    <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="155"/>
-        <source>Made by a community</source>
-        <translation>Feito por uma comunidade</translation>
-    </message>
-    <message>
-        <location filename="../../../rootfs/etc/calamares/branding/vendor/show.qml" line="156"/>
-        <source>Mainuan is free software, developed in the open on GitHub. Ask questions, share ideas, report problems and help translate it: github.com/mainuan and t.me/mainuan_comunidade</source>
-        <translation>O Mainuan é software livre, desenvolvido de forma aberta no GitHub. Tire dúvidas, compartilhe ideias, relate problemas e ajude a traduzir: github.com/mainuan e t.me/mainuan_comunidade</translation>
-    </message>
-</context>
+    <context>
+        <name>show</name>
+        <message>
+            <source>Welcome to Mainuan!</source>
+            <translation>Boas-vindas ao Mainuan!</translation>
+        </message>
+        <message>
+            <source>A modern and secure operating system, designed to boost your productivity.
+
+Built to meet the demands of the corporate world with excellence, while also being suited to personal use.</source>
+            <translation>Um sistema operacional moderno e seguro, projetado para elevar sua produtividade.
+
+Feito para atender com excelência às exigências do mundo corporativo, mas também adequado ao uso pessoal.</translation>
+        </message>
+        <message>
+            <source>Proven long-term stability</source>
+            <translation>Estabilidade comprovada a longo prazo</translation>
+        </message>
+        <message>
+            <source>Mainuan stands for predictability and solidity. It builds on the legacy, solidity, security and technical maturity developed over 19 years of TigerOS development, offering a robust platform ready for the future.
+
+• Continuity first: A system strategically designed so your team’s workflow or activities at home never suffer interruptions.
+
+• Secure updates: A predictable maintenance cycle that ensures long-term stability, free from unexpected system failures.</source>
+            <translation>O Mainuan é sinônimo de previsibilidade e solidez. Consolida o legado, a estabilidade, a segurança e a maturidade técnica de 19 anos de desenvolvimento do projeto TigerOS, oferecendo uma plataforma robusta e pronta para o futuro.
+
+• Foco em continuidade: Sistema planejado estrategicamente para que o fluxo de trabalho da sua equipe ou as atividades da sua casa nunca sofram interrupções.
+
+• Atualizações seguras: Ciclo de manutenção previsível que garante estabilidade a longo prazo, livre de falhas inesperadas do sistema.</translation>
+        </message>
+        <message>
+            <source>Easy adaptation, without barriers</source>
+            <translation>Adaptação imediata e sem barreiras</translation>
+        </message>
+        <message>
+            <source>A familiar, refined interface, designed specifically to eliminate the learning curve. Whether at the office or at home, the transition to Mainuan is natural, smooth and immediate.
+
+• Intuitive navigation: An intelligently organised applications menu, with essential tools always just a few clicks away.
+
+• High-performance environment: A clean, elegant design that minimises visual distractions, supporting concentration and mental clarity during use.</source>
+            <translation>Uma interface familiar e refinada, desenvolvida especificamente para eliminar a curva de aprendizado. Seja no escritório ou em casa, a transição para o Mainuan é natural, fluida e imediata.
+
+• Navegação lógica: Menu de programas organizado de forma inteligente, com ferramentas essenciais sempre acessíveis a poucos cliques.
+
+• Ambiente de alto desempenho: Design limpo e elegante que minimiza distrações visuais, favorecendo a concentração e a clareza mental durante o uso.</translation>
+        </message>
+        <message>
+            <source>Economic efficiency</source>
+            <translation>Eficiência econômica</translation>
+        </message>
+        <message>
+            <source>Mainuan maximises the return on your technology investment. It gets the most performance from the hardware you already own, smoothly extending the useful life of computers considered obsolete.
+
+• Real sustainability: We fight digital waste and electronic waste by avoiding artificial hardware requirements, such as TPM 2 or Secure Boot.
+
+• Intelligent resource use: Optimised memory and processor management generates real savings in energy and infrastructure, both for your home and your company.</source>
+            <translation>O Mainuan maximiza o retorno sobre seu investimento em tecnologia. Ele extrai o máximo de desempenho do hardware que você já possui, estendendo com fluidez a vida útil de computadores considerados obsoletos.
+
+• Sustentabilidade real: Combatemos o desperdício digital e o lixo eletrônico ao dispensar exigências artificiais de hardware recente, como chips TPM 2 ou Secure Boot.
+
+• Consumo inteligente de recursos: O gerenciamento otimizado de memória e processador gera economia real de energia e infraestrutura, tanto para sua residência quanto para sua empresa.</translation>
+        </message>
+        <message>
+            <source>Absolute privacy</source>
+            <translation>Privacidade absoluta</translation>
+        </message>
+        <message>
+            <source>Strong protection against digital threats, combined with an uncompromising ethical stance on your data. In Mainuan, the security of your business and the privacy of your home are treated as top priorities.
+
+• Zero telemetry: Completely free from hidden tracking, data collection and intrusive advertisements. Mainuan respects you! Your information belongs exclusively to you.</source>
+            <translation>Proteção robusta contra ameaças digitais, combinada com uma postura ética inegociável em relação aos seus dados. No Mainuan, a segurança do seu negócio e a privacidade da sua casa são prioridades máximas.
+
+• Zero telemetria: Totalmente livre de rastreamento oculto, coleta de dados e anúncios invasivos. O Mainuan respeita você! Suas informações pertencem exclusivamente a você.</translation>
+        </message>
+    </context>
 </TS>
