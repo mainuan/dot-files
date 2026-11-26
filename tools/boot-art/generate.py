@@ -146,20 +146,6 @@ def grub_background(w=1920, h=1080):
     return svg_doc(w, h, body, defs)
 
 
-def grub_logo():
-    # Logo and wordmark side by side (300 x 80 at 1x).
-    with open(LOGO, encoding="utf-8") as f:
-        logo = f.read()
-    tmp = tempfile.mkdtemp()
-    logo_png = os.path.join(tmp, "logo.png")
-    render(logo, logo_png, 72, 72)
-    body = (f'<image x="0" y="4" width="72" height="72" xlink:href="file://{logo_png}"/>'
-            f'<text x="90" y="55" font-family="Noto Sans" font-weight="300" font-size="40" '
-            f'letter-spacing="0.5" fill="{TEXT}">Mainuan</text>')
-    render(svg_doc(300, 80, body), os.path.join(GRUB, "logo.png"))
-    shutil.rmtree(tmp)
-
-
 def nine_slice(prefix, radius, fill, fill_op, stroke, stroke_op):
     """Write prefix_{nw,n,ne,w,c,e,sw,s,se}.png for a rounded rectangle."""
     size = radius * 2 + 4
@@ -258,7 +244,6 @@ def grub_hints():
 
 def grub():
     render(grub_background(), os.path.join(GRUB, "background.png"))
-    grub_logo()
     nine_slice("select", 8, CYAN, 0.16, CYAN, 0.55)
     nine_slice("menu", 14, LINE, 0.035, LINE, 0.09)
     nine_slice("scrollbar_thumb", 2, CYAN, 0.7, CYAN, 0.0)

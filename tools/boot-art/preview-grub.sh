@@ -8,7 +8,7 @@
 #         "dual" (+ Windows and another Linux) or "long" (20 entries).
 #
 # Needs grub-mkrescue (with i386-pc and x86_64-efi modules), grub-mkfont,
-# xorriso, mtools, qemu-system-x86_64, OVMF and the Noto Sans fonts.
+# xorriso, mtools, qemu-system-x86_64, OVMF, fonts-ubuntu and the bundled Barlow font.
 set -euo pipefail
 
 out=$(realpath -m "$1")
@@ -20,17 +20,16 @@ theme_src="$here/../../rootfs/usr/share/grub/themes/mainuan"
 work=$(mktemp -d)
 trap 'kill "${qemu_pid:-0}" 2>/dev/null || true; rm -rf "$work"' EXIT
 
-font_dir=""
-for d in /usr/share/fonts/truetype/noto /usr/share/fonts/noto; do
-    [[ -f $d/NotoSans-Regular.ttf ]] && font_dir=$d && break
-done
-[[ -n $font_dir ]] || { echo "Noto Sans not found" >&2; exit 1; }
+font_dir="/usr/share/fonts/truetype/ubuntu"
+[[ -f $font_dir/Ubuntu-R.ttf ]] || { echo "Ubuntu fonts not found (install fonts-ubuntu)" >&2; exit 1; }
+barlow_font="$here/fonts/Barlow-Bold.ttf"
+[[ -s $barlow_font ]] || { echo "Bundled Barlow Bold font not found: $barlow_font" >&2; exit 1; }
 
 root="$work/iso"
 theme="$root/boot/grub/themes/mainuan"
 mkdir -p "$theme"
 cp -r "$theme_src"/. "$theme"/
-"$here/make-grub-fonts.sh" "$font_dir" "$theme"
+"$here/make-grub-fonts.sh" "$font_dir" "$theme" "$barlow_font"
 
 entry() {  # title, classes...
     local title=$1; shift

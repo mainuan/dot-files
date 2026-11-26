@@ -1,33 +1,43 @@
 #!/bin/sh
-# Generate the PF2 fonts of the Mainuan GRUB theme from Noto Sans.
+# Generate the PF2 fonts of the Mainuan GRUB theme.
 #
-#   tools/boot-art/make-grub-fonts.sh <noto-font-dir> <theme-dir>
+#   tools/boot-art/make-grub-fonts.sh <ubuntu-font-dir> <theme-dir> <barlow-bold.ttf>
 #
-# Used by debian/rules (fonts-noto-core and fonts-noto-mono) and by
-# preview-grub.sh. The names inside the files ("Noto Sans Regular 18"…) are
-# the ones referenced by theme.txt.
+# Ubuntu Font Licence 1.0 requires derivative font names to retain the
+# original family name and append a distinguishing derivative name. The
+# Ubuntu PFF2 families are therefore named "Ubuntu derivative Mainuan" and
+# "Ubuntu Mono derivative Mainuan". Barlow is distributed under the OFL.
 set -eu
-if [ "$#" -ne 2 ]; then
-    echo "uso: $0 <diretório-noto> <diretório-tema>" >&2
+if [ "$#" -ne 3 ]; then
+    echo "uso: $0 <diretório-ubuntu> <diretório-tema> <Barlow-Bold.ttf>" >&2
     exit 2
 fi
 src=$1
 dst=$2
+barlow=$3
 if ! command -v grub-mkfont >/dev/null 2>&1; then
     echo "grub-mkfont não encontrado (instale grub-common)" >&2
     exit 1
 fi
-for font in NotoSans-Regular.ttf NotoSans-Bold.ttf NotoSansMono-Regular.ttf; do
+for font in Ubuntu-R.ttf Ubuntu-M.ttf UbuntuMono-R.ttf; do
     if [ ! -s "$src/$font" ]; then
-        echo "fonte Noto Sans ausente ou vazia: $src/$font" >&2
+        echo "fonte Ubuntu ausente ou vazia: $src/$font" >&2
         exit 1
     fi
 done
+if [ ! -s "$barlow" ]; then
+    echo "fonte Barlow Bold ausente ou vazia: $barlow" >&2
+    exit 1
+fi
 mkdir -p "$dst"
 # Latin, Latin-1, Latin Extended-A, general punctuation and arrows.
 range=0x20-0x7E,0xA0-0x17F,0x2010-0x2027,0x2190-0x21FF
-mk() { grub-mkfont --range="$range" -s "$3" -o "$dst/$2" "$src/$1"; }
-mk NotoSans-Regular.ttf noto_sans_regular_14.pf2 14
-mk NotoSans-Regular.ttf noto_sans_regular_18.pf2 18
-mk NotoSans-Bold.ttf noto_sans_bold_18.pf2 18
-mk NotoSansMono-Regular.ttf noto_sans_mono_regular_16.pf2 16
+mk() {
+    grub-mkfont --range="$range" --name="$4" -s "$3" -o "$dst/$2" "$src/$1"
+}
+mk Ubuntu-R.ttf ubuntu_derivative_mainuan_regular_14.pf2 14 "Ubuntu derivative Mainuan"
+mk Ubuntu-R.ttf ubuntu_derivative_mainuan_regular_18.pf2 18 "Ubuntu derivative Mainuan"
+mk Ubuntu-M.ttf ubuntu_derivative_mainuan_medium_18.pf2 18 "Ubuntu derivative Mainuan"
+mk UbuntuMono-R.ttf ubuntu_mono_derivative_mainuan_regular_16.pf2 16 "Ubuntu Mono derivative Mainuan"
+# Barlow retains its original family name; the OFL file reserves no name.
+grub-mkfont --range="$range" -s 40 -o "$dst/barlow_bold_40.pf2" "$barlow"

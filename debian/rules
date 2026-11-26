@@ -30,10 +30,10 @@ execute_after_dh_install:
 		/usr/lib/qt6/bin/lrelease -silent $$ts -qm $(PKG)/usr/share/calamares/lang/$$(basename $$ts .ts).qm; \
 	done
 	test -s $(PKG)/usr/share/calamares/lang/calamares_pt_BR.qm
-	# GRUB theme fonts, generated from Noto Sans (names used by theme.txt).
-	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/noto $(GRUBTHEME)
-	for f in $$(grep -o '"Noto Sans[^"]*"' $(GRUBTHEME)/theme.txt | sort -u | tr -d '"' | tr 'A-Z ' 'a-z_'); do \
-		test -s $(GRUBTHEME)/$$f.pf2; \
+	# GRUB theme fonts: Ubuntu derivatives and the Barlow Bold wordmark.
+	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/ubuntu $(GRUBTHEME) tools/boot-art/fonts/Barlow-Bold.ttf
+	for f in $(grep -oE '"(Ubuntu|Barlow)[^"]*"' $(GRUBTHEME)/theme.txt | sort -u | tr -d '"' | tr 'A-Z ' 'a-z_'); do \
+		test -s $(GRUBTHEME)/$f.pf2; \
 	done
 	# Fontes de tradução, pacote .plasmoid, capturas do leia-me, leia-mes e
 	# licenças dos widgets ficam no pacote-fonte; as licenças estão em
