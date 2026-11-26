@@ -229,8 +229,13 @@ jobs:
           T=/usr/share/grub/themes/mainuan
 
           check() {
-            # Fonts referenced by theme.txt exist and carry that exact name.
-            grep -o '"Noto Sans[^"]*"' $T/theme.txt | sort -u | tr -d '"' | while read -r font; do
+            # Fonts referenced by theme.txt exist and carry that exact PFF2 name.
+            for font in \
+              "Barlow Bold 40" \
+              "Ubuntu derivative Mainuan Regular 14" \
+              "Ubuntu derivative Mainuan Regular 18" \
+              "Ubuntu derivative Mainuan Medium Regular 18" \
+              "Ubuntu Mono derivative Mainuan Regular 16"; do
               f="$T/$(echo "$font" | tr 'A-Z ' 'a-z_').pf2"
               test -s "$f"
               head -c 120 "$f" | grep -aq "$font"
@@ -245,7 +250,7 @@ jobs:
             test -s $T/icons/mainuan.png
             # Copy in /boot (readable by GRUB) and the guarded options.
             cmp $T/theme.txt /boot/grub/themes/mainuan/theme.txt
-            test "$(ls /boot/grub/themes/mainuan/*.pf2 | wc -l)" = 4
+            test "$(ls /boot/grub/themes/mainuan/*.pf2 | wc -l)" = 5
             sh -n /etc/default/grub.d/60-mainuan-theme.cfg
             ( . /etc/default/grub.d/60-mainuan-theme.cfg
               test "$GRUB_THEME" = /boot/grub/themes/mainuan/theme.txt
