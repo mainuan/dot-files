@@ -37,7 +37,7 @@ mk() {
 }
 mk Ubuntu-R.ttf ubuntu_derivative_mainuan_regular_14.pf2 14 "Ubuntu derivative Mainuan"
 mk Ubuntu-R.ttf ubuntu_derivative_mainuan_regular_18.pf2 18 "Ubuntu derivative Mainuan"
-mk Ubuntu-M.ttf ubuntu_derivative_mainuan_medium_18.pf2 18 "Ubuntu derivative Mainuan"
+mk Ubuntu-M.ttf ubuntu_derivative_mainuan_medium_regular_18.pf2 18 "Ubuntu derivative Mainuan Medium"
 mk UbuntuMono-R.ttf ubuntu_mono_derivative_mainuan_regular_16.pf2 16 "Ubuntu Mono derivative Mainuan"
 # Barlow retains its original family name; the OFL file reserves no name.
 grub-mkfont --range="$range" -s 40 -o "$dst/barlow_bold_40.pf2" "$barlow"
