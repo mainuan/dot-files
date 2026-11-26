@@ -42,7 +42,7 @@ terminal-border: "0"
     height = 45%
     menu_pixmap_style = "menu_*.png"
     item_font = "Ubuntu derivative Mainuan Regular 18"
-    selected_item_font = "Ubuntu derivative Mainuan Medium 18"
+    selected_item_font = "Ubuntu derivative Mainuan Medium Regular 18"
     item_color = "#c3d0d5"
     selected_item_color = "#ffffff"
     item_height = 46
