@@ -8,8 +8,8 @@ results:
 
     python3 tools/boot-art/generate.py
 
-Needs python3 and rsvg-convert (librsvg). GRUB wordmark uses Barlow Bold; keycap letters are rendered with the
-"Ubuntu" family through fontconfig.
+Needs python3 and rsvg-convert (librsvg). Text is rendered with the
+"Noto Sans" family through fontconfig.
 """
 import math
 import os
@@ -225,7 +225,7 @@ def grub_hints():
     up = f'<path d="M0,-6 L5,1 H-5 Z" fill="{TEXT}"/>'
     down = f'<path d="M0,6 L5,-1 H-5 Z" fill="{TEXT}"/>'
     enter = f'<path d="M6,-6 V2 H-5 M-2,-2 L-6,2 L-2,6" fill="none" stroke="{TEXT}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
-    letter = lambda ch: (f'<text x="0" y="5" text-anchor="middle" font-family="Ubuntu" font-weight="500" '
+    letter = lambda ch: (f'<text x="0" y="5" text-anchor="middle" font-family="Noto Sans" font-weight="600" '
                          f'font-size="14" fill="{TEXT}">{ch}</text>')
     nav = f'<path d="M0,-7 V7 M-4,-3 L0,-7 L4,-3 M-4,3 L0,7 L4,3" fill="none" stroke="{m}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
     play = f'<path d="M-4,-6 L6,0 L-4,6 Z" fill="{m}"/>'

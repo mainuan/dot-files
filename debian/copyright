@@ -114,6 +114,7 @@ License: GPL-2+
 Comment: Restauração da identidade visual (pacote mainuan-identity).
 
 Files: tools/boot-art/fonts/Barlow-Bold.ttf
+       tools/boot-art/fonts/OFL.txt
        usr/share/grub/themes/mainuan/barlow_*.pf2
 Copyright: 2017 The Barlow Project Authors (https://github.com/jpt/barlow)
 License: OFL-1.1
