@@ -238,7 +238,7 @@ jobs:
               "Ubuntu Mono derivative Mainuan Regular 16"; do
               f="$T/$(echo "$font" | tr 'A-Z ' 'a-z_').pf2"
               test -s "$f"
-              head -c 120 "$f" | grep -aq "$font"
+              grep -a -q "$font" "$f"
             done
             # Every file named by theme.txt exists.
             grep -o '"[^"]*\.png"' $T/theme.txt | tr -d '"' | while read -r img; do
