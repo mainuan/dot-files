@@ -5,8 +5,10 @@
 #
 # Ubuntu Font Licence 1.0 requires derivative font names to retain the
 # original family name and append a distinguishing derivative name. The
-# Ubuntu PFF2 families are therefore named "Ubuntu derivative Mainuan" and
-# "Ubuntu Mono derivative Mainuan". Barlow is distributed under the OFL.
+# Regular and Mono families use "Ubuntu derivative Mainuan" and
+# "Ubuntu Mono derivative Mainuan". grub-mkfont labels non-bold faces
+# "Regular", so the Medium source gets its own "Ubuntu derivative Mainuan
+# Medium" family alias to avoid a duplicate PFF2 name. Barlow is OFL-licensed.
 set -eu
 if [ "$#" -ne 3 ]; then
     echo "uso: $0 <diretório-ubuntu> <diretório-tema> <Barlow-Bold.ttf>" >&2
