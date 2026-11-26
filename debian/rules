@@ -32,9 +32,13 @@ execute_after_dh_install:
 	test -s $(PKG)/usr/share/calamares/lang/calamares_pt_BR.qm
 	# GRUB theme fonts: Ubuntu derivatives and the Barlow Bold wordmark.
 	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/ubuntu $(GRUBTHEME) tools/boot-art/fonts/Barlow-Bold.ttf
-	for f in $(grep -oE '"(Ubuntu|Barlow)[^"]*"' $(GRUBTHEME)/theme.txt | sort -u | tr -d '"' | tr 'A-Z ' 'a-z_'); do \
-		test -s $(GRUBTHEME)/$f.pf2; \
-	done
+	# Check each PFF2 file referenced by theme.txt; avoid shell-variable expansion
+	# in this Make recipe so every test is executed by the shell.
+	test -s $(GRUBTHEME)/barlow_bold_40.pf2
+	test -s $(GRUBTHEME)/ubuntu_derivative_mainuan_regular_14.pf2
+	test -s $(GRUBTHEME)/ubuntu_derivative_mainuan_regular_18.pf2
+	test -s $(GRUBTHEME)/ubuntu_derivative_mainuan_medium_regular_18.pf2
+	test -s $(GRUBTHEME)/ubuntu_mono_derivative_mainuan_regular_16.pf2
 	# Fontes de tradução, pacote .plasmoid, capturas do leia-me, leia-mes e
 	# licenças dos widgets ficam no pacote-fonte; as licenças estão em
 	# debian/copyright. Os catálogos usados pelo Plasma ficam em
