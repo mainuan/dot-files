@@ -159,7 +159,9 @@ Presentation {
         topRatio: 0.46
         widthRatio: 0.56
         titleRatio: 0.045
-        bodyRatio: 0.026
+        // Portrait crops leave less vertical room in the rounded panel;
+        // use a slightly smaller body size there without shrinking desktop slides.
+        bodyRatio: width > height ? 0.026 : 0.022
         // Keep both paragraphs fully inside the rounded panel, even with
         // longer translations (Spanish, Italian, Portuguese, German, etc.).
         bottomRatio: 0.215
@@ -171,10 +173,11 @@ Presentation {
         heading: qsTr("Proven long-term stability")
         body: qsTr("Mainuan stands for predictability and solidity. It builds on the legacy, solidity, security and technical maturity developed over 19 years of TigerOS development, offering a robust platform ready for the future.\n\n• Continuity first: A system strategically designed so your team’s workflow or activities at home never suffer interruptions.\n\n• Secure updates: A predictable maintenance cycle that ensures long-term stability, free from unexpected system failures.")
         picture: "images/slide-2.png"
-        topRatio: width > height ? 0.26 : 0.24
-        widthRatio: 0.43
+        topRatio: width > height ? 0.26 : 0.22
+        // Portrait artwork leaves a wider text lane on the left.
+        widthRatio: width > height ? 0.43 : 0.50
         titleRatio: 0.039
-        bodyRatio: 0.023
+        bodyRatio: width > height ? 0.023 : 0.021
     }
 
     MainuanSlide {
