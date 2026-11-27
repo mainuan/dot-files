@@ -52,8 +52,9 @@ for lang in "$@"; do
             echo "$lang: renderer timed out after 90s" >&2
         else
             echo "$lang: renderer failed (exit $rc)" >&2
-            status=1
         fi
+        # A timeout is a test failure too; never let a hung locale pass CI.
+        status=1
     }
 done
 exit $status
