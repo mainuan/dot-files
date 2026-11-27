@@ -10,11 +10,12 @@ if [ "$#" -ne 3 ]; then
     exit 2
 fi
 
-src=$1
-dst=$2
-barlow=$3
+src=$(realpath -- "$1")
+dst=$(realpath -m -s -- "$2")
+barlow=$(realpath -- "$3")
 here=$(CDPATH= cd "$(dirname "$0")" && pwd)
 checker="$here/check-grub-theme.py"
+deployer="$here/deploy-grub-theme.sh"
 
 command -v grub-mkfont >/dev/null 2>&1 || {
     echo "grub-mkfont não encontrado (instale grub-common)" >&2
@@ -32,6 +33,10 @@ command -v python3 >/dev/null 2>&1 || {
     echo "validador PFF2 ausente: $checker" >&2
     exit 1
 }
+[ -f "$deployer" ] || {
+    echo "publicador transacional do tema ausente: $deployer" >&2
+    exit 1
+}
 
 for font in Ubuntu-R.ttf Ubuntu-M.ttf UbuntuMono-R.ttf; do
     if [ ! -s "$src/$font" ]; then
@@ -44,10 +49,12 @@ done
     exit 1
 }
 
-mkdir -p "$dst"
-tmp=$(mktemp -d "$dst/.grub-fonts.XXXXXX")
+work=$(mktemp -d "${TMPDIR:-/tmp}/mainuan-grub-fonts.XXXXXX")
+tmp="$work/fonts"
+candidate="$work/theme"
+mkdir -p "$tmp" "$candidate"
 cleanup() {
-    rm -rf "$tmp"
+    rm -rf "$work"
 }
 trap cleanup EXIT
 trap 'exit 1' HUP INT TERM
@@ -69,19 +76,21 @@ mk UbuntuMono-R.ttf ubuntu_mono_derivative_mainuan_regular_16.pf2 16 "Ubuntu Mon
 grub-mkfont --range="$range" -s 40 \
     -o "$tmp/barlow_bold_40.pf2" "$barlow"
 
-# Validate the generated data before replacing any previous build outputs.
+# Validate generated fonts against the current theme before touching the live
+# output. The candidate is outside the destination so the complete theme can
+# be published through the rollback-safe deployment helper.
 python3 "$checker" --theme-dir "$dst" --font-dir "$tmp"
 
-# The GRUB theme loader auto-discovers every *.pf2 in this directory. Remove
-# obsolete outputs so an old Noto font cannot shadow or clutter the new set.
-find "$dst" -maxdepth 1 -type f -name '*.pf2' -delete
+cp -a "$dst/." "$candidate/"
+find "$candidate" -maxdepth 1 -type f -name '*.pf2' -delete
 for font in "$tmp"/*.pf2; do
     [ -s "$font" ] || {
         echo "arquivo PFF2 gerado ausente ou vazio: $font" >&2
         exit 1
     }
-    mv "$font" "$dst/"
+    install -m 0644 "$font" "$candidate/"
 done
+python3 "$checker" --theme-dir "$candidate"
+sh "$deployer" "$candidate" "$dst"
 
-trap - EXIT HUP INT TERM
-cleanup
+echo "Fontes PFF2 publicadas com validação e rollback: $dst"

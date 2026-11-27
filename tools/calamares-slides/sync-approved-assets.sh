@@ -20,7 +20,32 @@ TARGET_TOOLS="$REPO_ROOT/tools/calamares-slides"
 TARGET_TRANSLATIONS="$TARGET_TOOLS/lang"
 TARGET_CALAMARES_LANG="$REPO_ROOT/rootfs/usr/share/calamares/lang"
 
-[[ -s "$SOURCE_QML" ]] || { echo "Erro: QML aprovado ausente: $SOURCE_QML" >&2; exit 1; }
+path_has_symlink() {
+    local candidate=$1
+    while [[ "$candidate" != "/" ]]; do
+        [[ ! -L "$candidate" ]] || return 0
+        candidate="${candidate%/*}"
+        [[ -n "$candidate" ]] || candidate="/"
+    done
+    return 1
+}
+for path in "$TARGET_BRANDING" "$TARGET_BRANDING/images" "$TARGET_BRANDING/lang" \
+            "$TARGET_TOOLS" "$TARGET_TRANSLATIONS" "$TARGET_CALAMARES_LANG"; do
+    if path_has_symlink "$path"; then
+        echo "Erro: caminho de destino contém componente simbólico: $path" >&2
+        exit 1
+    fi
+done
+for path in "$TARGET_BRANDING/show.qml" "$TARGET_TOOLS/show.qml" \
+            "$TARGET_CALAMARES_LANG/calamares_pt_BR.qm"; do
+    [[ ! -L "$path" ]] || {
+        echo "Erro: arquivo de destino é link simbólico: $path" >&2
+        exit 1
+    }
+done
+
+[[ -s "$SOURCE_QML" && ! -L "$SOURCE_QML" ]] || { echo "Erro: QML aprovado ausente, vazio ou simbólico: $SOURCE_QML" >&2; exit 1; }
+[[ ! -L "$SOURCE_QM_DIR" ]] || { echo "Erro: diretório de catálogos-fonte é simbólico: $SOURCE_QM_DIR" >&2; exit 1; }
 [[ -d "$SOURCE_QM_DIR" ]] || { echo "Erro: diretório de catálogos compilados ausente: $SOURCE_QM_DIR" >&2; exit 1; }
 [[ -s "$SOURCE_CALAMARES_QM" ]] || { echo "Erro: catálogo pt_BR do Calamares corrigido não encontrado: $SOURCE_CALAMARES_QM" >&2; exit 1; }
 
@@ -33,19 +58,43 @@ if (( ${#qm_files[@]} != 34 )); then
     echo "Erro: esperados 34 catálogos compilados do slideshow; encontrados ${#qm_files[@]}." >&2
     exit 1
 fi
+for qm in "${qm_files[@]}"; do
+    [[ -s "$qm" && ! -L "$qm" ]] || {
+        echo "Erro: catálogo aprovado ausente, vazio ou simbólico: $qm" >&2
+        exit 1
+    }
+done
 
 for n in 1 2 3 4 5; do
-    [[ -s "$SOURCE_IMAGES/slide-$n.png" ]] || {
-        echo "Erro: imagem aprovada ausente: $SOURCE_IMAGES/slide-$n.png" >&2
+    [[ -s "$SOURCE_IMAGES/slide-$n.png" && ! -L "$SOURCE_IMAGES/slide-$n.png" ]] || {
+        echo "Erro: imagem aprovada ausente, vazia ou simbólica: $SOURCE_IMAGES/slide-$n.png" >&2
         exit 1
     }
 done
 
 TMP_DIR="$(mktemp -d)"
+SYNC_STARTED=0
+BACKUP=""
+declare -a ROLLBACK_RELS=()
 cleanup() {
-    local rc=$?
-    if (( rc != 0 )) && [[ -n "${BACKUP:-}" && -d "${BACKUP:-}" ]]; then
-        echo "Falha na sincronização; o backup foi preservado em: $BACKUP" >&2
+    local rc=$? restore_failed=0 rel target
+    if (( rc != 0 && SYNC_STARTED == 1 )); then
+        echo "Falha na sincronização; restaurando o estado anterior..." >&2
+        for rel in "${ROLLBACK_RELS[@]}"; do
+            target="$REPO_ROOT/$rel"
+            rm -rf -- "$target" || restore_failed=1
+            if [[ -e "$BACKUP/$rel" || -L "$BACKUP/$rel" ]]; then
+                mkdir -p -- "$(dirname -- "$target")" || restore_failed=1
+                cp -a -- "$BACKUP/$rel" "$target" || restore_failed=1
+            fi
+        done
+        if (( restore_failed )); then
+            echo "ERRO CRÍTICO: rollback incompleto; preserve e inspecione o backup: $BACKUP" >&2
+        else
+            echo "Rollback concluído; backup integral preservado em: $BACKUP" >&2
+        fi
+    elif (( rc != 0 )) && [[ -n "$BACKUP" && -d "$BACKUP" ]]; then
+        echo "Falha antes da sincronização; backup preservado em: $BACKUP" >&2
     fi
     rm -rf -- "$TMP_DIR"
     return "$rc"
@@ -106,31 +155,49 @@ PY
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP_DIR="${BACKUP_DIR:-$HOME/Downloads}"
-BACKUP="$BACKUP_DIR/dot-files-calamares-backup-$STAMP"
-mkdir -p "$BACKUP"
+mkdir -p "$BACKUP_DIR"
+BACKUP="$(mktemp -d "$BACKUP_DIR/dot-files-calamares-backup-$STAMP.XXXXXX")"
 
-# Preserve the repository state before replacing any tracked artifact.
-for item in \
-    "$TARGET_BRANDING/show.qml" \
-    "$TARGET_BRANDING/images" \
-    "$TARGET_BRANDING/lang" \
-    "$TARGET_TOOLS/show.qml" \
-    "$TARGET_TRANSLATIONS" \
-    "$TARGET_CALAMARES_LANG/calamares_pt_BR.qm"; do
-    if [[ -e "$item" ]]; then
-        rel="${item#"$REPO_ROOT"/}"
+# Preserve every path touched below. Missing paths are recorded too, so a
+# failed first-time sync removes newly created files/directories on rollback.
+backup_items=(
+    "$TARGET_BRANDING/show.qml"
+    "$TARGET_BRANDING/images"
+    "$TARGET_BRANDING/lang"
+    "$TARGET_TOOLS/show.qml"
+    "$TARGET_TRANSLATIONS"
+    "$TARGET_CALAMARES_LANG/calamares_pt_BR.qm"
+)
+for old in "$TARGET_BRANDING"/slides_*.png; do
+    [[ -e "$old" || -L "$old" ]] || continue
+    backup_items+=("$old")
+done
+for item in "${backup_items[@]}"; do
+    rel="${item#"$REPO_ROOT"/}"
+    ROLLBACK_RELS+=("$rel")
+    if [[ -e "$item" || -L "$item" ]]; then
+        [[ ! -L "$item" ]] || {
+            echo "Erro: não sincronizo sobre link simbólico: $item" >&2
+            exit 1
+        }
         mkdir -p "$BACKUP/$(dirname "$rel")"
         cp -a -- "$item" "$BACKUP/$rel"
     fi
 done
+SYNC_STARTED=1
 
 mkdir -p "$TARGET_BRANDING/images" "$TARGET_BRANDING/lang" \
          "$TARGET_TRANSLATIONS" "$TARGET_CALAMARES_LANG"
 
 # Remove obsolete slide assets before copying the approved set. The backup
 # above preserves the previous state if a later validation needs recovery.
-find "$TARGET_BRANDING/images" -maxdepth 1 -name 'slide-*.png' -delete
-find "$TARGET_BRANDING/lang" -maxdepth 1 -name 'calamares-vendor_*.qm' -delete
+find "$TARGET_BRANDING/images" -maxdepth 1 \( -type f -o -type l \) -name 'slide-*.png' -delete
+find "$TARGET_BRANDING/lang" -maxdepth 1 \( -type f -o -type l \) -name 'calamares-vendor_*.qm' -delete
+find "$TARGET_TRANSLATIONS" -maxdepth 1 \( -type f -o -type l \) -name 'calamares-vendor_*.ts' -delete
+for old in "$TARGET_BRANDING"/slides_*.png; do
+    [[ -e "$old" || -L "$old" ]] || continue
+    rm -rf -- "$old"
+done
 
 echo "=== Instalando recursos aprovados em rootfs/ e tools/ ==="
 install -m 0644 "$SOURCE_QML" "$TARGET_BRANDING/show.qml"
@@ -158,6 +225,11 @@ done
 cmp -s "$SOURCE_CALAMARES_QM" "$TARGET_CALAMARES_LANG/calamares_pt_BR.qm"
 test "$(find "$TARGET_BRANDING/images" -maxdepth 1 -type f -name 'slide-*.png' | wc -l)" -eq 5
 test "$(find "$TARGET_BRANDING/lang" -maxdepth 1 -type f -name 'calamares-vendor_*.qm' | wc -l)" -eq 34
+test "$(find "$TARGET_TRANSLATIONS" -maxdepth 1 -type f -name 'calamares-vendor_*.ts' | wc -l)" -eq 34
+if compgen -G "$TARGET_BRANDING/slides_*.png" >/dev/null; then
+    echo "Erro: recursos antigos slides_*.png ainda estão no branding." >&2
+    exit 1
+fi
 
 echo
 echo "SUCESSO: QML aprovado sincronizado em rootfs/ e tools/."

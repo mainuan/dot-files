@@ -14,7 +14,9 @@ execute_after_dh_install:
 	# initramfs hook does not follow links out of the theme directory).
 	test -s $(PKG)/usr/share/plymouth/themes/mainuan/throbber-0048.png
 	if find $(PKG)/usr/share/plymouth -type l | grep .; then exit 1; fi
-	# Calamares slideshow translations (Qt): lang/calamares-vendor_<lang>.qm.
+	# Calamares slideshow: match all 34 complete TS catalogs to qsTr() and
+	# the packaged QM set before compiling the catalogs used in the ISO.
+	python3 tools/calamares-slides/validate-translations.py
 	mkdir -p $(PKG)/etc/calamares/branding/vendor/lang
 	for ts in tools/calamares-slides/lang/calamares-vendor_*.ts; do \
 		/usr/lib/qt6/bin/lrelease -silent $$ts -qm $(PKG)/etc/calamares/branding/vendor/lang/$$(basename $$ts .ts).qm; \

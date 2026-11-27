@@ -46,9 +46,11 @@ jobs:
         sh -n tools/boot-art/make-grub-fonts.sh
         sh -n tools/boot-art/deploy-grub-theme.sh
         sh -n tools/boot-art/test-grub-deploy.sh
+        sh -n tools/boot-art/test-grub-fonts.sh
         bash -n tools/boot-art/preview-grub.sh
         python3 -I -c 'import ast, sys; [ast.parse(open(f, encoding="utf-8").read(), f) for f in sys.argv[1:]]' tools/boot-art/generate.py tools/boot-art/check-grub-theme.py
         sh tools/boot-art/test-grub-deploy.sh
+        sh tools/boot-art/test-grub-fonts.sh
         sh -n rootfs/etc/default/grub.d/60-mainuan-theme.cfg
         # Plasma: validar o desktop, o papel de parede e os provedores dos widgets externos.
         python3 -I tools/check-plasma-layout.py \
@@ -170,7 +172,7 @@ jobs:
         grep -Fq 'qsTr("Welcome to Mainuan!")' "$V/show.qml"
         test "$(ls $V/images/slide-*.png | wc -l)" = 5
         if ls $V/slides_*.png 2>/dev/null; then exit 1; fi
-        test "$(ls $V/lang/calamares-vendor_*.qm | wc -l)" -ge 33
+        test "$(ls $V/lang/calamares-vendor_*.qm | wc -l)" -eq 34
         # Calamares catalogs with fixed %N placeholders (read before the
         # built-in copies): pt_BR summary says "fuso horário para %1".
         test "$(ls /usr/share/calamares/lang/calamares_*.qm | wc -l)" = 9

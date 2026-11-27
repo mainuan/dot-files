@@ -157,12 +157,12 @@ Presentation {
         picture: "images/slide-1.png"
         leftRatio: 0.095
         topRatio: 0.46
-        // Portrait crops expose a wider text lane but a shorter rounded panel.
-        widthRatio: width > height ? 0.56 : 0.62
+        // Keep long translations inside the rounded panel in both orientations.
+        widthRatio: width > height ? 0.60 : 0.62
         titleRatio: width > height ? 0.045 : 0.038
         bodyRatio: width > height ? 0.026 : 0.020
-        // Keep the copy inside the panel border in both aspect ratios.
-        bottomRatio: 0.238
+        // Landscape has more panel depth; portrait uses a shorter visible panel.
+        bottomRatio: width > height ? 0.215 : 0.238
         headingColor: "#43b3d3"
     }
 

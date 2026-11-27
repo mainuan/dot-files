@@ -38,7 +38,10 @@ if not PACKAGED_QM_DIR.is_dir():
     raise SystemExit(f"ERRO: diretório de catálogos compilados ausente: {PACKAGED_QM_DIR}")
 qm_paths = list(PACKAGED_QM_DIR.glob("calamares-vendor_*.qm"))
 actual_qm = {p.name for p in qm_paths}
-invalid_qm = sorted(p.name for p in qm_paths if not p.is_file() or p.stat().st_size == 0)
+invalid_qm = sorted(
+    p.name for p in qm_paths
+    if p.is_symlink() or not p.is_file() or p.stat().st_size == 0
+)
 if actual_qm != expected_qm or invalid_qm:
     missing = sorted(expected_qm - actual_qm)
     extra = sorted(actual_qm - expected_qm)
@@ -68,10 +71,18 @@ for path in files:
 
     for message in messages:
         source = message.findtext("source", default="")
-        translation = message.findtext("translation", default="")
+        translation_node = message.find("translation")
         if not source.strip():
             raise SystemExit(f"ERRO: {path.name}: string-fonte vazia")
-        if not translation.strip() or message.find("translation") is None:
+        if translation_node is None:
+            raise SystemExit(f"ERRO: {path.name}: elemento de tradução ausente para {source[:50]!r}")
+        translation_status = translation_node.get("type", "")
+        if translation_status in {"unfinished", "vanished", "obsolete"}:
+            raise SystemExit(
+                f"ERRO: {path.name}: tradução {translation_status!r} para {source[:50]!r}"
+            )
+        translation = "".join(translation_node.itertext())
+        if not translation.strip():
             raise SystemExit(f"ERRO: {path.name}: tradução vazia para {source[:50]!r}")
 
     print(f"OK {path.name}: 10 mensagens correspondentes ao QML")
