@@ -691,8 +691,12 @@ jobs:
           (cd /tmp && apt-get download calamares-data && dpkg-deb -x calamares-data_*.deb calamares)
           Q=/tmp/calamares/usr/share/calamares/qml
           test -s $Q/calamares/slideshow/Slide.qml
-          tools/calamares-slides/check.sh $Q
+          # Keep both the source QML copies and all translation keys in sync.
+          cmp rootfs/etc/calamares/branding/vendor/show.qml tools/calamares-slides/show.qml
+          python3 tools/calamares-slides/validate-translations.py
+          # Capture representative locales even if the full matrix fails.
           tools/calamares-slides/check.sh $Q captures en pt_BR ar
+          tools/calamares-slides/check.sh $Q
 
       - name: Upload captures
         if: always()
