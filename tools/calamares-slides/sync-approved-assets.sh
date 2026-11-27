@@ -42,7 +42,15 @@ for n in 1 2 3 4 5; do
 done
 
 TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
+cleanup() {
+    local rc=$?
+    if (( rc != 0 )) && [[ -n "${BACKUP:-}" && -d "${BACKUP:-}" ]]; then
+        echo "Falha na sincronização; o backup foi preservado em: $BACKUP" >&2
+    fi
+    rm -rf -- "$TMP_DIR"
+    return "$rc"
+}
+trap cleanup EXIT
 STAGED_TS="$TMP_DIR/lang"
 mkdir -p "$STAGED_TS"
 

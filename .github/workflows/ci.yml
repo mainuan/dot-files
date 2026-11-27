@@ -699,6 +699,12 @@ jobs:
           bash -n tools/calamares-slides/build-translations.sh tools/calamares-slides/sync-approved-assets.sh tools/calamares-slides/patch-installer-welcome-pt_BR.sh
           python3 -m py_compile tools/calamares-slides/validate-translations.py
           catalog_test="$(mktemp -d)"
+          if bash tools/calamares-slides/build-translations.sh /; then
+            echo "::error::the compiler accepted / as a destination"; exit 1
+          fi
+          if bash tools/calamares-slides/build-translations.sh "$GITHUB_WORKSPACE/tools/calamares-slides/lang"; then
+            echo "::error::the compiler accepted its own source directory"; exit 1
+          fi
           mkdir -p "$catalog_test/lang"
           printf 'preserve me\n' > "$catalog_test/lang/keep.txt"
           printf 'obsolete\n' > "$catalog_test/lang/calamares-vendor_obsolete.qm"

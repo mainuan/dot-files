@@ -10,6 +10,10 @@ if [[ $# -ne 1 ]]; then
     exit 2
 fi
 TARGET_DIR="$(realpath -m -- "$1")"
+if [[ "$TARGET_DIR" == "/" || "$TARGET_DIR" == "$SOURCE_DIR" || "$(basename -- "$TARGET_DIR")" != "lang" ]]; then
+    echo "Erro: o destino deve ser um diretório 'lang' dedicado, diferente da pasta de fontes: $TARGET_DIR" >&2
+    exit 2
+fi
 
 find_lrelease() {
     local candidate
