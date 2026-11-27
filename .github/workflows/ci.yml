@@ -696,10 +696,9 @@ jobs:
           python3 tools/calamares-slides/validate-translations.py
           # Capture representative locales even if the full matrix fails.
           tools/calamares-slides/check.sh $Q captures en pt_BR ar
-          # Keep diagnostic screenshots for the long translations in portrait mode.
+          # Capture the portrait layouts that exposed the previous overflows.
+          # The full matrix below remains authoritative for pass/fail.
           SLIDE_SIZES=700x760 tools/calamares-slides/check.sh $Q captures fa hi nl ur || true
-          # The full matrix below is authoritative; the diagnostic render above
-          # is allowed to record the known overflows before their responsive fix.
           tools/calamares-slides/check.sh $Q
 
       - name: Upload captures
