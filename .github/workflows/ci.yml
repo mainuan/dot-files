@@ -694,6 +694,35 @@ jobs:
           # Keep both the source QML copies and all translation keys in sync.
           cmp rootfs/etc/calamares/branding/vendor/show.qml tools/calamares-slides/show.qml
           python3 tools/calamares-slides/validate-translations.py
+          # Syntax-check the maintenance scripts and test transactional catalog replacement.
+          sh -n tools/calamares-slides/check.sh
+          bash -n tools/calamares-slides/build-translations.sh tools/calamares-slides/sync-approved-assets.sh tools/calamares-slides/patch-installer-welcome-pt_BR.sh
+          python3 -m py_compile tools/calamares-slides/validate-translations.py
+          catalog_test="$(mktemp -d)"
+          mkdir -p "$catalog_test/lang"
+          printf 'preserve me\\n' > "$catalog_test/lang/keep.txt"
+          printf 'obsolete\\n' > "$catalog_test/lang/calamares-vendor_obsolete.qm"
+          cat > "$catalog_test/fake-lrelease" <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          n=0
+          [[ ! -f "$LRELEASE_COUNT_FILE" ]] || n="$(cat "$LRELEASE_COUNT_FILE")"
+          n=$((n + 1))
+          printf '%s\\n' "$n" > "$LRELEASE_COUNT_FILE"
+          [[ "$n" -ne 3 ]] || exit 42
+          printf 'fake catalog\\n' > "${@: -1}"
+          SH
+          chmod +x "$catalog_test/fake-lrelease"
+          if LRELEASE="$catalog_test/fake-lrelease" LRELEASE_COUNT_FILE="$catalog_test/count" tools/calamares-slides/build-translations.sh "$catalog_test/lang"; then
+            echo "::error::the injected lrelease failure was not propagated"; exit 1
+          fi
+          test "$(cat "$catalog_test/lang/keep.txt")" = 'preserve me'
+          test "$(cat "$catalog_test/lang/calamares-vendor_obsolete.qm")" = obsolete
+          tools/calamares-slides/build-translations.sh "$catalog_test/lang"
+          test "$(cat "$catalog_test/lang/keep.txt")" = 'preserve me'
+          test ! -e "$catalog_test/lang/calamares-vendor_obsolete.qm"
+          test "$(find "$catalog_test/lang" -maxdepth 1 -type f -name 'calamares-vendor_*.qm' | wc -l)" -eq 34
+          rm -rf "$catalog_test"
           # Capture representative locales even if the full matrix fails.
           tools/calamares-slides/check.sh $Q captures en pt_BR ar
           # Capture the portrait layouts that exposed the previous overflows.

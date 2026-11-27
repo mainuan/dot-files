@@ -121,8 +121,8 @@ mkdir -p "$TARGET_BRANDING/images" "$TARGET_BRANDING/lang" \
 
 # Remove obsolete slide assets before copying the approved set. The backup
 # above preserves the previous state if a later validation needs recovery.
-find "$TARGET_BRANDING/images" -maxdepth 1 -type f -name 'slide-*.png' -delete
-find "$TARGET_BRANDING/lang" -maxdepth 1 -type f -name 'calamares-vendor_*.qm' -delete
+find "$TARGET_BRANDING/images" -maxdepth 1 -name 'slide-*.png' -delete
+find "$TARGET_BRANDING/lang" -maxdepth 1 -name 'calamares-vendor_*.qm' -delete
 
 echo "=== Instalando recursos aprovados em rootfs/ e tools/ ==="
 install -m 0644 "$SOURCE_QML" "$TARGET_BRANDING/show.qml"

@@ -75,7 +75,7 @@ STAGE_DIR="$(mktemp -d "$TARGET_PARENT/.${TARGET_NAME}.new.XXXXXX")"
 if [[ -d "$TARGET_DIR" ]]; then
     cp -a -- "$TARGET_DIR/." "$STAGE_DIR/"
 fi
-find "$STAGE_DIR" -maxdepth 1 -type f -name 'calamares-vendor_*.qm' -delete
+find "$STAGE_DIR" -maxdepth 1 -name 'calamares-vendor_*.qm' -delete
 install -m 0644 "$TMP_DIR"/calamares-vendor_*.qm "$STAGE_DIR"/
 test "$(find "$STAGE_DIR" -maxdepth 1 -type f -name 'calamares-vendor_*.qm' | wc -l)" -eq 34
 
