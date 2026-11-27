@@ -700,17 +700,17 @@ jobs:
           python3 -m py_compile tools/calamares-slides/validate-translations.py
           catalog_test="$(mktemp -d)"
           mkdir -p "$catalog_test/lang"
-          printf 'preserve me\\n' > "$catalog_test/lang/keep.txt"
-          printf 'obsolete\\n' > "$catalog_test/lang/calamares-vendor_obsolete.qm"
+          printf 'preserve me\n' > "$catalog_test/lang/keep.txt"
+          printf 'obsolete\n' > "$catalog_test/lang/calamares-vendor_obsolete.qm"
           cat > "$catalog_test/fake-lrelease" <<'SH'
           #!/usr/bin/env bash
           set -euo pipefail
           n=0
           [[ ! -f "$LRELEASE_COUNT_FILE" ]] || n="$(cat "$LRELEASE_COUNT_FILE")"
           n=$((n + 1))
-          printf '%s\\n' "$n" > "$LRELEASE_COUNT_FILE"
+          printf '%s\n' "$n" > "$LRELEASE_COUNT_FILE"
           [[ "$n" -ne 3 ]] || exit 42
-          printf 'fake catalog\\n' > "${@: -1}"
+          printf 'fake catalog\n' > "${@: -1}"
           SH
           chmod +x "$catalog_test/fake-lrelease"
           if LRELEASE="$catalog_test/fake-lrelease" LRELEASE_COUNT_FILE="$catalog_test/count" tools/calamares-slides/build-translations.sh "$catalog_test/lang"; then
