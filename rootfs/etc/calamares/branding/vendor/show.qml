@@ -119,7 +119,7 @@ Presentation {
                     font.family: "Noto Sans"
                     font.pixelSize: slide.bodyPixels
                     fontSizeMode: Text.Fit
-                    minimumPixelSize: 12
+                    minimumPixelSize: 9
                     wrapMode: Text.WordWrap
                     lineHeight: 1.16
                     textFormat: Text.PlainText
