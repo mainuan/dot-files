@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 BASE = Path(__file__).resolve().parent
 ROOT = BASE / "lang"
 QML = BASE / "show.qml"
+PACKAGED_QM_DIR = BASE.parents[1] / "rootfs/etc/calamares/branding/vendor/lang"
 EXPECTED_LOCALES = {
     "ar", "bn", "cs", "da", "de", "el", "es", "fa", "fi", "fr", "he", "hi", "hu",
     "id", "it", "ja", "ko", "nb", "nl", "pl", "pt", "pt_BR", "pt_PT", "ro", "ru",
@@ -30,6 +31,16 @@ files = sorted(ROOT.glob("calamares-vendor_*.ts"))
 locales = {p.stem.removeprefix("calamares-vendor_") for p in files}
 if locales != EXPECTED_LOCALES:
     raise SystemExit(f"ERRO: conjunto de idiomas incorreto: {sorted(locales ^ EXPECTED_LOCALES)}")
+
+# The package must ship exactly the same 34 compiled catalogs as the sources.
+expected_qm = {f"calamares-vendor_{locale}.qm" for locale in EXPECTED_LOCALES}
+if not PACKAGED_QM_DIR.is_dir():
+    raise SystemExit(f"ERRO: diretório de catálogos compilados ausente: {PACKAGED_QM_DIR}")
+actual_qm = {p.name for p in PACKAGED_QM_DIR.glob("calamares-vendor_*.qm")}
+if actual_qm != expected_qm:
+    missing = sorted(expected_qm - actual_qm)
+    extra = sorted(actual_qm - expected_qm)
+    raise SystemExit(f"ERRO: catálogos QM divergentes. Ausentes: {missing}; extras: {extra}")
 
 for path in files:
     try:
