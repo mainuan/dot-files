@@ -36,14 +36,16 @@ if locales != EXPECTED_LOCALES:
 expected_qm = {f"calamares-vendor_{locale}.qm" for locale in EXPECTED_LOCALES}
 if not PACKAGED_QM_DIR.is_dir():
     raise SystemExit(f"ERRO: diretório de catálogos compilados ausente: {PACKAGED_QM_DIR}")
-actual_qm = {
-    p.name for p in PACKAGED_QM_DIR.glob("calamares-vendor_*.qm")
-    if p.is_file() and p.stat().st_size > 0
-}
-if actual_qm != expected_qm:
+qm_paths = list(PACKAGED_QM_DIR.glob("calamares-vendor_*.qm"))
+actual_qm = {p.name for p in qm_paths}
+invalid_qm = sorted(p.name for p in qm_paths if not p.is_file() or p.stat().st_size == 0)
+if actual_qm != expected_qm or invalid_qm:
     missing = sorted(expected_qm - actual_qm)
     extra = sorted(actual_qm - expected_qm)
-    raise SystemExit(f"ERRO: catálogos QM divergentes. Ausentes: {missing}; extras: {extra}")
+    raise SystemExit(
+        f"ERRO: catálogos QM divergentes. Ausentes: {missing}; extras: {extra}; "
+        f"inválidos/vazios: {invalid_qm}"
+    )
 
 for path in files:
     try:
