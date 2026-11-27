@@ -9,8 +9,8 @@ Build-Depends: debhelper-compat (= 13),
                python3:any,
                qt6-l10n-tools,
                gettext <!nocheck>,
-               librsvg2-bin <!nocheck>,
-               python3-pil <!nocheck>,
+               librsvg2-bin,
+               python3-pil,
                python3 <!nocheck>,
 Standards-Version: 4.7.2
 Rules-Requires-Root: no

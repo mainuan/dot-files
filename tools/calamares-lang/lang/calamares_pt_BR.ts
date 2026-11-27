@@ -1151,22 +1151,22 @@ O instalador será fechado e todas as alterações serão perdidas.</translation
     <message>
       <location filename="../src/modules/welcome/Config.cpp" line="264"/>
       <source>&lt;h1&gt;Welcome to the Calamares setup program for %1&lt;/h1&gt;</source>
-      <translation>&lt;h1&gt;Bem-vindo ao programa de configuração Calamares para %1&lt;/h1&gt;</translation>
+      <translation>&lt;h1&gt;Boas-vindas ao programa de configuração Calamares para %1&lt;/h1&gt;</translation>
     </message>
     <message>
       <location filename="../src/modules/welcome/Config.cpp" line="265"/>
       <source>&lt;h1&gt;Welcome to %1 setup&lt;/h1&gt;</source>
-      <translation>&lt;h1&gt;Bem-vindo à configuração de %1&lt;/h1&gt;</translation>
+      <translation>&lt;h1&gt;Boas-vindas à configuração de %1&lt;/h1&gt;</translation>
     </message>
     <message>
       <location filename="../src/modules/welcome/Config.cpp" line="269"/>
       <source>&lt;h1&gt;Welcome to the Calamares installer for %1&lt;/h1&gt;</source>
-      <translation>&lt;h1&gt;Bem-vindo ao instalador Calamares para %1&lt;/h1&gt;</translation>
+      <translation>&lt;h1&gt;Boas-vindas ao instalador Calamares para %1&lt;/h1&gt;</translation>
     </message>
     <message>
       <location filename="../src/modules/welcome/Config.cpp" line="270"/>
       <source>&lt;h1&gt;Welcome to the %1 installer&lt;/h1&gt;</source>
-      <translation>&lt;h1&gt;Bem-vindo ao instalador de %1&lt;/h1&gt;</translation>
+      <translation>&lt;h1&gt;Boas-vindas ao instalador de %1&lt;/h1&gt;</translation>
     </message>
   </context>
   <context>
@@ -4644,7 +4644,7 @@ Saída:
       <location filename="../src/modules/welcomeq/WelcomeQmlViewStep.cpp" line="40"/>
       <source>Welcome</source>
       <comment>@title</comment>
-      <translation>Bem-vindo</translation>
+      <translation>Boas-vindas</translation>
     </message>
   </context>
   <context>
@@ -4653,7 +4653,7 @@ Saída:
       <location filename="../src/modules/welcome/WelcomeViewStep.cpp" line="46"/>
       <source>Welcome</source>
       <comment>@title</comment>
-      <translation>Bem-vindo</translation>
+      <translation>Boas-vindas</translation>
     </message>
   </context>
   <context>

@@ -11,6 +11,7 @@ results:
 Needs python3 and rsvg-convert (librsvg). Text is rendered with the
 "Ubuntu" family through fontconfig.
 """
+import argparse
 import math
 import os
 import shutil
@@ -274,8 +275,33 @@ def splash():
     shutil.rmtree(tmp)
 
 
-if __name__ == "__main__":
-    plymouth()
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--only", choices=("all", "grub"), default="all",
+        help="gera toda a arte de boot (padrão) ou apenas os recursos do GRUB",
+    )
+    parser.add_argument(
+        "--grub-dir", type=str,
+        help="diretório de saída do tema GRUB (usado com --only grub)",
+    )
+    args = parser.parse_args()
+
+    if args.grub_dir and args.only != "grub":
+        parser.error("--grub-dir só pode ser usado com --only grub")
+
+    global GRUB
+    if args.grub_dir:
+        GRUB = os.path.abspath(args.grub_dir)
+        os.makedirs(GRUB, exist_ok=True)
+
+    if args.only == "all":
+        plymouth()
     grub()
-    splash()
+    if args.only == "all":
+        splash()
     print("ok")
+
+
+if __name__ == "__main__":
+    main()

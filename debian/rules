@@ -30,15 +30,12 @@ execute_after_dh_install:
 		/usr/lib/qt6/bin/lrelease -silent $$ts -qm $(PKG)/usr/share/calamares/lang/$$(basename $$ts .ts).qm; \
 	done
 	test -s $(PKG)/usr/share/calamares/lang/calamares_pt_BR.qm
-	# GRUB theme fonts: Ubuntu derivatives and the Barlow Bold wordmark.
+	# Regenerate the GRUB images in the package staging area. This refreshes
+	# hints.png too, so the key labels use Ubuntu rather than stale bitmap text.
+	python3 tools/boot-art/generate.py --only grub --grub-dir $(GRUBTHEME)
+	# Generate, parse and validate the five PFF2 files before packaging them.
 	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/ubuntu $(GRUBTHEME) tools/boot-art/fonts/Barlow-Bold.ttf
-	# Check each PFF2 file referenced by theme.txt; avoid shell-variable expansion
-	# in this Make recipe so every test is executed by the shell.
-	test -s $(GRUBTHEME)/barlow_bold_40.pf2
-	test -s $(GRUBTHEME)/ubuntu_derivative_mainuan_regular_14.pf2
-	test -s $(GRUBTHEME)/ubuntu_derivative_mainuan_regular_18.pf2
-	test -s $(GRUBTHEME)/ubuntu_derivative_mainuan_medium_regular_18.pf2
-	test -s $(GRUBTHEME)/ubuntu_mono_derivative_mainuan_regular_16.pf2
+	python3 tools/boot-art/check-grub-theme.py --theme-dir $(GRUBTHEME)
 	# Fontes de tradução, pacote .plasmoid, capturas do leia-me, leia-mes e
 	# licenças dos widgets ficam no pacote-fonte; as licenças estão em
 	# debian/copyright. Os catálogos usados pelo Plasma ficam em

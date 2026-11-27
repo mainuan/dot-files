@@ -1,18 +1,15 @@
 #!/bin/sh
 set -e
 
-# The GRUB theme is read at boot from /boot/grub/themes/mainuan: /boot is
-# always readable by GRUB, even when /usr is on another (or encrypted)
-# file system. The copy is replaced as a whole on every configure.
+# The GRUB theme is read from /boot so it remains available when /usr is on
+# another filesystem. The deployment helper stages and validates a complete
+# copy, then atomically renames it into place with rollback on failure.
 case "$1" in
     configure)
-        mkdir -p /boot/grub/themes
-        rm -rf /boot/grub/themes/mainuan.dpkg-new
-        cp -r /usr/share/grub/themes/mainuan /boot/grub/themes/mainuan.dpkg-new
-        rm -rf /boot/grub/themes/mainuan
-        mv /boot/grub/themes/mainuan.dpkg-new /boot/grub/themes/mainuan
-        # Only on an installed system: in an image being built (no grub.cfg)
-        # the installer runs update-grub later.
+        /usr/libexec/mainuan-grub-theme/deploy-grub-theme.sh \
+            /usr/share/grub/themes/mainuan /boot/grub/themes/mainuan
+        # During image construction there may not be a grub.cfg yet; the
+        # installer runs update-grub later. On an installed system, refresh it.
         if [ -e /boot/grub/grub.cfg ] && command -v update-grub >/dev/null 2>&1; then
             update-grub || echo "mainuan-grub-theme: update-grub falhou; rode-o de novo para aplicar o tema" >&2
         fi

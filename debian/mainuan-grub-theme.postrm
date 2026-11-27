@@ -1,11 +1,13 @@
 #!/bin/sh
 set -e
 
-# Removing the copy in /boot also disables 60-mainuan-theme.cfg (its options
-# only apply while the theme exists), so GRUB goes back to its defaults.
+# Removing these Mainuan-owned directories disables 60-mainuan-theme.cfg,
+# whose options are guarded by the existence of theme.txt.
 case "$1" in
     remove|purge)
-        rm -rf /boot/grub/themes/mainuan /boot/grub/themes/mainuan.dpkg-new
+        rm -rf /boot/grub/themes/mainuan \
+               /boot/grub/themes/mainuan.dpkg-new \
+               /boot/grub/themes/mainuan.dpkg-old
         if [ -e /boot/grub/grub.cfg ] && command -v update-grub >/dev/null 2>&1; then
             update-grub || echo "mainuan-grub-theme: update-grub falhou; rode-o de novo" >&2
         fi
