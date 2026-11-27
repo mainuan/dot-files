@@ -119,6 +119,12 @@ if ! validate_theme "$stage"; then
     rm -rf "$stage"
     die "a cópia temporária falhou na validação; tema anterior preservado"
 fi
+# A copy can theoretically return success while data is incomplete or altered.
+# Compare every name and file byte before moving the live theme out of the way.
+if ! diff -qr -- "$src" "$stage" >/dev/null; then
+    rm -rf "$stage"
+    die "a cópia temporária diverge da origem; tema anterior preservado"
+fi
 
 had_old=no
 if [ -e "$dest" ]; then

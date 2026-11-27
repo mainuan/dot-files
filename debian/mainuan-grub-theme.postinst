@@ -10,7 +10,9 @@ case "$1" in
             /usr/share/grub/themes/mainuan /boot/grub/themes/mainuan
         # During image construction there may not be a grub.cfg yet; the
         # installer runs update-grub later. On an installed system, refresh it.
-        if [ -e /boot/grub/grub.cfg ] && command -v update-grub >/dev/null 2>&1; then
+        if [ -L /boot/grub/grub.cfg ]; then
+            echo "mainuan-grub-theme: /boot/grub/grub.cfg é um link simbólico; update-grub ignorado" >&2
+        elif [ -f /boot/grub/grub.cfg ] && command -v update-grub >/dev/null 2>&1; then
             update-grub || echo "mainuan-grub-theme: update-grub falhou; rode-o de novo para aplicar o tema" >&2
         fi
         ;;

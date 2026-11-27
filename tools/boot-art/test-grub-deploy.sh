@@ -63,6 +63,23 @@ test "$rc" -ne 0
 cmp "$work/previous-theme.txt" "$dest/theme.txt"
 test ! -e "$dest.dpkg-new"
 test ! -e "$dest.dpkg-old"
+
+# Detect a silent corruption even when the copy command reports success.
+cat > "$shim/cp" <<'SH'
+#!/bin/sh
+/bin/cp "$@" || exit $?
+case "$3" in
+    */mainuan.dpkg-new/) printf 'corrupted candidate\n' > "$3/theme.txt" ;;
+esac
+exit 0
+SH
+chmod 0755 "$shim/cp"
+rc=0
+PATH="$shim:$PATH" "$helper" "$src" "$dest" || rc=$?
+test "$rc" -ne 0
+cmp "$work/previous-theme.txt" "$dest/theme.txt"
+test ! -e "$dest.dpkg-new"
+test ! -e "$dest.dpkg-old"
 rm "$shim/cp"
 
 # A failed staging-to-live rename must roll back the old directory.

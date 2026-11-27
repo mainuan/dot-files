@@ -16,7 +16,9 @@ case "$1" in
             rm -rf /boot/grub/themes/mainuan \
                    /boot/grub/themes/mainuan.dpkg-new \
                    /boot/grub/themes/mainuan.dpkg-old
-            if [ -e /boot/grub/grub.cfg ] && command -v update-grub >/dev/null 2>&1; then
+            if [ -L /boot/grub/grub.cfg ]; then
+                echo "mainuan-grub-theme: /boot/grub/grub.cfg é um link simbólico; update-grub ignorado" >&2
+            elif [ -f /boot/grub/grub.cfg ] && command -v update-grub >/dev/null 2>&1; then
                 update-grub || echo "mainuan-grub-theme: update-grub falhou; rode-o de novo" >&2
             fi
         fi
