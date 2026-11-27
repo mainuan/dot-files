@@ -5,7 +5,8 @@ mainuan-desktop-defaults (2026.11.27) resolute; urgency=medium
   * GRUB: protege a implantação contra caminhos simbólicos e destinos
     inválidos; preserva backups corrompidos para diagnóstico, verifica a
     cópia byte a byte e bloqueia update-grub diante de grub.cfg simbólico.
-    Os testes cobrem cópias parciais, corrupção silenciosa e recuperação.
+    A prévia mantém o menu ativo durante toda a espera configurável; os testes
+    cobrem cópias parciais, corrupção silenciosa e recuperação.
   * Traduções: valida os 34 arquivos QM gerados antes de substituir os
     catálogos instalados e preserva as permissões do diretório.
   * GRUB: sincroniza os recursos PNG versionados com o gerador oficial e
@@ -22,7 +23,7 @@ mainuan-desktop-defaults (2026.11.27) resolute; urgency=medium
     "Boas-vindas" da tela inicial e da etapa lateral do Calamares, garantindo
     que a saudação aprovada permaneça após a compilação do pacote.
 
- -- Daigo <openwebosbr@gmail.com>  Fri, 27 Nov 2026 18:58:00 -0300
+ -- Daigo <openwebosbr@gmail.com>  Fri, 27 Nov 2026 18:59:00 -0300
 
 mainuan-desktop-defaults (2026.11.22) resolute; urgency=medium
 

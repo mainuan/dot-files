@@ -106,7 +106,7 @@ entry() {
     for class in "$@"; do
         classes+=" --class $class"
     done
-    printf "menuentry '%s'%s {\n  echo '%s'\n  sleep 30\n}\n" "$title" "$classes" "$title"
+    printf "menuentry '%s'%s {\n  echo '%s'\n  sleep 180\n}\n" "$title" "$classes" "$title"
 }
 
 {
@@ -122,7 +122,7 @@ entry() {
     echo 'set theme=$prefix/themes/mainuan/theme.txt'
     echo 'export theme'
     echo "set timeout_style=menu"
-    echo "set timeout=30"
+    echo "set timeout=180"
     entry "Mainuan" mainuan gnu-linux gnu os
     echo "submenu 'Advanced options for Mainuan' {"
     entry "Mainuan, with Linux 7.0.0-43-generic" mainuan gnu-linux gnu os
