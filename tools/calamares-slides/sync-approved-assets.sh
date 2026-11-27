@@ -119,6 +119,11 @@ done
 mkdir -p "$TARGET_BRANDING/images" "$TARGET_BRANDING/lang" \
          "$TARGET_TRANSLATIONS" "$TARGET_CALAMARES_LANG"
 
+# Remove obsolete slide assets before copying the approved set. The backup
+# above preserves the previous state if a later validation needs recovery.
+find "$TARGET_BRANDING/images" -maxdepth 1 -type f -name 'slide-*.png' -delete
+find "$TARGET_BRANDING/lang" -maxdepth 1 -type f -name 'calamares-vendor_*.qm' -delete
+
 echo "=== Instalando recursos aprovados em rootfs/ e tools/ ==="
 install -m 0644 "$SOURCE_QML" "$TARGET_BRANDING/show.qml"
 install -m 0644 "$SOURCE_QML" "$TARGET_TOOLS/show.qml"
@@ -143,6 +148,8 @@ for qm in "${qm_files[@]}"; do
     cmp -s "$qm" "$TARGET_BRANDING/lang/$(basename "$qm")"
 done
 cmp -s "$SOURCE_CALAMARES_QM" "$TARGET_CALAMARES_LANG/calamares_pt_BR.qm"
+test "$(find "$TARGET_BRANDING/images" -maxdepth 1 -type f -name 'slide-*.png' | wc -l)" -eq 5
+test "$(find "$TARGET_BRANDING/lang" -maxdepth 1 -type f -name 'calamares-vendor_*.qm' | wc -l)" -eq 34
 
 echo
 echo "SUCESSO: QML aprovado sincronizado em rootfs/ e tools/."
