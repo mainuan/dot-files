@@ -157,14 +157,12 @@ Presentation {
         picture: "images/slide-1.png"
         leftRatio: 0.095
         topRatio: 0.46
-        widthRatio: 0.56
-        titleRatio: 0.045
-        // Portrait crops leave less vertical room in the rounded panel;
-        // use a slightly smaller body size there without shrinking desktop slides.
-        bodyRatio: width > height ? 0.026 : 0.022
-        // Keep both paragraphs fully inside the rounded panel, even with
-        // longer translations (Spanish, Italian, Portuguese, German, etc.).
-        bottomRatio: 0.215
+        // Portrait crops expose a wider text lane but a shorter rounded panel.
+        widthRatio: width > height ? 0.56 : 0.62
+        titleRatio: width > height ? 0.045 : 0.038
+        bodyRatio: width > height ? 0.026 : 0.020
+        // Keep the copy inside the panel border in both aspect ratios.
+        bottomRatio: width > height ? 0.215 : 0.238
         headingColor: "#43b3d3"
     }
 
