@@ -713,12 +713,12 @@ jobs:
           printf 'fake catalog\n' > "${@: -1}"
           SH
           chmod +x "$catalog_test/fake-lrelease"
-          if LRELEASE="$catalog_test/fake-lrelease" LRELEASE_COUNT_FILE="$catalog_test/count" tools/calamares-slides/build-translations.sh "$catalog_test/lang"; then
+          if LRELEASE="$catalog_test/fake-lrelease" LRELEASE_COUNT_FILE="$catalog_test/count" bash tools/calamares-slides/build-translations.sh "$catalog_test/lang"; then
             echo "::error::the injected lrelease failure was not propagated"; exit 1
           fi
           test "$(cat "$catalog_test/lang/keep.txt")" = 'preserve me'
           test "$(cat "$catalog_test/lang/calamares-vendor_obsolete.qm")" = obsolete
-          tools/calamares-slides/build-translations.sh "$catalog_test/lang"
+          bash tools/calamares-slides/build-translations.sh "$catalog_test/lang"
           test "$(cat "$catalog_test/lang/keep.txt")" = 'preserve me'
           test ! -e "$catalog_test/lang/calamares-vendor_obsolete.qm"
           test "$(find "$catalog_test/lang" -maxdepth 1 -type f -name 'calamares-vendor_*.qm' | wc -l)" -eq 34
