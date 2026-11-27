@@ -182,7 +182,7 @@ Presentation {
         heading: qsTr("Easy adaptation, without barriers")
         body: qsTr("A familiar, refined interface, designed specifically to eliminate the learning curve. Whether at the office or at home, the transition to Mainuan is natural, smooth and immediate.\n\n• Intuitive navigation: An intelligently organised applications menu, with essential tools always just a few clicks away.\n\n• High-performance environment: A clean, elegant design that minimises visual distractions, supporting concentration and mental clarity during use.")
         picture: "images/slide-3.png"
-        topRatio: 0.285
+        topRatio: 0.26
         widthRatio: 0.425
         titleRatio: 0.039
         bodyRatio: 0.023
