@@ -1,5 +1,6 @@
 mainuan-desktop-defaults (2026.11.27) resolute; urgency=medium
 
+  * GRUB: sincroniza os recursos PNG versionados com o gerador oficial e faz o CI detectar divergências.
   * GRUB: valida a estrutura PFF2, os índices Unicode e todos os recursos visuais antes do empacotamento.
   * GRUB: publica o tema em /boot com cópia temporária, validação, recuperação e rollback em caso de falha.
   * CI: separa os testes do GRUB dos testes de Plasma/Calamares e captura menus reais em QEMU para BIOS/UEFI.

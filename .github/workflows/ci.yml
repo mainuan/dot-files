@@ -59,6 +59,10 @@ jobs:
         rm -rf /tmp/boot-art && cp -r . /tmp/boot-art
         python3 /tmp/boot-art/tools/boot-art/generate.py
         test "$(ls /tmp/boot-art/rootfs/usr/share/plymouth/themes/mainuan/throbber-*.png | wc -l)" = 48
+        # Generated GRUB assets committed to the source tree must stay in sync
+        # with the canonical generator (including typography in hints.png).
+        diff -qr rootfs/usr/share/grub/themes/mainuan \
+          /tmp/boot-art/rootfs/usr/share/grub/themes/mainuan
         rm -rf /tmp/boot-art
         # The source package must not carry .git or build leftovers.
         dpkg-source -Zgzip -z1 --build .
