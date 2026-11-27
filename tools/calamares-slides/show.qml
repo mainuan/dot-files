@@ -162,7 +162,7 @@ Presentation {
         titleRatio: width > height ? 0.045 : 0.038
         bodyRatio: width > height ? 0.026 : 0.020
         // Keep the copy inside the panel border in both aspect ratios.
-        bottomRatio: width > height ? 0.215 : 0.238
+        bottomRatio: 0.238
         headingColor: "#43b3d3"
     }
 
