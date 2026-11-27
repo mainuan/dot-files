@@ -114,7 +114,7 @@ Presentation {
                     id: description
                     width: parent.width
                     height: Math.max(0, parent.height - title.height - copy.spacing)
-                    text: slide.body
+                    text: slide.body.replace(/\n\n/g, "\n")
                     color: presentation.ink
                     font.family: "Noto Sans"
                     font.pixelSize: slide.bodyPixels
@@ -153,7 +153,7 @@ Presentation {
     MainuanSlide {
         index: 0
         heading: qsTr("Welcome to Mainuan!")
-        body: qsTr("A modern and secure operating system, designed to boost your productivity.\nBuilt to meet the demands of the corporate world with excellence, while also being suited to personal use.")
+        body: qsTr("A modern and secure operating system, designed to boost your productivity.\n\nBuilt to meet the demands of the corporate world with excellence, while also being suited to personal use.")
         picture: "images/slide-1.png"
         leftRatio: 0.095
         topRatio: 0.46
@@ -169,7 +169,7 @@ Presentation {
     MainuanSlide {
         index: 1
         heading: qsTr("Proven long-term stability")
-        body: qsTr("Mainuan stands for predictability and solidity. It builds on the legacy, solidity, security and technical maturity developed over 19 years of TigerOS development, offering a robust platform ready for the future.\n• Continuity first: A system strategically designed so your team’s workflow or activities at home never suffer interruptions.\n• Secure updates: A predictable maintenance cycle that ensures long-term stability, free from unexpected system failures.")
+        body: qsTr("Mainuan stands for predictability and solidity. It builds on the legacy, solidity, security and technical maturity developed over 19 years of TigerOS development, offering a robust platform ready for the future.\n\n• Continuity first: A system strategically designed so your team’s workflow or activities at home never suffer interruptions.\n\n• Secure updates: A predictable maintenance cycle that ensures long-term stability, free from unexpected system failures.")
         picture: "images/slide-2.png"
         topRatio: 0.285
         widthRatio: 0.43
@@ -180,7 +180,7 @@ Presentation {
     MainuanSlide {
         index: 2
         heading: qsTr("Easy adaptation, without barriers")
-        body: qsTr("A familiar, refined interface, designed specifically to eliminate the learning curve. Whether at the office or at home, the transition to Mainuan is natural, smooth and immediate.\n• Intuitive navigation: An intelligently organised applications menu, with essential tools always just a few clicks away.\n• High-performance environment: A clean, elegant design that minimises visual distractions, supporting concentration and mental clarity during use.")
+        body: qsTr("A familiar, refined interface, designed specifically to eliminate the learning curve. Whether at the office or at home, the transition to Mainuan is natural, smooth and immediate.\n\n• Intuitive navigation: An intelligently organised applications menu, with essential tools always just a few clicks away.\n\n• High-performance environment: A clean, elegant design that minimises visual distractions, supporting concentration and mental clarity during use.")
         picture: "images/slide-3.png"
         topRatio: 0.285
         widthRatio: 0.425
@@ -191,7 +191,7 @@ Presentation {
     MainuanSlide {
         index: 3
         heading: qsTr("Economic efficiency")
-        body: qsTr("Mainuan maximises the return on your technology investment. It gets the most performance from the hardware you already own, smoothly extending the useful life of computers considered obsolete.\n• Real sustainability: We fight digital waste and electronic waste by avoiding artificial hardware requirements, such as TPM 2 or Secure Boot.\n• Intelligent resource use: Optimised memory and processor management generates real savings in energy and infrastructure, both for your home and your company.")
+        body: qsTr("Mainuan maximises the return on your technology investment. It gets the most performance from the hardware you already own, smoothly extending the useful life of computers considered obsolete.\n\n• Real sustainability: We fight digital waste and electronic waste by avoiding artificial hardware requirements, such as TPM 2 or Secure Boot.\n\n• Intelligent resource use: Optimised memory and processor management generates real savings in energy and infrastructure, both for your home and your company.")
         picture: "images/slide-4.png"
         topRatio: 0.25
         widthRatio: 0.41
@@ -202,7 +202,7 @@ Presentation {
     MainuanSlide {
         index: 4
         heading: qsTr("Absolute privacy")
-        body: qsTr("Strong protection against digital threats, combined with an uncompromising ethical stance on your data. In Mainuan, the security of your business and the privacy of your home are treated as top priorities.\n• Zero telemetry: Completely free from hidden tracking, data collection and intrusive advertisements. Mainuan respects you! Your information belongs exclusively to you.")
+        body: qsTr("Strong protection against digital threats, combined with an uncompromising ethical stance on your data. In Mainuan, the security of your business and the privacy of your home are treated as top priorities.\n\n• Zero telemetry: Completely free from hidden tracking, data collection and intrusive advertisements. Mainuan respects you! Your information belongs exclusively to you.")
         picture: "images/slide-5.png"
         topRatio: 0.295
         widthRatio: 0.39
