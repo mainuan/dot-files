@@ -686,7 +686,7 @@ jobs:
           apt-get update
           apt-get install --yes --no-install-recommends qml-qt6 qt6-declarative-dev-tools \
             qt6-l10n-tools qml6-module-qtquick qml6-module-qtquick-window \
-            qml6-module-qtqml-workerscript qt6-svg-plugins fonts-noto-core fonts-noto-cjk
+            qml6-module-qtqml-workerscript qt6-svg-plugins fonts-noto-core fonts-noto-cjk python3
           # Only the QML module of Calamares (calamares-data, as on the ISO).
           (cd /tmp && apt-get download calamares-data && dpkg-deb -x calamares-data_*.deb calamares)
           Q=/tmp/calamares/usr/share/calamares/qml
