@@ -7,6 +7,7 @@ import glob
 import re
 import struct
 import sys
+import zlib
 from pathlib import Path
 
 EXPECTED_FONTS = {
@@ -36,7 +37,7 @@ SLICE_PREFIXES = {
     "progress_highlight_",
 }
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
-PORTUGUESE_GLYPHS = set(map(ord, "áãâàçéêíóôõúÁÃÇÉÊÍÓÔÕÚ"))
+PORTUGUESE_GLYPHS = set(map(ord, "áãâàçéêíóôõúÀÁÂÃÇÉÊÍÓÔÕÚ"))
 
 
 class ValidationError(Exception):
@@ -195,11 +196,59 @@ def check_png(path: Path) -> None:
         data = path.read_bytes()
     except OSError as exc:
         fail(f"{path}: erro de leitura: {exc}")
-    if len(data) < 24 or data[:8] != PNG_SIGNATURE or data[12:16] != b"IHDR":
+    if len(data) < 45 or data[:8] != PNG_SIGNATURE:
         fail(f"{path}: PNG inválido ou truncado")
-    width, height = struct.unpack(">II", data[16:24])
-    if not width or not height or width > 16384 or height > 16384:
-        fail(f"{path}: dimensões PNG inválidas: {width}x{height}")
+
+    offset = 8
+    chunks = 0
+    saw_ihdr = False
+    saw_idat = False
+    saw_iend = False
+
+    while offset < len(data):
+        if len(data) - offset < 12:
+            fail(f"{path}: cabeçalho de bloco PNG truncado")
+        length = struct.unpack(">I", data[offset:offset + 4])[0]
+        kind = data[offset + 4:offset + 8]
+        payload_start = offset + 8
+        payload_end = payload_start + length
+        crc_end = payload_end + 4
+        if crc_end > len(data):
+            fail(f"{path}: bloco PNG {kind!r} ultrapassa o fim do arquivo")
+
+        payload = data[payload_start:payload_end]
+        stored_crc = struct.unpack(">I", data[payload_end:crc_end])[0]
+        actual_crc = zlib.crc32(kind + payload) & 0xFFFFFFFF
+        if actual_crc != stored_crc:
+            fail(f"{path}: CRC inválido no bloco PNG {kind.decode('ascii', 'replace')}")
+
+        if chunks == 0 and (kind != b"IHDR" or length != 13):
+            fail(f"{path}: IHDR ausente ou inválido como primeiro bloco")
+        if kind == b"IHDR":
+            if saw_ihdr or chunks != 0 or length != 13:
+                fail(f"{path}: bloco IHDR duplicado ou malformado")
+            width, height = struct.unpack(">II", payload[:8])
+            if not width or not height or width > 16384 or height > 16384:
+                fail(f"{path}: dimensões PNG inválidas: {width}x{height}")
+            saw_ihdr = True
+        elif kind == b"IDAT":
+            if not saw_ihdr or saw_iend:
+                fail(f"{path}: bloco IDAT fora de ordem")
+            saw_idat = True
+        elif kind == b"IEND":
+            if length != 0 or not saw_idat:
+                fail(f"{path}: bloco IEND inválido ou sem dados IDAT")
+            saw_iend = True
+            if crc_end != len(data):
+                fail(f"{path}: dados extras depois do bloco IEND")
+            offset = crc_end
+            break
+
+        chunks += 1
+        offset = crc_end
+
+    if not (saw_ihdr and saw_idat and saw_iend):
+        fail(f"{path}: sequência PNG incompleta (IHDR/IDAT/IEND)")
 
 
 def check_theme(theme_dir: Path, font_dir: Path) -> int:
@@ -261,8 +310,16 @@ def check_theme(theme_dir: Path, font_dir: Path) -> int:
         if path.is_symlink():
             fail(f"link simbólico não permitido no tema: {path}")
 
+    # Validate every PNG shipped in the theme, including class icons that
+    # GRUB loads implicitly and therefore are not named in theme.txt.
+    for path in theme_dir.rglob("*.png"):
+        if path not in checked:
+            check_png(path)
+            checked.add(path)
+
     for relative in {"background.png", "hints.png", "icons/mainuan.png"}:
-        check_png(theme_dir / relative)
+        if theme_dir / relative not in checked:
+            fail(f"imagem obrigatória não foi validada: {relative}")
 
     return len(expected_files)
 
