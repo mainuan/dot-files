@@ -99,6 +99,12 @@ test "$rc" -ne 0
 test ! -e "$outside/mainuan"
 test ! -e "$outside/mainuan.dpkg-new"
 
+# Reject traversal in the destination itself, not just in its parent.
+rc=0
+"$helper" "$src" "$work/boot/grub/themes/mainuan/../escaped" || rc=$?
+test "$rc" -ne 0
+test ! -e "$work/boot/grub/themes/escaped"
+
 # A corrupt recovery backup must be preserved together with the partial tree.
 mv "$dest" "$dest.dpkg-old"
 mkdir -p "$dest"

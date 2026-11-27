@@ -68,6 +68,7 @@ validate_theme() {
 case "$src/" in "$dest/"*) die "a origem não pode estar dentro do destino" ;; esac
 case "$dest/" in "$src/"*) die "o destino não pode estar dentro da origem" ;; esac
 safe_path_components "$src" || die "origem contém caminho inseguro ou componente simbólico: $src"
+safe_path_components "$dest" || die "destino contém caminho inseguro ou componente simbólico: $dest"
 safe_path_components "$parent" || die "diretório pai contém caminho inseguro ou componente simbólico: $parent"
 [ -d "$src" ] || die "origem inválida: $src"
 validate_theme "$src" || die "tema de origem incompleto ou inválido: $src"
