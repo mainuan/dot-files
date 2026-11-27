@@ -250,8 +250,28 @@ def check_png(path: Path) -> None:
     if not (saw_ihdr and saw_idat and saw_iend):
         fail(f"{path}: sequência PNG incompleta (IHDR/IDAT/IEND)")
 
+    # Valid CRCs do not prove the compressed pixel stream is decodable.
+    # Pillow fully decodes the image and catches corrupted or truncated IDAT.
+    try:
+        from PIL import Image
+        Image.MAX_IMAGE_PIXELS = 64_000_000
+        with Image.open(path) as image:
+            if image.format != "PNG":
+                fail(f"{path}: Pillow não reconheceu o formato PNG")
+            image.verify()
+        with Image.open(path) as image:
+            image.load()
+    except ImportError:
+        fail("Pillow (python3-pil) é obrigatório para validar os dados PNG")
+    except Exception as exc:
+        fail(f"{path}: decodificação PNG inválida: {exc}")
+
 
 def check_theme(theme_dir: Path, font_dir: Path) -> int:
+    if theme_dir.is_symlink() or not theme_dir.is_dir():
+        fail(f"diretório do tema ausente, inválido ou link simbólico: {theme_dir}")
+    if font_dir.is_symlink() or not font_dir.is_dir():
+        fail(f"diretório das fontes ausente, inválido ou link simbólico: {font_dir}")
     theme_file = theme_dir / "theme.txt"
     if theme_file.is_symlink() or not theme_file.is_file():
         fail(f"theme.txt ausente ou não regular: {theme_file}")

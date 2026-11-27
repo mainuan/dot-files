@@ -33,15 +33,28 @@ test ! -e "$dest.dpkg-old"
 printf '\n# candidate version\n' >> "$src/theme.txt"
 cp "$dest/theme.txt" "$work/previous-theme.txt"
 
-# Copy failure after a partial write must leave the live directory intact.
+# An incomplete source is rejected before touching the installed theme.
+badsrc="$work/incomplete-source"
+mkdir -p "$badsrc"
+cp -a "$src/." "$badsrc/"
+rm "$badsrc/barlow_bold_40.pf2"
+rc=0
+"$helper" "$badsrc" "$dest" || rc=$?
+test "$rc" -ne 0
+cmp "$work/previous-theme.txt" "$dest/theme.txt"
+test ! -e "$dest.dpkg-new"
+test ! -e "$dest.dpkg-old"
+
+# A copy that writes only theme.txt and then fails must be cleaned up.
 cat > "$shim/cp" <<'SH'
 #!/bin/sh
-/bin/cp "$@" || exit $?
-for arg do last=$arg; done
-case "$last" in
-    */mainuan.dpkg-new/) exit 42 ;;
+[ "$#" -eq 3 ] && [ "$1" = "-a" ] || exit 97
+case "$3" in
+    */mainuan.dpkg-new/) ;;
+    *) exec /bin/cp "$@" ;;
 esac
-exit 0
+/bin/cp "$2/theme.txt" "$3/" || exit $?
+exit 42
 SH
 chmod 0755 "$shim/cp"
 rc=0
@@ -75,12 +88,31 @@ test ! -e "$dest.dpkg-new"
 test ! -e "$dest.dpkg-old"
 rm "$shim/mv"
 
-# Simulate interruption after the old tree was moved aside and an incomplete
-# new directory appeared. The next configure must recover and finish deploy.
-printf '\n# recovered deployment\n' >> "$src/theme.txt"
+# Refuse a parent symlink instead of writing through it into an unrelated tree.
+outside="$work/outside"
+link_parent="$work/redirected-parent"
+mkdir -p "$outside"
+ln -s "$outside" "$link_parent"
+rc=0
+"$helper" "$src" "$link_parent/mainuan" || rc=$?
+test "$rc" -ne 0
+test ! -e "$outside/mainuan"
+test ! -e "$outside/mainuan.dpkg-new"
+
+# A corrupt recovery backup must be preserved together with the partial tree.
 mv "$dest" "$dest.dpkg-old"
 mkdir -p "$dest"
 printf 'partial copy\n' > "$dest/theme.txt"
+rm "$dest.dpkg-old/barlow_bold_40.pf2"
+rc=0
+"$helper" "$src" "$dest" || rc=$?
+test "$rc" -ne 0
+test -s "$dest/theme.txt"
+test -d "$dest.dpkg-old"
+test ! -e "$dest.dpkg-new"
+# Restore the missing file, then confirm recovery and deployment complete.
+cp "$src/barlow_bold_40.pf2" "$dest.dpkg-old/"
+printf '\n# recovered deployment\n' >> "$src/theme.txt"
 "$helper" "$src" "$dest"
 cmp "$src/theme.txt" "$dest/theme.txt"
 test ! -e "$dest.dpkg-new"

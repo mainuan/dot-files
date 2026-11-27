@@ -8,8 +8,12 @@ if [ "$#" -ne 2 ]; then
     exit 2
 fi
 
-src=$1
-dest=$2
+src=${1%/}
+dest=${2%/}
+[ -n "$src" ] && [ -n "$dest" ] || {
+    echo "mainuan-grub-theme: origem e destino não podem ser /" >&2
+    exit 2
+}
 parent=$(dirname "$dest")
 stage="${dest}.dpkg-new"
 backup="${dest}.dpkg-old"
@@ -17,6 +21,22 @@ backup="${dest}.dpkg-old"
 die() {
     echo "mainuan-grub-theme: $*" >&2
     exit 1
+}
+
+# Reject relative paths, traversal components and symlinks in any existing
+# component. This helper runs as root; following a redirected /boot path
+# could publish or remove files outside the intended boot volume.
+safe_path_components() {
+    candidate=$1
+    case "$candidate" in /*) ;; *) return 1 ;; esac
+    case "$candidate" in
+        *//*|*/./*|*/../*|*/.|*/..) return 1 ;;
+    esac
+    while [ "$candidate" != "/" ]; do
+        [ ! -L "$candidate" ] || return 1
+        candidate=$(dirname "$candidate")
+    done
+    return 0
 }
 
 validate_theme() {
@@ -44,9 +64,15 @@ validate_theme() {
     return 0
 }
 
-[ -d "$src" ] && [ ! -L "$src" ] || die "origem inválida: $src"
+[ "$src" != "$dest" ] || die "origem e destino são iguais"
+case "$src/" in "$dest/"*) die "a origem não pode estar dentro do destino" ;; esac
+case "$dest/" in "$src/"*) die "o destino não pode estar dentro da origem" ;; esac
+safe_path_components "$src" || die "origem contém caminho inseguro ou componente simbólico: $src"
+safe_path_components "$parent" || die "diretório pai contém caminho inseguro ou componente simbólico: $parent"
+[ -d "$src" ] || die "origem inválida: $src"
 validate_theme "$src" || die "tema de origem incompleto ou inválido: $src"
 mkdir -p "$parent"
+safe_path_components "$parent" || die "diretório pai mudou para um caminho inseguro: $parent"
 
 if [ -L "$dest" ]; then
     die "destino inesperado é um link simbólico: $dest"
@@ -63,10 +89,12 @@ if [ -e "$backup" ]; then
         if validate_theme "$dest"; then
             rm -rf "$backup"
         else
+            validate_theme "$backup" || die "backup inválido; preservando backup e destino para inspeção"
             rm -rf "$dest" || die "não foi possível remover a cópia incompleta"
             mv "$backup" "$dest" || die "não foi possível restaurar o backup anterior"
         fi
     else
+        validate_theme "$backup" || die "backup inválido; preservado para inspeção"
         mv "$backup" "$dest" || die "não foi possível recuperar o tema anterior"
     fi
 fi

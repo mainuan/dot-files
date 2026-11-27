@@ -55,16 +55,20 @@ def mix(a, b, t):
 
 def render(svg, out, width=None, height=None):
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    with tempfile.NamedTemporaryFile("w", suffix=".svg", delete=False) as f:
-        f.write(svg)
-        src = f.name
-    cmd = ["rsvg-convert", "-o", out]
-    if width:
-        cmd += ["-w", str(width)]
-    if height:
-        cmd += ["-h", str(height)]
-    subprocess.run(cmd + [src], check=True)
-    os.unlink(src)
+    src = None
+    try:
+        with tempfile.NamedTemporaryFile("w", suffix=".svg", delete=False) as f:
+            src = f.name
+            f.write(svg)
+        cmd = ["rsvg-convert", "-o", out]
+        if width:
+            cmd += ["-w", str(width)]
+        if height:
+            cmd += ["-h", str(height)]
+        subprocess.run(cmd + [src], check=True)
+    finally:
+        if src and os.path.exists(src):
+            os.unlink(src)
 
 
 def write(path, text):
@@ -152,18 +156,17 @@ def nine_slice(prefix, radius, fill, fill_op, stroke, stroke_op):
     size = radius * 2 + 4
     full = svg_doc(size, size, f'<rect x="0.5" y="0.5" width="{size - 1}" height="{size - 1}" rx="{radius}" '
                    f'fill="{fill}" fill-opacity="{fill_op}" stroke="{stroke}" stroke-opacity="{stroke_op}"/>')
-    tmp = tempfile.mkdtemp()
-    whole = os.path.join(tmp, "whole.png")
-    render(full, whole)
     from PIL import Image
-    im = Image.open(whole)
-    r = radius
-    boxes = {"nw": (0, 0, r, r), "n": (r, 0, size - r, r), "ne": (size - r, 0, size, r),
-             "w": (0, r, r, size - r), "c": (r, r, size - r, size - r), "e": (size - r, r, size, size - r),
-             "sw": (0, size - r, r, size), "s": (r, size - r, size - r, size), "se": (size - r, size - r, size, size)}
-    for name, box in boxes.items():
-        im.crop(box).save(os.path.join(GRUB, f"{prefix}_{name}.png"), optimize=True)
-    shutil.rmtree(tmp)
+    with tempfile.TemporaryDirectory() as tmp:
+        whole = os.path.join(tmp, "whole.png")
+        render(full, whole)
+        r = radius
+        boxes = {"nw": (0, 0, r, r), "n": (r, 0, size - r, r), "ne": (size - r, 0, size, r),
+                 "w": (0, r, r, size - r), "c": (r, r, size - r, size - r), "e": (size - r, r, size, size - r),
+                 "sw": (0, size - r, r, size), "s": (r, size - r, size - r, size), "se": (size - r, size - r, size, size)}
+        with Image.open(whole) as im:
+            for name, box in boxes.items():
+                im.crop(box).save(os.path.join(GRUB, f"{prefix}_{name}.png"), optimize=True)
 
 
 ICONS = {
@@ -261,18 +264,17 @@ def splash():
     shutil.copyfile(LOGO, os.path.join(images, "logo.svg"))
     write(os.path.join(images, "ring.svg"), ring_svg(0))
     # Preview shown in System Settings (Splash Screen).
-    tmp = tempfile.mkdtemp()
-    ring_png, logo_png = os.path.join(tmp, "ring.png"), os.path.join(tmp, "logo.png")
-    render(ring_svg(0), ring_png, 80, 80)
-    render(logo_svg(), logo_png, 48, 48)
-    w, h = 400, 225
-    defs = (f'<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{BG_TOP}"/>'
-            f'<stop offset="1" stop-color="{BG_BOTTOM}"/></linearGradient>')
-    body = (f'<rect width="{w}" height="{h}" fill="url(#bg)"/>'
-            f'<image x="{(w - 80) / 2}" y="{(h - 80) / 2}" width="80" height="80" xlink:href="file://{ring_png}"/>'
-            f'<image x="{(w - 48) / 2}" y="{(h - 48) / 2}" width="48" height="48" xlink:href="file://{logo_png}"/>')
-    render(svg_doc(w, h, body, defs), os.path.join(SPLASH, "previews/splash.png"))
-    shutil.rmtree(tmp)
+    with tempfile.TemporaryDirectory() as tmp:
+        ring_png, logo_png = os.path.join(tmp, "ring.png"), os.path.join(tmp, "logo.png")
+        render(ring_svg(0), ring_png, 80, 80)
+        render(logo_svg(), logo_png, 48, 48)
+        w, h = 400, 225
+        defs = (f'<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{BG_TOP}"/>'
+                f'<stop offset="1" stop-color="{BG_BOTTOM}"/></linearGradient>')
+        body = (f'<rect width="{w}" height="{h}" fill="url(#bg)"/>'
+                f'<image x="{(w - 80) / 2}" y="{(h - 80) / 2}" width="80" height="80" xlink:href="file://{ring_png}"/>'
+                f'<image x="{(w - 48) / 2}" y="{(h - 48) / 2}" width="48" height="48" xlink:href="file://{logo_png}"/>')
+        render(svg_doc(w, h, body, defs), os.path.join(SPLASH, "previews/splash.png"))
 
 
 def main():
