@@ -1,17 +1,22 @@
 mainuan-desktop-defaults (2026.11.27) resolute; urgency=medium
 
-  * GRUB: valida CRC, sequência e integridade de todos os blocos PNG, inclusive ícones de classes implícitos.
-  * GRUB: sincroniza os recursos PNG versionados com o gerador oficial e faz o CI detectar divergências.
-  * GRUB: valida a estrutura PFF2, os índices Unicode e todos os recursos visuais antes do empacotamento.
-  * GRUB: publica o tema em /boot com cópia temporária, validação, recuperação e rollback em caso de falha.
-  * CI: separa os testes do GRUB dos testes de Plasma/Calamares e captura menus reais em QEMU para BIOS/UEFI.
+  * GRUB: valida CRC, sequência e integridade dos blocos PNG, inclusive
+    ícones carregados implicitamente pelas classes dos menus.
+  * GRUB: sincroniza os recursos PNG versionados com o gerador oficial e
+    adiciona ao CI a verificação de divergências.
+  * GRUB: valida a estrutura PFF2, os índices Unicode e todos os recursos
+    visuais antes do empacotamento.
+  * GRUB: publica o tema em /boot com cópia temporária, validação,
+    recuperação e rollback em caso de falha.
+  * CI: separa os testes do GRUB dos testes de Plasma/Calamares e captura
+    menus reais em QEMU para BIOS/UEFI.
   * Instalador: publica as cinco novas ilustrações e o QML atualizado do
     slideshow do Calamares, junto aos 34 catálogos Qt correspondentes.
   * Tradução pt_BR: incorpora à fonte do pacote as seis correções de
     "Boas-vindas" da tela inicial e da etapa lateral do Calamares, garantindo
     que a saudação aprovada permaneça após a compilação do pacote.
 
- -- Daigo <openwebosbr@gmail.com>  Fri, 27 Nov 2026 15:16:00 -0300
+ -- Daigo <openwebosbr@gmail.com>  Fri, 27 Nov 2026 16:40:00 -0300
 
 mainuan-desktop-defaults (2026.11.22) resolute; urgency=medium
 
