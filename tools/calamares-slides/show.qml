@@ -171,7 +171,7 @@ Presentation {
         heading: qsTr("Proven long-term stability")
         body: qsTr("Mainuan stands for predictability and solidity. It builds on the legacy, solidity, security and technical maturity developed over 19 years of TigerOS development, offering a robust platform ready for the future.\n\n• Continuity first: A system strategically designed so your team’s workflow or activities at home never suffer interruptions.\n\n• Secure updates: A predictable maintenance cycle that ensures long-term stability, free from unexpected system failures.")
         picture: "images/slide-2.png"
-        topRatio: 0.26
+        topRatio: 0.24
         widthRatio: 0.43
         titleRatio: 0.039
         bodyRatio: 0.023
