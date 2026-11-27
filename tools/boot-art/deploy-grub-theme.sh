@@ -10,8 +10,8 @@ fi
 
 src=${1%/}
 dest=${2%/}
-[ -n "$src" ] && [ -n "$dest" ] || {
-    echo "mainuan-grub-theme: origem e destino não podem ser /" >&2
+[ -n "$src" ] && [ -n "$dest" ] && [ "$src" != "/" ] && [ "$dest" != "/" ] || {
+    echo "mainuan-grub-theme: origem e destino precisam ser diretórios específicos, diferentes de /" >&2
     exit 2
 }
 parent=$(dirname "$dest")

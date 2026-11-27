@@ -88,6 +88,20 @@ for ts in "${catalogues[@]}"; do
     "$LRELEASE" "$ts" -qm "$TMP_DIR/calamares-vendor_${locale}.qm"
 done
 
+# A successful exit status is not enough: lrelease must create every catalog
+# and none may be empty before the current installation is touched.
+generated_qm=("$TMP_DIR"/calamares-vendor_*.qm)
+if (( ${#generated_qm[@]} != 34 )); then
+    echo "Erro: esperados 34 catálogos QM gerados; encontrados ${#generated_qm[@]}." >&2
+    exit 1
+fi
+for qm in "${generated_qm[@]}"; do
+    [[ -s "$qm" ]] || {
+        echo "Erro: catálogo QM gerado ausente ou vazio: $qm" >&2
+        exit 1
+    }
+done
+
 # Stage beside the destination so the final directory rename stays on one
 # filesystem. Preserve unrelated files, but replace the complete catalog set.
 mkdir -p "$TARGET_PARENT"

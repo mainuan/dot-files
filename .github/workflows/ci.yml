@@ -725,6 +725,18 @@ jobs:
           fi
           test "$(cat "$catalog_test/lang/keep.txt")" = 'preserve me'
           test "$(cat "$catalog_test/lang/calamares-vendor_obsolete.qm")" = obsolete
+          cat > "$catalog_test/fake-lrelease-empty" <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          : > "${@: -1}"
+          SH
+          chmod +x "$catalog_test/fake-lrelease-empty"
+          if LRELEASE="$catalog_test/fake-lrelease-empty" bash tools/calamares-slides/build-translations.sh "$catalog_test/lang"; then
+            echo "::error::the compiler accepted empty QM catalogs"; exit 1
+          fi
+          test "$(cat "$catalog_test/lang/keep.txt")" = 'preserve me'
+          test "$(cat "$catalog_test/lang/calamares-vendor_obsolete.qm")" = obsolete
+          test "$(stat -c '%a' "$catalog_test/lang")" = 750
           bash tools/calamares-slides/build-translations.sh "$catalog_test/lang"
           test "$(cat "$catalog_test/lang/keep.txt")" = 'preserve me'
           test "$(stat -c '%a' "$catalog_test/lang")" = 750
