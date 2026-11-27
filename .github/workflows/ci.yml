@@ -157,7 +157,7 @@ jobs:
         grep -qx 'DefaultDarkLookAndFeel=Dream-Dark-Color-Global-6' /etc/xdg/kdeglobals
         # Installer slideshow: translatable QML, images without text, catalogs.
         V=/etc/calamares/branding/vendor
-        grep -q 'qsTr("Welcome to Mainuan")' $V/show.qml
+        grep -Fq 'qsTr("Welcome to Mainuan!")' "$V/show.qml"
         test "$(ls $V/images/slide-*.png | wc -l)" = 5
         if ls $V/slides_*.png 2>/dev/null; then exit 1; fi
         test "$(ls $V/lang/calamares-vendor_*.qm | wc -l)" -ge 33
