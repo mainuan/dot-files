@@ -32,11 +32,11 @@ execute_after_dh_install:
 		/usr/lib/qt6/bin/lrelease -silent $$ts -qm $(PKG)/usr/share/calamares/lang/$$(basename $$ts .ts).qm; \
 	done
 	test -s $(PKG)/usr/share/calamares/lang/calamares_pt_BR.qm
-	# Regenerate the GRUB images in the package staging area. This refreshes
-	# hints.png too, so the key labels use Ubuntu rather than stale bitmap text.
+	# Regenerate the GRUB images in the package staging area: hints.png (Ubuntu)
+	# and wordmark.png (bundled Barlow Bold), both antialiased PNGs.
 	python3 tools/boot-art/generate.py --only grub --grub-dir $(GRUBTHEME)
-	# Generate, parse and validate the five PFF2 files before packaging them.
-	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/ubuntu $(GRUBTHEME) tools/boot-art/fonts/Barlow-Bold.ttf
+	# Generate, parse and validate the four DejaVu PFF2 files before packaging them.
+	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/dejavu $(GRUBTHEME)
 	python3 tools/boot-art/check-grub-theme.py --theme-dir $(GRUBTHEME)
 	# Fontes de tradução, pacote .plasmoid, capturas do leia-me, leia-mes e
 	# licenças dos widgets ficam no pacote-fonte; as licenças estão em

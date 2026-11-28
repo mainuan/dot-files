@@ -46,18 +46,18 @@ validate_theme() {
     [ -s "$dir/theme.txt" ] || return 1
     [ -s "$dir/background.png" ] || return 1
     [ -s "$dir/hints.png" ] || return 1
+    [ -s "$dir/wordmark.png" ] || return 1
     [ -s "$dir/icons/mainuan.png" ] || return 1
     for font in \
-        barlow_bold_40.pf2 \
-        ubuntu_derivative_mainuan_regular_14.pf2 \
-        ubuntu_derivative_mainuan_regular_18.pf2 \
-        ubuntu_derivative_mainuan_medium_regular_18.pf2 \
-        ubuntu_mono_derivative_mainuan_regular_16.pf2; do
+        dejavu_sans_regular_14.pf2 \
+        dejavu_sans_regular_18.pf2 \
+        dejavu_sans_bold_18.pf2 \
+        dejavu_sans_mono_regular_16.pf2; do
         [ -s "$dir/$font" ] || return 1
         [ ! -L "$dir/$font" ] || return 1
     done
     count=$(find "$dir" -maxdepth 1 -type f -name '*.pf2' | wc -l)
-    [ "$count" -eq 5 ] || return 1
+    [ "$count" -eq 4 ] || return 1
     if find "$dir" -type l -print | grep -q .; then
         return 1
     fi

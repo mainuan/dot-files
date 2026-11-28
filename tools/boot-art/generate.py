@@ -8,8 +8,10 @@ results:
 
     python3 tools/boot-art/generate.py
 
-Needs python3 and rsvg-convert (librsvg). Text is rendered with the
-"Ubuntu" family through fontconfig.
+Needs python3, Pillow and rsvg-convert (librsvg). The GRUB wordmark is
+rendered with the bundled Barlow Bold (fonts/Barlow-Bold.ttf) into an
+antialiased PNG, because GRUB's own PFF2 fonts are 1-bit bitmaps. The key
+hints use the "Ubuntu" family through fontconfig.
 """
 import argparse
 import math
@@ -21,6 +23,7 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 LOGO = os.path.join(HERE, "logo.svg")
+BARLOW_BOLD = os.path.join(HERE, "fonts", "Barlow-Bold.ttf")
 
 # --- Design tokens (see docs/boot/02-design-system.md) -----------------------
 BG_TOP = "#121a1e"        # graphite, top of the vertical gradient
@@ -203,6 +206,34 @@ def grub_icons():
         shutil.copyfile(os.path.join(d, f"{src}.png"), os.path.join(d, f"{alias}.png"))
 
 
+WORDMARK_MARK = 72       # logo diameter in the GRUB wordmark
+WORDMARK_TEXT = 52       # Barlow Bold size, in pixels
+WORDMARK_GAP = 20        # space between the logo and the name
+
+
+def grub_wordmark():
+    """Logo + "Mainuan" in Barlow Bold, smooth (alpha) edges, one PNG."""
+    from PIL import Image, ImageDraw, ImageFont
+    font = ImageFont.truetype(BARLOW_BOLD, WORDMARK_TEXT)
+    left, top, right, bottom = font.getbbox("Mainuan")
+    cap_top, _, _, baseline = font.getbbox("M")
+    text_w = right - left
+    w = WORDMARK_MARK + WORDMARK_GAP + text_w
+    h = WORDMARK_MARK
+    with tempfile.TemporaryDirectory() as tmp:
+        mark = os.path.join(tmp, "mark.png")
+        render(logo_svg(), mark, WORDMARK_MARK, WORDMARK_MARK)
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        with Image.open(mark) as m:
+            im.alpha_composite(m.convert("RGBA"), (0, 0))
+    # Centre the cap height (not the descender box) on the logo.
+    y = round((h - (baseline - cap_top)) / 2 - cap_top)
+    ImageDraw.Draw(im).text((WORDMARK_MARK + WORDMARK_GAP - left, y), "Mainuan",
+                            font=font, fill=hex_rgb(TEXT) + (255,))
+    im.save(os.path.join(GRUB, "wordmark.png"), optimize=True)
+    return w, h
+
+
 def underline(prefix, color, opacity, thick=3):
     """9-slice pieces of a box that is transparent except for a bottom line.
 
@@ -255,6 +286,7 @@ def grub():
     underline("progress_highlight", CYAN, 1.0)
     grub_icons()
     grub_hints()
+    grub_wordmark()
 
 
 # --- Plasma splash --------------------------------------------------------------

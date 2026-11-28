@@ -5,7 +5,8 @@
 #   tools/boot-art/preview-grub.sh <out.png> [bios|uefi] [WxH] [simple|dual|long]
 #
 # Requires grub-mkrescue, grub-mkfont, xorriso, mtools, QEMU, OVMF (UEFI),
-# fonts-ubuntu, Python 3 and the bundled Barlow Bold font.
+# fonts-dejavu-core (menu PFF2), fonts-ubuntu (key hints), Pillow, Python 3
+# and the bundled Barlow Bold font (wordmark).
 set -Eeuo pipefail
 
 usage() {
@@ -47,7 +48,13 @@ fi
 
 here=$(cd "$(dirname "$0")" && pwd)
 theme_src="$here/../../rootfs/usr/share/grub/themes/mainuan"
-font_dir="/usr/share/fonts/truetype/ubuntu"
+font_dir=
+for dir in /usr/share/fonts/truetype/dejavu /usr/share/fonts/TTF /usr/share/fonts/dejavu; do
+    if [[ -s $dir/DejaVuSans.ttf && -s $dir/DejaVuSans-Bold.ttf && -s $dir/DejaVuSansMono.ttf ]]; then
+        font_dir=$dir
+        break
+    fi
+done
 barlow_font="$here/fonts/Barlow-Bold.ttf"
 
 for tool in grub-mkrescue grub-mkfont qemu-system-x86_64 python3 xorriso mcopy; do
@@ -57,8 +64,8 @@ for tool in grub-mkrescue grub-mkfont qemu-system-x86_64 python3 xorriso mcopy; 
     }
 done
 [[ -d $theme_src ]] || { echo "tema-fonte ausente: $theme_src" >&2; exit 1; }
-[[ -s $font_dir/Ubuntu-R.ttf && -s $font_dir/Ubuntu-M.ttf && -s $font_dir/UbuntuMono-R.ttf ]] || {
-    echo "fontes Ubuntu ausentes em $font_dir (instale fonts-ubuntu)" >&2
+[[ -n $font_dir ]] || {
+    echo "fontes DejaVu ausentes (instale fonts-dejavu-core)" >&2
     exit 1
 }
 [[ -s $barlow_font ]] || {
@@ -95,7 +102,7 @@ cp -a "$theme_src/." "$theme/"
 # Regenerate the GRUB-specific images as well as fonts. In particular,
 # hints.png must use the same Ubuntu typography as the menu.
 python3 "$here/generate.py" --only grub --grub-dir "$theme"
-sh "$here/make-grub-fonts.sh" "$font_dir" "$theme" "$barlow_font"
+sh "$here/make-grub-fonts.sh" "$font_dir" "$theme"
 python3 "$here/check-grub-theme.py" --theme-dir "$theme"
 
 entry() {

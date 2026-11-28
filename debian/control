@@ -4,6 +4,7 @@ Priority: optional
 Maintainer: Mainuan Packaging <openwebosbr@gmail.com>
 Uploaders: ruscher <rruscher@gmail.com>
 Build-Depends: debhelper-compat (= 13),
+               fonts-dejavu-core,
                fonts-ubuntu,
                grub-common,
                python3:any,

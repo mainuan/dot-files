@@ -17,11 +17,10 @@ shim="$work/shim"
 mkdir -p "$src" "$shim" "$(dirname "$dest")"
 cp -a "$source_theme/." "$src/"
 for font in \
-    barlow_bold_40.pf2 \
-    ubuntu_derivative_mainuan_regular_14.pf2 \
-    ubuntu_derivative_mainuan_regular_18.pf2 \
-    ubuntu_derivative_mainuan_medium_regular_18.pf2 \
-    ubuntu_mono_derivative_mainuan_regular_16.pf2; do
+    dejavu_sans_regular_14.pf2 \
+    dejavu_sans_regular_18.pf2 \
+    dejavu_sans_bold_18.pf2 \
+    dejavu_sans_mono_regular_16.pf2; do
     printf 'test-font\n' > "$src/$font"
 done
 
@@ -37,7 +36,7 @@ cp "$dest/theme.txt" "$work/previous-theme.txt"
 badsrc="$work/incomplete-source"
 mkdir -p "$badsrc"
 cp -a "$src/." "$badsrc/"
-rm "$badsrc/barlow_bold_40.pf2"
+rm "$badsrc/dejavu_sans_bold_18.pf2"
 rc=0
 "$helper" "$badsrc" "$dest" || rc=$?
 test "$rc" -ne 0
@@ -126,7 +125,7 @@ test ! -e "$work/boot/grub/themes/escaped"
 mv "$dest" "$dest.dpkg-old"
 mkdir -p "$dest"
 printf 'partial copy\n' > "$dest/theme.txt"
-rm "$dest.dpkg-old/barlow_bold_40.pf2"
+rm "$dest.dpkg-old/dejavu_sans_bold_18.pf2"
 rc=0
 "$helper" "$src" "$dest" || rc=$?
 test "$rc" -ne 0
@@ -134,7 +133,7 @@ test -s "$dest/theme.txt"
 test -d "$dest.dpkg-old"
 test ! -e "$dest.dpkg-new"
 # Restore the missing file, then confirm recovery and deployment complete.
-cp "$src/barlow_bold_40.pf2" "$dest.dpkg-old/"
+cp "$src/dejavu_sans_bold_18.pf2" "$dest.dpkg-old/"
 printf '\n# recovered deployment\n' >> "$src/theme.txt"
 "$helper" "$src" "$dest"
 cmp "$src/theme.txt" "$dest/theme.txt"
