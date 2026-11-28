@@ -9,8 +9,9 @@ results:
     python3 tools/boot-art/generate.py
 
 Needs python3 and rsvg-convert (librsvg). Text is rendered with the
-"Noto Sans" family through fontconfig.
+"Ubuntu" family through fontconfig.
 """
+import argparse
 import math
 import os
 import shutil
@@ -54,16 +55,20 @@ def mix(a, b, t):
 
 def render(svg, out, width=None, height=None):
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    with tempfile.NamedTemporaryFile("w", suffix=".svg", delete=False) as f:
-        f.write(svg)
-        src = f.name
-    cmd = ["rsvg-convert", "-o", out]
-    if width:
-        cmd += ["-w", str(width)]
-    if height:
-        cmd += ["-h", str(height)]
-    subprocess.run(cmd + [src], check=True)
-    os.unlink(src)
+    src = None
+    try:
+        with tempfile.NamedTemporaryFile("w", suffix=".svg", delete=False) as f:
+            src = f.name
+            f.write(svg)
+        cmd = ["rsvg-convert", "-o", out]
+        if width:
+            cmd += ["-w", str(width)]
+        if height:
+            cmd += ["-h", str(height)]
+        subprocess.run(cmd + [src], check=True)
+    finally:
+        if src and os.path.exists(src):
+            os.unlink(src)
 
 
 def write(path, text):
@@ -146,37 +151,22 @@ def grub_background(w=1920, h=1080):
     return svg_doc(w, h, body, defs)
 
 
-def grub_logo():
-    # Logo and wordmark side by side (300 x 80 at 1x).
-    with open(LOGO, encoding="utf-8") as f:
-        logo = f.read()
-    tmp = tempfile.mkdtemp()
-    logo_png = os.path.join(tmp, "logo.png")
-    render(logo, logo_png, 72, 72)
-    body = (f'<image x="0" y="4" width="72" height="72" xlink:href="file://{logo_png}"/>'
-            f'<text x="90" y="55" font-family="Noto Sans" font-weight="300" font-size="40" '
-            f'letter-spacing="0.5" fill="{TEXT}">Mainuan</text>')
-    render(svg_doc(300, 80, body), os.path.join(GRUB, "logo.png"))
-    shutil.rmtree(tmp)
-
-
 def nine_slice(prefix, radius, fill, fill_op, stroke, stroke_op):
     """Write prefix_{nw,n,ne,w,c,e,sw,s,se}.png for a rounded rectangle."""
     size = radius * 2 + 4
     full = svg_doc(size, size, f'<rect x="0.5" y="0.5" width="{size - 1}" height="{size - 1}" rx="{radius}" '
                    f'fill="{fill}" fill-opacity="{fill_op}" stroke="{stroke}" stroke-opacity="{stroke_op}"/>')
-    tmp = tempfile.mkdtemp()
-    whole = os.path.join(tmp, "whole.png")
-    render(full, whole)
     from PIL import Image
-    im = Image.open(whole)
-    r = radius
-    boxes = {"nw": (0, 0, r, r), "n": (r, 0, size - r, r), "ne": (size - r, 0, size, r),
-             "w": (0, r, r, size - r), "c": (r, r, size - r, size - r), "e": (size - r, r, size, size - r),
-             "sw": (0, size - r, r, size), "s": (r, size - r, size - r, size), "se": (size - r, size - r, size, size)}
-    for name, box in boxes.items():
-        im.crop(box).save(os.path.join(GRUB, f"{prefix}_{name}.png"), optimize=True)
-    shutil.rmtree(tmp)
+    with tempfile.TemporaryDirectory() as tmp:
+        whole = os.path.join(tmp, "whole.png")
+        render(full, whole)
+        r = radius
+        boxes = {"nw": (0, 0, r, r), "n": (r, 0, size - r, r), "ne": (size - r, 0, size, r),
+                 "w": (0, r, r, size - r), "c": (r, r, size - r, size - r), "e": (size - r, r, size, size - r),
+                 "sw": (0, size - r, r, size), "s": (r, size - r, size - r, size), "se": (size - r, size - r, size, size)}
+        with Image.open(whole) as im:
+            for name, box in boxes.items():
+                im.crop(box).save(os.path.join(GRUB, f"{prefix}_{name}.png"), optimize=True)
 
 
 ICONS = {
@@ -239,7 +229,7 @@ def grub_hints():
     up = f'<path d="M0,-6 L5,1 H-5 Z" fill="{TEXT}"/>'
     down = f'<path d="M0,6 L5,-1 H-5 Z" fill="{TEXT}"/>'
     enter = f'<path d="M6,-6 V2 H-5 M-2,-2 L-6,2 L-2,6" fill="none" stroke="{TEXT}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
-    letter = lambda ch: (f'<text x="0" y="5" text-anchor="middle" font-family="Noto Sans" font-weight="600" '
+    letter = lambda ch: (f'<text x="0" y="5" text-anchor="middle" font-family="Ubuntu" font-weight="500" '
                          f'font-size="14" fill="{TEXT}">{ch}</text>')
     nav = f'<path d="M0,-7 V7 M-4,-3 L0,-7 L4,-3 M-4,3 L0,7 L4,3" fill="none" stroke="{m}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
     play = f'<path d="M-4,-6 L6,0 L-4,6 Z" fill="{m}"/>'
@@ -258,7 +248,6 @@ def grub_hints():
 
 def grub():
     render(grub_background(), os.path.join(GRUB, "background.png"))
-    grub_logo()
     nine_slice("select", 8, CYAN, 0.16, CYAN, 0.55)
     nine_slice("menu", 14, LINE, 0.035, LINE, 0.09)
     nine_slice("scrollbar_thumb", 2, CYAN, 0.7, CYAN, 0.0)
@@ -275,22 +264,46 @@ def splash():
     shutil.copyfile(LOGO, os.path.join(images, "logo.svg"))
     write(os.path.join(images, "ring.svg"), ring_svg(0))
     # Preview shown in System Settings (Splash Screen).
-    tmp = tempfile.mkdtemp()
-    ring_png, logo_png = os.path.join(tmp, "ring.png"), os.path.join(tmp, "logo.png")
-    render(ring_svg(0), ring_png, 80, 80)
-    render(logo_svg(), logo_png, 48, 48)
-    w, h = 400, 225
-    defs = (f'<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{BG_TOP}"/>'
-            f'<stop offset="1" stop-color="{BG_BOTTOM}"/></linearGradient>')
-    body = (f'<rect width="{w}" height="{h}" fill="url(#bg)"/>'
-            f'<image x="{(w - 80) / 2}" y="{(h - 80) / 2}" width="80" height="80" xlink:href="file://{ring_png}"/>'
-            f'<image x="{(w - 48) / 2}" y="{(h - 48) / 2}" width="48" height="48" xlink:href="file://{logo_png}"/>')
-    render(svg_doc(w, h, body, defs), os.path.join(SPLASH, "previews/splash.png"))
-    shutil.rmtree(tmp)
+    with tempfile.TemporaryDirectory() as tmp:
+        ring_png, logo_png = os.path.join(tmp, "ring.png"), os.path.join(tmp, "logo.png")
+        render(ring_svg(0), ring_png, 80, 80)
+        render(logo_svg(), logo_png, 48, 48)
+        w, h = 400, 225
+        defs = (f'<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{BG_TOP}"/>'
+                f'<stop offset="1" stop-color="{BG_BOTTOM}"/></linearGradient>')
+        body = (f'<rect width="{w}" height="{h}" fill="url(#bg)"/>'
+                f'<image x="{(w - 80) / 2}" y="{(h - 80) / 2}" width="80" height="80" xlink:href="file://{ring_png}"/>'
+                f'<image x="{(w - 48) / 2}" y="{(h - 48) / 2}" width="48" height="48" xlink:href="file://{logo_png}"/>')
+        render(svg_doc(w, h, body, defs), os.path.join(SPLASH, "previews/splash.png"))
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--only", choices=("all", "grub"), default="all",
+        help="gera toda a arte de boot (padrão) ou apenas os recursos do GRUB",
+    )
+    parser.add_argument(
+        "--grub-dir", type=str,
+        help="diretório de saída do tema GRUB (usado com --only grub)",
+    )
+    args = parser.parse_args()
+
+    if args.grub_dir and args.only != "grub":
+        parser.error("--grub-dir só pode ser usado com --only grub")
+
+    global GRUB
+    if args.grub_dir:
+        GRUB = os.path.abspath(args.grub_dir)
+        os.makedirs(GRUB, exist_ok=True)
+
+    if args.only == "all":
+        plymouth()
+    grub()
+    if args.only == "all":
+        splash()
+    print("ok")
 
 
 if __name__ == "__main__":
-    plymouth()
-    grub()
-    splash()
-    print("ok")
+    main()

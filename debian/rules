@@ -14,7 +14,9 @@ execute_after_dh_install:
 	# initramfs hook does not follow links out of the theme directory).
 	test -s $(PKG)/usr/share/plymouth/themes/mainuan/throbber-0048.png
 	if find $(PKG)/usr/share/plymouth -type l | grep .; then exit 1; fi
-	# Calamares slideshow translations (Qt): lang/calamares-vendor_<lang>.qm.
+	# Calamares slideshow: match all 34 complete TS catalogs to qsTr() and
+	# the packaged QM set before compiling the catalogs used in the ISO.
+	python3 tools/calamares-slides/validate-translations.py
 	mkdir -p $(PKG)/etc/calamares/branding/vendor/lang
 	for ts in tools/calamares-slides/lang/calamares-vendor_*.ts; do \
 		/usr/lib/qt6/bin/lrelease -silent $$ts -qm $(PKG)/etc/calamares/branding/vendor/lang/$$(basename $$ts .ts).qm; \
@@ -30,11 +32,12 @@ execute_after_dh_install:
 		/usr/lib/qt6/bin/lrelease -silent $$ts -qm $(PKG)/usr/share/calamares/lang/$$(basename $$ts .ts).qm; \
 	done
 	test -s $(PKG)/usr/share/calamares/lang/calamares_pt_BR.qm
-	# GRUB theme fonts, generated from Noto Sans (names used by theme.txt).
-	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/noto $(GRUBTHEME)
-	for f in $$(grep -o '"Noto Sans[^"]*"' $(GRUBTHEME)/theme.txt | sort -u | tr -d '"' | tr 'A-Z ' 'a-z_'); do \
-		test -s $(GRUBTHEME)/$$f.pf2; \
-	done
+	# Regenerate the GRUB images in the package staging area. This refreshes
+	# hints.png too, so the key labels use Ubuntu rather than stale bitmap text.
+	python3 tools/boot-art/generate.py --only grub --grub-dir $(GRUBTHEME)
+	# Generate, parse and validate the five PFF2 files before packaging them.
+	sh tools/boot-art/make-grub-fonts.sh /usr/share/fonts/truetype/ubuntu $(GRUBTHEME) tools/boot-art/fonts/Barlow-Bold.ttf
+	python3 tools/boot-art/check-grub-theme.py --theme-dir $(GRUBTHEME)
 	# Fontes de tradução, pacote .plasmoid, capturas do leia-me, leia-mes e
 	# licenças dos widgets ficam no pacote-fonte; as licenças estão em
 	# debian/copyright. Os catálogos usados pelo Plasma ficam em

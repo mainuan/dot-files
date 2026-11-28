@@ -1,28 +1,37 @@
 # Mainuan GRUB theme
 #
 # Layout in percentages of the screen, tuned for 1920x1080 and still usable
-# from 1024x768. The images come from tools/boot-art/generate.py; the
-# fonts (*.pf2) are generated from Noto Sans when the package is built.
+# from 1024x768. The logo mark is an image; the wordmark is rendered by GRUB
+# using Barlow Bold. Menu and system text use Ubuntu-family PFF2 fonts.
 # Without graphics, GRUB falls back to its text menu and this file is ignored.
 
 title-text: ""
 desktop-image: "background.png"
 desktop-image-scale-method: "stretch"
 desktop-color: "#0e1518"
-terminal-font: "Noto Sans Mono Regular 16"
+terminal-font: "Ubuntu Mono derivative Mainuan Regular 16"
 terminal-left: "10%"
 terminal-top: "10%"
 terminal-width: "80%"
 terminal-height: "80%"
 terminal-border: "0"
 
-# Logo and wordmark
+# Brand mark and wordmark
 + image {
     left = 50%-150
-    top = 11%
-    width = 300
-    height = 80
-    file = "logo.png"
+    top = 11%+4
+    width = 72
+    height = 72
+    file = "icons/mainuan.png"
+}
+
++ label {
+    left = 50%-60
+    top = 11%+16
+    width = 210
+    text = "Mainuan"
+    font = "Barlow Bold 40"
+    color = "#e8f1f3"
 }
 
 # Menu of operating systems
@@ -32,8 +41,8 @@ terminal-border: "0"
     width = 660
     height = 45%
     menu_pixmap_style = "menu_*.png"
-    item_font = "Noto Sans Regular 18"
-    selected_item_font = "Noto Sans Bold 18"
+    item_font = "Ubuntu derivative Mainuan Regular 18"
+    selected_item_font = "Ubuntu derivative Mainuan Medium Regular 18"
     item_color = "#c3d0d5"
     selected_item_color = "#ffffff"
     item_height = 46
@@ -56,7 +65,7 @@ terminal-border: "0"
     width = 660
     height = 34
     show_text = true
-    font = "Noto Sans Regular 14"
+    font = "Ubuntu derivative Mainuan Regular 14"
     text_color = "#8fa3ab"
     text = "@TIMEOUT_NOTIFICATION_MIDDLE@"
     bar_style = "progress_bar_*.png"

@@ -1,13 +1,26 @@
 #!/bin/sh
 set -e
 
-# Removing the copy in /boot also disables 60-mainuan-theme.cfg (its options
-# only apply while the theme exists), so GRUB goes back to its defaults.
+# Removing these Mainuan-owned directories disables 60-mainuan-theme.cfg,
+# whose options are guarded by the existence of theme.txt.
 case "$1" in
     remove|purge)
-        rm -rf /boot/grub/themes/mainuan /boot/grub/themes/mainuan.dpkg-new
-        if [ -e /boot/grub/grub.cfg ] && command -v update-grub >/dev/null 2>&1; then
-            update-grub || echo "mainuan-grub-theme: update-grub falhou; rode-o de novo" >&2
+        unsafe_boot_path=no
+        for path in /boot /boot/grub /boot/grub/themes; do
+            if [ -L "$path" ]; then
+                echo "mainuan-grub-theme: caminho simbólico inesperado ($path); limpeza de /boot ignorada" >&2
+                unsafe_boot_path=yes
+            fi
+        done
+        if [ "$unsafe_boot_path" = no ]; then
+            rm -rf /boot/grub/themes/mainuan \
+                   /boot/grub/themes/mainuan.dpkg-new \
+                   /boot/grub/themes/mainuan.dpkg-old
+            if [ -L /boot/grub/grub.cfg ]; then
+                echo "mainuan-grub-theme: /boot/grub/grub.cfg é um link simbólico; update-grub ignorado" >&2
+            elif [ -f /boot/grub/grub.cfg ] && command -v update-grub >/dev/null 2>&1; then
+                update-grub || echo "mainuan-grub-theme: update-grub falhou; rode-o de novo" >&2
+            fi
         fi
         ;;
 esac

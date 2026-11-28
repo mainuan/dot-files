@@ -4,14 +4,13 @@ Priority: optional
 Maintainer: Mainuan Packaging <openwebosbr@gmail.com>
 Uploaders: ruscher <rruscher@gmail.com>
 Build-Depends: debhelper-compat (= 13),
-               fonts-noto-core,
-               fonts-noto-mono,
+               fonts-ubuntu,
                grub-common,
                python3:any,
                qt6-l10n-tools,
                gettext <!nocheck>,
-               librsvg2-bin <!nocheck>,
-               python3-pil <!nocheck>,
+               librsvg2-bin,
+               python3-pil,
                python3 <!nocheck>,
 Standards-Version: 4.7.2
 Rules-Requires-Root: no

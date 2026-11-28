@@ -1,2 +1,3 @@
 rootfs/usr/share/grub usr/share
 rootfs/etc/default/grub.d etc/default
+tools/boot-art/deploy-grub-theme.sh usr/libexec/mainuan-grub-theme/

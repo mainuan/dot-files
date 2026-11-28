@@ -64,8 +64,15 @@ Window {
             if (c.truncated === true)
                 fail(where + ": text cut: " + c.text);
             if (c.contentHeight !== undefined && c.wrapMode !== undefined && c.height > 0
-                && c.contentHeight > c.height + 1)
-                fail(where + ": text taller than its box: " + c.text);
+                && c.contentHeight > c.height + 1) {
+                const fontPixels = c.font && c.font.pixelSize !== undefined ? c.font.pixelSize : "n/a";
+                const minimumPixels = c.minimumPixelSize !== undefined ? c.minimumPixelSize : "n/a";
+                fail(where + ": text taller than its box (contentHeight="
+                     + Number(c.contentHeight).toFixed(1) + "px, boxHeight="
+                     + Number(c.height).toFixed(1) + "px, width="
+                     + Number(c.width).toFixed(1) + "px, font.pixelSize="
+                     + fontPixels + "px, minimumPixelSize=" + minimumPixels + "px): " + c.text);
+            }
             const p = c.mapToItem(loader.item, 0, 0);
             if (c.width > 0 && c.height > 0
                 && (p.x < -1 || p.y < -1 || p.x + c.width > loader.width + 1 || p.y + c.height > loader.height + 1)

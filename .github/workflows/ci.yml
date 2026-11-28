@@ -43,6 +43,14 @@ jobs:
         rm -rf /tmp/idroot /tmp/idcheck.txt
         sh -n debian/mainuan-grub-theme.postinst
         sh -n debian/mainuan-grub-theme.postrm
+        sh -n tools/boot-art/make-grub-fonts.sh
+        sh -n tools/boot-art/deploy-grub-theme.sh
+        sh -n tools/boot-art/test-grub-deploy.sh
+        sh -n tools/boot-art/test-grub-fonts.sh
+        bash -n tools/boot-art/preview-grub.sh
+        python3 -I -c 'import ast, sys; [ast.parse(open(f, encoding="utf-8").read(), f) for f in sys.argv[1:]]' tools/boot-art/generate.py tools/boot-art/check-grub-theme.py
+        sh tools/boot-art/test-grub-deploy.sh
+        sh tools/boot-art/test-grub-fonts.sh
         sh -n rootfs/etc/default/grub.d/60-mainuan-theme.cfg
         # Plasma: validar o desktop, o papel de parede e os provedores dos widgets externos.
         python3 -I tools/check-plasma-layout.py \
@@ -53,6 +61,10 @@ jobs:
         rm -rf /tmp/boot-art && cp -r . /tmp/boot-art
         python3 /tmp/boot-art/tools/boot-art/generate.py
         test "$(ls /tmp/boot-art/rootfs/usr/share/plymouth/themes/mainuan/throbber-*.png | wc -l)" = 48
+        # Generated GRUB assets committed to the source tree must stay in sync
+        # with the canonical generator (including typography in hints.png).
+        diff -qr rootfs/usr/share/grub/themes/mainuan \
+          /tmp/boot-art/rootfs/usr/share/grub/themes/mainuan
         rm -rf /tmp/boot-art
         # The source package must not carry .git or build leftovers.
         dpkg-source -Zgzip -z1 --build .
@@ -160,7 +172,7 @@ jobs:
         grep -Fq 'qsTr("Welcome to Mainuan!")' "$V/show.qml"
         test "$(ls $V/images/slide-*.png | wc -l)" = 5
         if ls $V/slides_*.png 2>/dev/null; then exit 1; fi
-        test "$(ls $V/lang/calamares-vendor_*.qm | wc -l)" -ge 33
+        test "$(ls $V/lang/calamares-vendor_*.qm | wc -l)" -eq 34
         # Calamares catalogs with fixed %N placeholders (read before the
         # built-in copies): pt_BR summary says "fuso horário para %1".
         test "$(ls /usr/share/calamares/lang/calamares_*.qm | wc -l)" = 9
@@ -194,6 +206,8 @@ jobs:
   # real consumers, check the files, the GRUB fonts named by theme.txt and
   # the KPackage, then reinstall, remove and purge without leftovers.
   boot-packages:
+    # A failure in an unrelated desktop smoke test must not skip GRUB checks.
+    if: ${{ !cancelled() }}
     needs: package
     runs-on: ubuntu-26.04
     timeout-minutes: 30
@@ -210,6 +224,11 @@ jobs:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
     steps:
+      - name: Check out source for GRUB validation
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Download package artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -225,27 +244,22 @@ jobs:
           splash="$(echo "$PWD"/dist/mainuan-plasma-splash_*.deb)"
           apt=(apt-get --yes --no-install-recommends)
           apt-get update
-          "${apt[@]}" install grub-common plasma-workspace kpackagetool6
+          "${apt[@]}" install grub-common plasma-workspace kpackagetool6 python3 python3-pil
           T=/usr/share/grub/themes/mainuan
 
           check() {
-            # Fonts referenced by theme.txt exist and carry that exact name.
-            grep -o '"Noto Sans[^"]*"' $T/theme.txt | sort -u | tr -d '"' | while read -r font; do
-              f="$T/$(echo "$font" | tr 'A-Z ' 'a-z_').pf2"
-              test -s "$f"
-              head -c 120 "$f" | grep -aq "$font"
-            done
-            # Every file named by theme.txt exists.
-            grep -o '"[^"]*\.png"' $T/theme.txt | tr -d '"' | while read -r img; do
-              case $img in
-                *'*'*) ls $T/${img%%\**}*.png >/dev/null ;;
-                *) test -s "$T/$img" ;;
-              esac
-            done
-            test -s $T/icons/mainuan.png
+            # Parse PFF2 sections and verify exact internal NAME/FAMI/PTSZ,
+            # all PNG references, and every nine-slice component.
+            python3 tools/boot-art/check-grub-theme.py --theme-dir "$T"
+            # The postinst must deploy through the tested rollback-safe helper.
+            test -x /usr/libexec/mainuan-grub-theme/deploy-grub-theme.sh
+            # The boot copy is what GRUB reads at startup; validate it too.
+            python3 tools/boot-art/check-grub-theme.py --theme-dir /boot/grub/themes/mainuan
+            test ! -e /boot/grub/themes/mainuan.dpkg-new
+            test ! -e /boot/grub/themes/mainuan.dpkg-old
             # Copy in /boot (readable by GRUB) and the guarded options.
             cmp $T/theme.txt /boot/grub/themes/mainuan/theme.txt
-            test "$(ls /boot/grub/themes/mainuan/*.pf2 | wc -l)" = 4
+            test "$(ls /boot/grub/themes/mainuan/*.pf2 | wc -l)" = 5
             sh -n /etc/default/grub.d/60-mainuan-theme.cfg
             ( . /etc/default/grub.d/60-mainuan-theme.cfg
               test "$GRUB_THEME" = /boot/grub/themes/mainuan/theme.txt
@@ -272,6 +286,50 @@ jobs:
           test ! -e /etc/default/grub.d/60-mainuan-theme.cfg
           test ! -e /usr/share/plasma/look-and-feel/org.mainuan.desktop
           if kpackagetool6 --global --type Plasma/LookAndFeel --list | grep -wF org.mainuan.desktop; then exit 1; fi
+
+  # Exercise actual GRUB rendering under BIOS and UEFI. This job is independent
+  # of desktop smoke tests so unrelated Plasma/Calamares failures cannot skip it.
+  boot-qemu:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install GRUB, QEMU and font tooling
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            grub-common grub-pc-bin grub-efi-amd64-bin xorriso mtools \
+            qemu-system-x86 ovmf fonts-ubuntu librsvg2-bin python3-pil
+
+      - name: Test transactional GRUB deployment
+        run: |
+          set -euo pipefail
+          sh tools/boot-art/test-grub-deploy.sh
+
+      - name: Build and capture BIOS/UEFI menus
+        run: |
+          set -euo pipefail
+          mkdir -p captures
+          PREVIEW_WAIT=8 bash tools/boot-art/preview-grub.sh captures/grub-bios-1920x1080.png bios 1920x1080 simple
+          PREVIEW_WAIT=8 bash tools/boot-art/preview-grub.sh captures/grub-uefi-1920x1080.png uefi 1920x1080 dual
+          PREVIEW_WAIT=8 bash tools/boot-art/preview-grub.sh captures/grub-bios-1024x768.png bios 1024x768 long
+          PREVIEW_WAIT=8 bash tools/boot-art/preview-grub.sh captures/grub-uefi-1024x768.png uefi 1024x768 long
+          test "$(find captures -maxdepth 1 -type f -name 'grub-*.png' | wc -l)" = 4
+
+      - name: Upload GRUB screenshots
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: grub-qemu-captures-${{ github.sha }}
+          path: captures/
+          if-no-files-found: ignore
 
   diversions:
     needs: package
@@ -630,13 +688,73 @@ jobs:
           apt-get update
           apt-get install --yes --no-install-recommends qml-qt6 qt6-declarative-dev-tools \
             qt6-l10n-tools qml6-module-qtquick qml6-module-qtquick-window \
-            qml6-module-qtqml-workerscript qt6-svg-plugins fonts-noto-core fonts-noto-cjk
+            qml6-module-qtqml-workerscript qt6-svg-plugins fonts-noto-core fonts-noto-cjk python3
           # Only the QML module of Calamares (calamares-data, as on the ISO).
           (cd /tmp && apt-get download calamares-data && dpkg-deb -x calamares-data_*.deb calamares)
           Q=/tmp/calamares/usr/share/calamares/qml
           test -s $Q/calamares/slideshow/Slide.qml
-          tools/calamares-slides/check.sh $Q
+          # Keep both the source QML copies and all translation keys in sync.
+          cmp rootfs/etc/calamares/branding/vendor/show.qml tools/calamares-slides/show.qml
+          python3 tools/calamares-slides/validate-translations.py
+          # Syntax-check the maintenance scripts and test transactional catalog replacement.
+          sh -n tools/calamares-slides/check.sh
+          bash -n tools/calamares-slides/build-translations.sh tools/calamares-slides/sync-approved-assets.sh tools/calamares-slides/patch-installer-welcome-pt_BR.sh
+          python3 -m py_compile tools/calamares-slides/validate-translations.py
+          catalog_test="$(mktemp -d)"
+          if bash tools/calamares-slides/build-translations.sh /; then
+            echo "::error::the compiler accepted / as a destination"; exit 1
+          fi
+          if bash tools/calamares-slides/build-translations.sh "$GITHUB_WORKSPACE/tools/calamares-slides/lang"; then
+            echo "::error::the compiler accepted its own source directory"; exit 1
+          fi
+          mkdir -p "$catalog_test/lang"
+          chmod 0750 "$catalog_test/lang"
+          printf 'preserve me\n' > "$catalog_test/lang/keep.txt"
+          printf 'obsolete\n' > "$catalog_test/lang/calamares-vendor_obsolete.qm"
+          cat > "$catalog_test/fake-lrelease" <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          n=0
+          [[ ! -f "$LRELEASE_COUNT_FILE" ]] || n="$(cat "$LRELEASE_COUNT_FILE")"
+          n=$((n + 1))
+          printf '%s\n' "$n" > "$LRELEASE_COUNT_FILE"
+          [[ "$n" -ne 3 ]] || exit 42
+          printf 'fake catalog\n' > "${@: -1}"
+          SH
+          chmod +x "$catalog_test/fake-lrelease"
+          if LRELEASE="$catalog_test/fake-lrelease" LRELEASE_COUNT_FILE="$catalog_test/count" bash tools/calamares-slides/build-translations.sh "$catalog_test/lang"; then
+            echo "::error::the injected lrelease failure was not propagated"; exit 1
+          fi
+          test "$(cat "$catalog_test/lang/keep.txt")" = 'preserve me'
+          test "$(cat "$catalog_test/lang/calamares-vendor_obsolete.qm")" = obsolete
+          cat > "$catalog_test/fake-lrelease-empty" <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          : > "${@: -1}"
+          SH
+          chmod +x "$catalog_test/fake-lrelease-empty"
+          if LRELEASE="$catalog_test/fake-lrelease-empty" bash tools/calamares-slides/build-translations.sh "$catalog_test/lang"; then
+            echo "::error::the compiler accepted empty QM catalogs"; exit 1
+          fi
+          test "$(cat "$catalog_test/lang/keep.txt")" = 'preserve me'
+          test "$(cat "$catalog_test/lang/calamares-vendor_obsolete.qm")" = obsolete
+          test "$(stat -c '%a' "$catalog_test/lang")" = 750
+          bash tools/calamares-slides/build-translations.sh "$catalog_test/lang"
+          test "$(cat "$catalog_test/lang/keep.txt")" = 'preserve me'
+          test "$(stat -c '%a' "$catalog_test/lang")" = 750
+          test ! -e "$catalog_test/lang/calamares-vendor_obsolete.qm"
+          test "$(find "$catalog_test/lang" -maxdepth 1 -type f -name 'calamares-vendor_*.qm' | wc -l)" -eq 34
+          fresh_lang="$catalog_test/fresh/lang"
+          LRELEASE="$catalog_test/fake-lrelease" LRELEASE_COUNT_FILE="$catalog_test/count" bash tools/calamares-slides/build-translations.sh "$fresh_lang"
+          test "$(stat -c '%a' "$fresh_lang")" = 755
+          test "$(find "$fresh_lang" -maxdepth 1 -type f -name 'calamares-vendor_*.qm' | wc -l)" -eq 34
+          rm -rf "$catalog_test"
+          # Capture representative locales even if the full matrix fails.
           tools/calamares-slides/check.sh $Q captures en pt_BR ar
+          # Capture the portrait layouts that exposed the previous overflows.
+          # The full matrix below remains authoritative for pass/fail.
+          SLIDE_SIZES=700x760 tools/calamares-slides/check.sh $Q captures fa hi nl ur || true
+          tools/calamares-slides/check.sh $Q
 
       - name: Upload captures
         if: always()
