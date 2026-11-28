@@ -11,24 +11,18 @@ import zlib
 from pathlib import Path
 
 EXPECTED_FONTS = {
-    "Barlow Bold 40": (
-        "barlow_bold_40.pf2", "Barlow", 40, "bold", "normal",
+    "DejaVu Sans Regular 14": (
+        "dejavu_sans_regular_14.pf2", "DejaVu Sans", 14, "normal", "normal",
     ),
-    "Ubuntu derivative Mainuan Regular 14": (
-        "ubuntu_derivative_mainuan_regular_14.pf2",
-        "Ubuntu derivative Mainuan", 14, "normal", "normal",
+    "DejaVu Sans Regular 18": (
+        "dejavu_sans_regular_18.pf2", "DejaVu Sans", 18, "normal", "normal",
     ),
-    "Ubuntu derivative Mainuan Regular 18": (
-        "ubuntu_derivative_mainuan_regular_18.pf2",
-        "Ubuntu derivative Mainuan", 18, "normal", "normal",
+    "DejaVu Sans Bold 18": (
+        "dejavu_sans_bold_18.pf2", "DejaVu Sans", 18, "bold", "normal",
     ),
-    "Ubuntu derivative Mainuan Medium Regular 18": (
-        "ubuntu_derivative_mainuan_medium_regular_18.pf2",
-        "Ubuntu derivative Mainuan Medium", 18, "normal", "normal",
-    ),
-    "Ubuntu Mono derivative Mainuan Regular 16": (
-        "ubuntu_mono_derivative_mainuan_regular_16.pf2",
-        "Ubuntu Mono derivative Mainuan", 16, "normal", "normal",
+    "DejaVu Sans Mono Regular 16": (
+        "dejavu_sans_mono_regular_16.pf2", "DejaVu Sans Mono", 16, "normal",
+        "normal",
     ),
 }
 SLICE_PARTS = {"nw", "n", "ne", "w", "c", "e", "sw", "s", "se"}
@@ -36,7 +30,8 @@ SLICE_PREFIXES = {
     "menu_", "select_", "scrollbar_thumb_", "progress_bar_",
     "progress_highlight_",
 }
-PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+JOINED_FLAGS = 0x80000000 | 0x40000000
+PNG_SIGNATURE =b"\x89PNG\r\n\x1a\n"
 PORTUGUESE_GLYPHS = set(map(ord, "áãâàçéêíóôõúÀÁÂÃÇÉÊÍÓÔÕÚ"))
 
 
@@ -137,7 +132,12 @@ def check_character_index(
         codepoint = struct.unpack(">I", record[:4])[0]
         flags = record[4]
         glyph_offset = struct.unpack(">I", record[5:9])[0]
-        if codepoint > 0x10FFFF or 0xD800 <= codepoint <= 0xDFFF:
+        # grub-mkfont stores Arabic joined forms as the base codepoint plus
+        # GRUB_FONT_CODE_LEFT_JOINED/RIGHT_JOINED (include/grub/font.h).
+        if codepoint & ~(JOINED_FLAGS | 0x1FFFFF):
+            fail(f"{path}: bits de ponto de código inválidos 0x{codepoint:08X}")
+        base = codepoint & 0x1FFFFF
+        if base > 0x10FFFF or 0xD800 <= base <= 0xDFFF:
             fail(f"{path}: ponto de código Unicode inválido U+{codepoint:04X}")
         if codepoint in codepoints:
             fail(f"{path}: ponto de código duplicado U+{codepoint:04X}")
@@ -185,7 +185,7 @@ def check_font(font_dir: Path, font_name: str) -> None:
 
     check_character_index(
         sections["CHIX"][0], path, data_start, file_size,
-        require_portuguese=(family != "Barlow"),
+        require_portuguese=True,
     )
 
 
@@ -337,7 +337,7 @@ def check_theme(theme_dir: Path, font_dir: Path) -> int:
             check_png(path)
             checked.add(path)
 
-    for relative in {"background.png", "hints.png", "icons/mainuan.png"}:
+    for relative in {"background.png", "hints.png", "wordmark.png", "icons/mainuan.png"}:
         if theme_dir / relative not in checked:
             fail(f"imagem obrigatória não foi validada: {relative}")
 
